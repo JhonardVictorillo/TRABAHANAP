@@ -1,0 +1,200 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap');
+*{
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+    font-family: 'poppins',sans-serif;
+}
+
+.login-form{
+    position: relative;
+    min-height: 100vh;
+    z-index: 0;
+    background:  #fff;
+    padding: 30px;
+    justify-content: center;
+    display: grid;
+    font-family: 'poppins',sans-serif;
+
+    grid-template-rows: 1fr auto 1fr;
+    align-items: center;
+}
+.container{
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.login-form h1{
+    text-align: center;
+    font-size: 2.5rem;
+    font-weight: 400;
+    color:  #118f39;
+    font-family: 'poppins',sans-serif;
+    font-weight: bold;
+
+} 
+.login-form h2{
+    line-height: 40px;
+    margin-bottom: 5px;
+    font-size: 30px;
+    font-weight: bold;
+    color:  #118f39;
+    text-align: center;
+}
+.login-form .main{
+    position: relative;
+    display: flex;
+    margin: 30px 0;
+}
+.content{
+    flex-basis: 50%;
+    padding: 3em 3em;
+    background: #fff;
+    box-shadow: 2px 9px 49px -17px rgba(0,0,0,0.1);
+    border: 2px solid #118f39;
+    border-top-left-radius: 8px;
+    border-bottom-left-radius: 8px;
+}
+.form-img{
+    flex-basis: 50%;
+    background: #118f39;
+    background-size: cover;
+    padding: 40px;
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+    align-items: center;
+    display: grid;
+}
+.form-img img{
+    max-width: 100%;
+}
+p{
+    color: #b6aaaa;
+    font-size: 16px;
+    line-height: 25px;
+    text-align: center;
+}
+.btn,button,input{
+    border-radius: 35px;
+}
+/* .btn:hover,
+button:hover{
+background: #fff;
+border: 1px solid #0AD48B;
+  color: #0AD48B;
+    transition: 0.5s ease;
+} */
+a{
+    text-decoration: none;
+}
+.login-form form{
+    margin: 30px 0;
+}
+.login-form input{
+    outline: none;
+    margin-bottom: 15px;
+    font-stretch: 16px;
+    color: #787373;
+    text-align: left;
+    padding: 14px 20px;
+    width: 100%;
+    display: inline-block;
+    box-sizing: border-box;
+    border: none;
+    background: #d4d9dd;
+    transition: 0.3s ease;
+}
+.login-form input:focus{
+    background: #fff;
+    border: 1px solid #118f39;
+}
+
+.login-form button{
+    font-size: 18px;
+    color: #fff;
+    width: 100%;
+    background: #118f39;
+    border: none;
+    padding: 14px 15px;
+    font-weight: 600;
+    transition: 0.3s ease;
+}
+
+
+p.account a{
+    color: #4e34b6;
+}
+p.account a:hover{
+ text-decoration: underline;
+}
+
+.close-icon {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    font-size: 24px;
+    color: black;
+    cursor: pointer;
+   
+}
+.close-icon:hover{
+    background-color: red;
+    color: #fff;
+    border-radius: 50%;
+}
+
+@media(max-width:736px){
+    .login-form .main{
+        flex-direction: column;
+    }
+    .login-form form{
+        margin-top: 30px;
+        margin-bottom: 10px;
+    }
+    .form-img{
+        border-radius: 0;
+        border-bottom-left-radius: 8px;
+        border-bottom-right-radius: 8px;
+        order: 2;
+    }
+    .content{
+        order: 1;
+        border-radius: 0;
+        border-top-left-radius: 8px;
+        border-top-right-radius: 8px;
+    }
+
+}
+
+.error {
+    color: #e74c3c; /* Red color for error messages */
+    font-size: 0.9em; /* Smaller font size */
+    margin-top: 5px; /* Adds space between the input and the error */
+    padding-left: 5px; /* Slight indentation for readability */
+    font-style: italic; /* Makes the error message stand out */
+}
+
+/* Optional: Add a subtle shake animation when there's an error */
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+.input-field input:invalid + .error {
+    animation: shake 0.3s ease;
+}
+
+
+.alert {
+    padding: 15px;
+    margin-bottom: 20px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+}
+
+.alert-success {
+    color: #3c763d;
+    background-color: #dff0d8;
+    border-color: #d6e9c6;
+}

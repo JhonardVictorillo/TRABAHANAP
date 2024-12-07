@@ -1,0 +1,140 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: transparent;
+}
+
+.wrapper {
+    margin-top: 40px;
+    width: 750px;
+    background: transparent;
+    border: 2px solid  #118f39;
+    border-radius: 10px;
+    color: #fff;
+    padding: 40px 35px 55px;
+    margin: 0 10px;
+    position: relative; 
+}
+
+h1 {
+    font-size: 50px;
+    text-align: center;
+    color:  #118f39;;
+}
+
+
+.wrapper .input-box {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+}
+
+.input-box .input-field {
+    position: relative;
+    width: 48%;
+    height: 50px;
+    margin: 13px 0;
+}
+
+.input-box .input-field input {
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    border: 1px solid rgb(122, 118, 118);
+    outline: none;
+    font-size: 16px;
+    color: rgb(122, 118, 118);
+    border-radius: 6px;
+    padding: 15px 15px 15px 40px;
+}
+
+.input-box .input-field input::placeholder {
+    color: rgb(122, 118, 118);
+}
+
+.input-box .input-field i {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 20px;
+    color: rgb(122, 118, 118);
+}
+
+.wrapper .registerbtn {
+    margin-top: 20px;
+    width: 100%;
+    height: 45px;
+    background: #118f39;
+    color: white;
+    border: none;
+    outline: none;
+    border-radius: 6px;
+    box-shadow: 0 0 10px rgb(0, 0, 0, .1);
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: 600;
+}
+.close-icon {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    font-size: 24px;
+    color: black;
+    cursor: pointer;
+}
+.close-icon:hover{
+    background-color: red;
+    color: #fff;
+    border-radius: 50%;
+}
+
+@media (max-width: 576px) {
+    .input-box .input-field {
+        width: 100%;
+        margin: 10px 0;
+    }
+}
+
+.error {
+  color: #e74c3c; 
+  font-size: 0.6em; 
+  margin-top: 5px; 
+  padding-left: 5px; 
+  font-style: italic; 
+}
+
+.alert {
+    padding: 15px;
+    margin-bottom: 20px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+}
+
+.alert-success {
+    color: #3c763d;
+    background-color: #dff0d8;
+    border-color: #d6e9c6;
+}
+
+/* Optional: Add a subtle shake animation when there's an error */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+.input-field input:invalid + .error {
+  animation: shake 0.3s ease;
+}

@@ -1,0 +1,185 @@
+* {
+    margin: 0;
+    box-sizing: border-box;
+}
+
+/* Simple styling for the form */
+.container {
+    width: 50%;
+    margin: 50px auto;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+h2 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.selectrole {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 20px;
+}
+
+.form-group {
+    text-align: center;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    width: 45%;
+    cursor: pointer;
+    transition: transform 0.3s ease, border-color 0.3s ease;
+}
+
+.form-group:hover {
+    transform: scale(1.05);
+}
+
+/* Hide radio button */
+.form-group input {
+    display: none;
+}
+
+/* Apply green border to the entire form-group when the radio is checked */
+.form-group input[type="radio"]:checked + img {
+    border: 10px solid #28a745;
+}
+
+.form-group input[type="radio"]:checked + img + span {
+    color: #28a745;
+    font-weight: bold;
+}
+
+/* Add green border to the entire form-group when selected */
+.form-group input[type="radio"]:checked {
+    border: none;
+}
+
+.form-group input[type="radio"]:checked ~ img {
+    border: 2px solid #28a745;
+}
+
+.form-group input[type="radio"]:checked ~ span {
+    color: #28a745;
+}
+
+.form-group img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    margin-bottom: 10px;
+}
+
+.btn-submit {
+    width: 100%;
+    padding: 10px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 30px;
+    font-size: 1rem;
+}
+
+.btn-submit:hover {
+    background-color: #218838;
+}
+
+
+/************************************************ admin css *******************************************/
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+}
+
+.admin-dashboard {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.admin-header {
+    background-color: #2c3e50;
+    color: #ecf0f1;
+    padding: 20px;
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.admin-header h1 {
+    margin-bottom: 10px;
+}
+
+.admin-header nav ul {
+    list-style-type: none;
+    display: flex;
+    justify-content: center;
+}
+
+.admin-header nav ul li {
+    margin: 0 15px;
+}
+
+.admin-header nav ul li a {
+    color: #ecf0f1;
+    text-decoration: none;
+}
+
+.admin-main {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.stats, .actions {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    width: 48%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.stats h2, .actions h2 {
+    margin-bottom: 20px;
+    color: #34495e;
+}
+
+.stat-item {
+    margin-bottom: 15px;
+}
+
+.stat-item h3 {
+    font-size: 18px;
+    color: #3498db;
+}
+
+.stat-item p {
+    font-size: 24px;
+    color: #2c3e50;
+}
+
+.actions button {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.actions button:hover {
+    background-color: #2980b9;
+}
