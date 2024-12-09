@@ -49,7 +49,7 @@ class AppointmentStatusUpdated extends Notification
             'appointment_id' => $this->appointment->id,
             'status' => $this->status,
             'freelancer_name' => $this->appointment->freelancer->firstname . ' ' . $this->appointment->freelancer->lastname,
-            'message' => 'Your appointment with ' . $this->appointment->freelancer->firstname . ' ' . $this->appointment->freelancer->lastname . ' has been ' . $this->status . '.',
+            'message' => 'Your appointment with ' .($this->appointment->freelancer)->firstname . ' ' .($this->appointment->freelancer)->lastname . ' has been ' . $this->status . '.',
         ];
     }
 

@@ -182,24 +182,63 @@
                     <!-- Placeholder for calendar -->
                     <p>Calendar Widget</p>
                 </div>
-                <div class="appointments">
-                                <ul>
-                    @foreach($unreadNotifications as $notification)
-                        <li>
-                            {{ $notification->data['customer_name'] }} booked an appointment on {{ $notification->data['date'] }} at {{ $notification->data['time'] }}
-                            <form action="{{ route('appointments.accept', $notification->data['appointment_id']) }}"  method="POST" style="display:inline;">
-                                @csrf
-                                <button type="submit" class="btn btn-success">Accept</button>
-                            </form>
-                            <form action="{{ route('appointments.decline', $notification->data['appointment_id']) }}" method="POST" style="display:inline;">
-                                @csrf
-                                <button type="submit" class="btn btn-danger">Decline</button>
-                            </form>
-                        </li>
-                    @endforeach
-                </ul>
-                </div>
-            </section>
+            <div class="appointments">
+           <ul>
+           @foreach($appointments as $appointment)
+                <li>
+                     {{ $appointment->name ?? 'Unknown' }} booked an appointment on {{ $appointment->date }} at 
+                    {{ $appointment->time }}<br>
+                    <strong>Status:</strong> 
+                    <span class="status {{ strtolower($appointment->status) }}">
+                        {{ ucfirst($appointment->status) }}
+                    </span>
+
+                    @if($appointment->status === 'pending')
+                        <!-- Accept Button -->
+                        <form action="{{ route('appointments.accept', $appointment->id) }}" method="POST" style="display:inline;">
+                            @csrf
+                            <button type="submit" class="btn btn-success">Accept</button>
+                        </form>
+
+                        <!-- Decline Button -->
+                        <form action="{{ route('appointments.decline', $appointment->id) }}" method="POST" style="display:inline;">
+                            @csrf
+                            <button type="submit" class="btn btn-danger">Decline</button>
+                        </form>
+                    @else
+                        <!-- Display final status -->
+                        <!-- <strong>Final Status:</strong> {{ ucfirst($appointment->status) }} -->
+                    @endif
+
+                    <!-- View Details Button -->
+                    <button type="button" class="btn btn-primary view-details" 
+                        data-customer="{{ $appointment->name ?? 'N/A' }}" 
+                        data-date="{{ $appointment->date }}" 
+                        data-time="{{ $appointment->time }}" 
+                        data-contact="{{ $appointment->contact ?? 'N/A' }}" 
+                        data-notes="{{ $appointment->notes ?? 'N/A' }}" 
+                        data-status="{{ ucfirst($appointment->status) }}">
+                        View Details
+                    </button>
+                </li>
+            @endforeach
+        </ul>
+    </div>
+
+    <!-- Appointment Details Modal -->
+    <div id="appointmentDetailsModal" class="appointmentDetailsModal">
+        <div class="divContent">
+            <h3>Appointment Details</h3>
+            <p><strong>Customer:</strong> <span id="modalCustomer"></span></p>
+            <p><strong>Date:</strong> <span id="modalDate"></span></p>
+            <p><strong>Time:</strong> <span id="modalTime"></span></p>
+            <p><strong>Contact:</strong> <span id="modalContact"></span></p>
+            <p><strong>Notes:</strong> <span id="modalNotes"></span></p>
+            <p><strong>Status:</strong> <span id="modalStatus"></span></p>
+            <button id="closeModal" style="margin-top: 10px;">Close</button>
+        </div>
+    </div>
+ </section>
 
                <!-- Messages Section -->
                <section id ="messages-section" class = "section">
@@ -445,7 +484,27 @@ function resetFormFields() {
     const recentWorksContainer = document.getElementById('recent-works-container');
     recentWorksContainer.innerHTML = '<input type="file" name="recent_works[]" accept="image/*" required>';
 }
+document.addEventListener('DOMContentLoaded', function () {
+    const viewButtons = document.querySelectorAll('.view-details');
+    const modal = document.getElementById('appointmentDetailsModal');
+    const closeModal = document.getElementById('closeModal');
 
+    viewButtons.forEach(button => {
+        button.addEventListener('click', function () {
+            document.getElementById('modalCustomer').textContent = this.dataset.customer;
+            document.getElementById('modalDate').textContent = this.dataset.date;
+            document.getElementById('modalTime').textContent = this.dataset.time;
+            document.getElementById('modalContact').textContent = this.dataset.contact;
+            document.getElementById('modalNotes').textContent = this.dataset.notes;
+            document.getElementById('modalStatus').textContent = this.dataset.status;
+            modal.style.display = 'flex';
+        });
+    });
+
+    closeModal.addEventListener('click', function () {
+        modal.style.display = 'none';
+    });
+});
 // Function to close the form and reset fields
 function closeForm() {
     const createPostForm = document.getElementById("create-post-form");

@@ -21,7 +21,12 @@ class FreelancerController extends Controller
           // Get the freelancer's first category (or modify as needed)
      $freelancerCategory = $user->categories()->first();
      $unreadNotifications = $user->unreadNotifications;
-    
+        
+      // Fetch appointments related to the freelancer
+      $appointments = Appointment::where('freelancer_id', $user->id)
+      ->with('customer') // Load related customer data
+      ->orderBy('created_at', 'desc')
+      ->get();
        
      $posts = Post::where('freelancer_id', $user->id)->get(); // Adjust if your `Post` model has a different relationship or field name
 
@@ -34,7 +39,7 @@ class FreelancerController extends Controller
             'freelancerCategory' => $freelancerCategory,
             'posts' => $posts, // Pass the posts data
             'unreadNotifications' => $unreadNotifications,
-           
+            'appointments' => $appointments,
         ]);
 
 }   

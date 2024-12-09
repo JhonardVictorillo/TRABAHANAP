@@ -54,7 +54,9 @@ class AppointmentRequest extends Notification
             'customer_name' => $this->appointment->name,
             'date' => $this->appointment->date,
             'time' => $this->appointment->time,
-            'address'=>$this->appointment->address
+            'address'=>$this->appointment->address,
+            'contact'=>$this->appointment->contact,
+            
         ];
     }
 }
