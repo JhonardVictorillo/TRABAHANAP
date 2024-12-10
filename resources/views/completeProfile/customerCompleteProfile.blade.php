@@ -81,23 +81,7 @@
                     @enderror
                 </div>
 
-                    <!-- ID Upload -->
-                    <h3>Upload Valid ID</h3>
-                    <div class="form-row">
-                        <label for="id_front">Front:</label>
-                        <input type="file" name="valid_id_front" id="id_front" accept="image/*" required>
-                        @error('valid_id_front')
-                            <div class="error-message">{{ $message }}</div>
-                        @enderror
-                    </div>
-                    <div class="form-row">
-                        <label for="id_back">Back:</label>
-                        <input type="file" name="valid_id_back" id="id_back" accept="image/*" required>
-                        @error('valid_id_back')
-                            <div class="error-message">{{ $message }}</div>
-                        @enderror
-                    </div>
-
+                   
                   
                     <button type="submit">Submit Details</button>
                 </div>

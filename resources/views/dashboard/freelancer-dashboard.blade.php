@@ -36,6 +36,7 @@
         <li>
             <a href=""  id="appointment-link" class="">
                 <span class="material-symbols-outlined">event</span>Appointment
+               
             </a>
         </li>
         <li>
@@ -125,7 +126,7 @@
             </form>
                 <hr>
                 <h2>Created Posts</h2>
-    <div class="post-container">
+       <div class="post-container">
         @foreach ($posts as $post)
             <div class="freelancer-card">
                 <img src="{{ asset('storage/' . ($post->freelancer->profile_picture ?? 'defaultprofile.jpg')) }}" alt="Freelancer Photo" class="freelancer-photo">
@@ -143,9 +144,9 @@
                 </div>
 
                 <div class="sub-services">
-                    @foreach (json_decode($post->sub_services) as $subService)
-                        <span>{{ $subService }}</span>
-                    @endforeach
+                @foreach ($post->sub_services as $subService)
+                    <span>{{ $subService }}</span>
+                  @endforeach
                 </div>
 
                 <p class="description">
@@ -347,144 +348,104 @@
      
     <script>
        
-        document.addEventListener("DOMContentLoaded", function() {
-            const dashboardLink = document.getElementById('dashboard-link');
-            const postLink = document.getElementById('post-link');
-            const appointmentLink = document.getElementById('appointment-link');
-            const messageLink = document.getElementById('message-link');
-            const profilepageLink = document.getElementById('profile-link')
-            const dashboardSection = document.getElementById('dashboard-overview');
-            const postSection = document.getElementById('posts-section');
-            const appointmentSection = document.getElementById('appointments-section');
-            const messageSection = document.getElementById('messages-section');
-            const profilepageSection = document.getElementById('profile-section');
-            // Show Dashboard by default
-            dashboardSection.style.display = 'block';
-            postSection.style.display = 'none';
-            appointmentSection.style.display = 'none';
-            messageSection.style.display = 'none';
-             profilepageSection .style.display ='none';
+       document.addEventListener("DOMContentLoaded", function () {
+    // Manage visibility of sections
+    const sections = {
+        dashboard: document.getElementById("dashboard-overview"),
+        posts: document.getElementById("posts-section"),
+        appointments: document.getElementById("appointments-section"),
+        messages: document.getElementById("messages-section"),
+        profile: document.getElementById("profile-section")
+    };
 
-            // Toggle to Users section when "Users" is clicked
-            dashboardLink.addEventListener('click', function(event) {
-                event.preventDefault();
-                postSection.style.display = 'none';
-                appointmentSection.style.display = 'none';
-                messageSection.style.display = 'none';
-                dashboardSection.style.display = 'block';
-                profilepageSection .style.display ='none'
-            });
+            const links = {
+                dashboard: document.getElementById("dashboard-link"),
+                posts: document.getElementById("post-link"),
+                appointments: document.getElementById("appointment-link"),
+                messages: document.getElementById("message-link"),
+                profile: document.getElementById("profile-link")
+            };
 
-            // Toggle back to Dashboard section when "Dashboard" is clicked
-            postLink.addEventListener('click', function(event) {
-                event.preventDefault();
-                postSection.style.display = 'block';
-                appointmentSection.style.display = 'none';
-                messageSection.style.display = 'none';
-                dashboardSection.style.display = 'none';
-                profilepageSection .style.display ='none'
-            });
+            Object.values(sections).forEach((section) => (section.style.display = "none"));
+            sections.dashboard.style.display = "block";
 
-            appointmentLink.addEventListener('click', function(event) {
-                event.preventDefault();
-                postSection.style.display = 'none';
-                appointmentSection.style.display = 'block';
-                messageSection.style.display = 'none';
-                dashboardSection.style.display = 'none';
-                profilepageSection .style.display ='none'
+            Object.keys(links).forEach((key) => {
+                links[key].addEventListener("click", function (event) {
+                    event.preventDefault();
+                    Object.values(sections).forEach((section) => (section.style.display = "none"));
+                    sections[key].style.display = "block";
+                });
             });
+            
+        
 
-            messageLink.addEventListener('click', function(event) {
-                event.preventDefault();
-                postSection.style.display = 'none';
-                appointmentSection.style.display = 'none';
-                messageSection.style.display = 'block';
-                dashboardSection.style.display = 'none';
-                profilepageSection .style.display ='none'
-            });
-            profilepageLink.addEventListener('click', function(event) {
-                event.preventDefault();
-                postSection.style.display = 'none';
-                appointmentSection.style.display = 'none';
-                messageSection.style.display = 'none';
-                dashboardSection.style.display = 'none';
-                profilepageSection .style.display ='block'
-            });
-        });
-      
-        // succes message time duration
-        document.addEventListener('DOMContentLoaded', function () {
-    const alert = document.querySelector('.alert-success');
-    if (alert) {
-        setTimeout(() => {
-            alert.remove();
-        }, 3000); // 3 seconds
-    }
-});
-
-     //************************* */ post parts javascript*********************
      
-document.addEventListener("DOMContentLoaded", function() {
-    const createPostButton = document.querySelector(".new-post-btn");
-    const createPostForm = document.getElementById("create-post-form");
+  //************************* */ post parts javascript*********************
+     
+  
+            const createPostButton = document.querySelector(".new-post-btn");
+            const createPostForm = document.getElementById("create-post-form");
 
-    // Toggle the visibility of the create post form
-    createPostButton.addEventListener("click", function() {
-        if (createPostForm.style.display === "none" || createPostForm.style.display === "") {
-            createPostForm.style.display = "block"; // Show the form
-        } else {
-            createPostForm.style.display = "none"; // Hide the form
+            // Toggle the visibility of the create post form
+            createPostButton.addEventListener("click", function() {
+                if (createPostForm.style.display === "none" || createPostForm.style.display === "") {
+                    createPostForm.style.display = "block"; // Show the form
+                } else {
+                    createPostForm.style.display = "none"; // Hide the form
+                }
+            });
+
+            // Add another sub-service input
+            document.getElementById('add-sub-service').addEventListener('click', function () {
+            const container = document.getElementById('sub-services-container');
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.name = 'sub_services[]'; // Ensure this is the correct name
+            input.placeholder = 'Sub-Service';
+            input.required = true; // Ensure the field is required
+            container.appendChild(input);
+        });
+            
+
+        document.getElementById("create-post-form").addEventListener("submit", function (event) {
+            event.preventDefault(); // Prevent default submission for debugging
+            const formData = new FormData(this);
+            for (let [key, value] of formData.entries()) {
+                console.log(key, value);
+            }
+            this.submit(); // Re-enable submission after debugging
+        });
+            // Reset the form fields on submission
+            createPostForm.addEventListener('submit', function(event) {
+                // Reset sub-services container to one input
+                resetFormFields();
+                // Optionally, you can hide the form after submission
+                createPostForm.style.display = "none"; // Hide the form after submission
+            });
+
+
+        // Function to reset the form fields
+        function resetFormFields() {
+            const subServicesContainer = document.getElementById('sub-services-container');
+            subServicesContainer.innerHTML = '<input type="text" name="sub_services[]" placeholder="Sub-Service" required>';
+            
+            const recentWorksContainer = document.getElementById('recent-works-container');
+            recentWorksContainer.innerHTML = '<input type="file" name="recent_works[]" accept="image/*" required>';
         }
-    });
 
-    // Add another sub-service input
-    document.getElementById('add-sub-service').addEventListener('click', function () {
-    const container = document.getElementById('sub-services-container');
-    const input = document.createElement('input');
-    input.type = 'text';
-    input.name = 'sub_services[]'; // Ensure this is the correct name
-    input.placeholder = 'Sub-Service';
-    input.required = true; // Ensure the field is required
-    container.appendChild(input);
-});
-    
-//     // Add another recent work image input
-//     document.getElementById('add-recent-work').addEventListener('click', function () {
-//     const container = document.getElementById('recent-works-container');
-//     const input = document.createElement('input');
-//     input.type = 'file';
-//     input.name = 'post_picture[]'; // Ensure this is the correct name
-//     input.accept = 'image/*';
-//     input.required = true; // Ensure the field is required
-//     container.appendChild(input);
-// });
- 
-document.getElementById("create-post-form").addEventListener("submit", function (event) {
-    event.preventDefault(); // Prevent default submission for debugging
-    const formData = new FormData(this);
-    for (let [key, value] of formData.entries()) {
-        console.log(key, value);
-    }
-    this.submit(); // Re-enable submission after debugging
-});
-    // Reset the form fields on submission
-    createPostForm.addEventListener('submit', function(event) {
-        // Reset sub-services container to one input
-        resetFormFields();
-        // Optionally, you can hide the form after submission
-        createPostForm.style.display = "none"; // Hide the form after submission
-    });
-});
 
-// Function to reset the form fields
-function resetFormFields() {
-    const subServicesContainer = document.getElementById('sub-services-container');
-    subServicesContainer.innerHTML = '<input type="text" name="sub_services[]" placeholder="Sub-Service" required>';
+        // succes message time duration
+      
+            const alert = document.querySelector('.alert-success');
+            if (alert) {
+                setTimeout(() => {
+                    alert.remove();
+                }, 3000); // 3 seconds
+            }
     
-    const recentWorksContainer = document.getElementById('recent-works-container');
-    recentWorksContainer.innerHTML = '<input type="file" name="recent_works[]" accept="image/*" required>';
-}
-document.addEventListener('DOMContentLoaded', function () {
+
+    ///////////// appointment view details
+
     const viewButtons = document.querySelectorAll('.view-details');
     const modal = document.getElementById('appointmentDetailsModal');
     const closeModal = document.getElementById('closeModal');
@@ -504,13 +465,14 @@ document.addEventListener('DOMContentLoaded', function () {
     closeModal.addEventListener('click', function () {
         modal.style.display = 'none';
     });
+
+        // Function to close the form and reset fields
+        function closeForm() {
+            const createPostForm = document.getElementById("create-post-form");
+            createPostForm.style.display = 'none'; // Hide the form
+            resetFormFields(); // Reset the form fields
+        }
 });
-// Function to close the form and reset fields
-function closeForm() {
-    const createPostForm = document.getElementById("create-post-form");
-    createPostForm.style.display = 'none'; // Hide the form
-    resetFormFields(); // Reset the form fields
-}
     </script>
 </body>
 </html>

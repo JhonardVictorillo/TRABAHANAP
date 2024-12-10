@@ -15,6 +15,10 @@ class Post extends Model
          'post_picture',
     ];
 
+    protected $casts = [
+        'sub_services' => 'array', // If it's stored as a JSON or array type in the database
+    ];
+
    
     // Define relationships
     public function freelancer()
@@ -31,4 +35,6 @@ class Post extends Model
     {
     return $this->freelancer->categories->first();
     }   
+
+   
 }

@@ -49,6 +49,7 @@ public function bookAppointment(Request $request)
 {
     $validated = $request->validate([
         'freelancer_id' => 'required|exists:users,id',  
+        'post_id' => 'required|exists:posts,id',
         'date' => 'required|date',
         'time' => 'required|string',
         'name' => 'required|string|max:255',
@@ -56,10 +57,11 @@ public function bookAppointment(Request $request)
         'contact' => 'required|string|max:20',
         'notes' => 'nullable|string',
     ]);
-
+   
    $appointment = Appointment::create([
         'freelancer_id' => $validated['freelancer_id'],
         'customer_id' => auth()->id(),
+        'post_id' => $validated['post_id'],
         'date' => $validated['date'],
         'time' => $validated['time'],
         'name' => $validated['name'],
@@ -73,7 +75,28 @@ public function bookAppointment(Request $request)
         $freelancer = User::find($validated['freelancer_id']);
         $freelancer->notify(new AppointmentRequest($appointment));
 
+        
+        session()->flash('success', 'Appointment booked successfully!');
     return redirect()->back()->with('success', 'Appointment request sent successfully!');
+}
+
+
+public function showAppointments()
+{
+    $appointments = Appointment::where('customer_id', auth()->id())
+    ->with(['freelancer', 'post', 'freelancer.categories'])
+    ->get();
+
+    return view('customerAppointments', compact('appointments'));
+}
+
+public function cancelAppointment($id)
+{
+    $appointment = Appointment::where('id', $id)->where('customer_id', auth()->id())->firstOrFail();
+    $appointment->status = 'Canceled'; // Update the status
+    $appointment->save();
+
+    return redirect()->route('customer.appointments')->with('success', 'Appointment canceled successfully.');
 }
 
 }

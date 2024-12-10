@@ -74,11 +74,15 @@ Route::post('/categories/store', [CategoryController::class, 'store'])->name('ca
 //    customer profile
 Route::get('/profile', [CustomerController::class, 'showProfile'])->name('customer.profile');
 
+//customer appointments
+Route::get('/appointments', [CustomerController::class, 'showAppointments'])->name('customer.appointments');
+Route::post('/customer/appointments/{id}/cancel', [CustomerController::class, 'cancelAppointment'])->name('customer.appointments.cancel');
+
 // post store
 Route::post('/posts', [PostController::class, 'store'])->name('posts.store');
 Route::get('/posts', [PostController::class, 'index'])->name('posts.index');
 
-    // post see profile and add appointments
+    // post see profile and add appointments in customer view
 Route::get('/freelancer/{id}/profile', [CustomerController::class, 'showFreelancerProfile'])->name('freelancer.profile');
 Route::post('/book-appointment', [CustomerController::class, 'bookAppointment'])->name('book.appointment');
 

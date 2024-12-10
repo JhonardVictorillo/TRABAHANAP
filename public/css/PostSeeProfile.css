@@ -258,3 +258,14 @@ textarea::placeholder {
 .contact-info .input-group + .input-group {
   margin-left: 20px;
 }
+
+
+/* success message css */
+
+  .alert {
+    padding: 15px;
+    background-color: #4CAF50;
+    color: white;
+    margin: 10px 0;
+    border-radius: 5px;
+  }

@@ -58,6 +58,8 @@
               <i class='bx bx-user-circle'></i>Profile</a>
             <a href="#">
               <i class='bx bx-cog' ></i>Settings</a>
+              <a href="{{ route('customer.appointments') }}">
+              <i class='bx bx-calendar'></i>Appointments</a>
             <a href="#">
               <i class='bx bx-help-circle'></i> Help</a>
               <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
@@ -90,8 +92,8 @@
                   <i class="fas fa-star"></i> {{ $post->rating }} ({{ $post->review_count }})
                 </div>
                 <div class="sub-services">
-                  @foreach (json_decode($post->sub_services) as $subService) <!-- Assuming a many-to-many relationship -->
-                    <span>{{ $subService}}</span>
+                @foreach ($post->sub_services as $subService)
+                    <span>{{ $subService }}</span>
                   @endforeach
                 </div>
                 <p class="description">{{ $post->description }}</p>

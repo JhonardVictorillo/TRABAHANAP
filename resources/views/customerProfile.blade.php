@@ -26,13 +26,13 @@
                     <h3><i class='bx bx-user'></i><span>Profile</span></h3>
                 </div>
                 <div class="profile-details">
-                    <div class="service-category">
+                    <!-- <div class="service-category">
                         <h4>Service Category</h4>
                         <span>Technician</span>
                         <span>Food & Pastries</span>
                         <span>Arts & Media</span>
                         <span>Party or Events</span>
-                    </div>
+                    </div> -->
                     <div class="personal-details">
                         <p><strong>First Name:</strong> <span>{{ $user->firstname }}</span></p>
                         <p><strong>Last Name:</strong> <span>{{ $user->lastname }}</span></p>

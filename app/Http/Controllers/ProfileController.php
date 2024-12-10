@@ -42,8 +42,7 @@ class ProfileController extends Controller
             'city' => 'required|string',
             'zipcode' => 'required|string',
             'google_map_link' => 'nullable|url',
-            'valid_id_front' => 'required|image|mimes:jpg,jpeg,png|max:2048', // Restrict to images and size limit
-            'valid_id_back' => 'required|image|mimes:jpg,jpeg,png|max:2048',  // Restrict to images and size limit
+            
             'profile_picture' => 'required|image|mimes:jpg,jpeg,png|max:2048', // New validation for profile picture
         ]);
         \Log::info('Validated Data:', $validatedData);
@@ -61,18 +60,7 @@ class ProfileController extends Controller
         $user->zipcode = $validatedData['zipcode'];
         $user->google_map_link = $validatedData['google_map_link'];
 
-        // Handle file uploads and store only the paths
-        if ($request->hasFile('valid_id_front')) {
-            $idFrontPath = $request->file('valid_id_front')->store('id_uploads', 'public');
-          
-            $user->id_front = $idFrontPath;
-        }
-
-        if ($request->hasFile('valid_id_back')) {
-            $idBackPath = $request->file('valid_id_back')->store('id_uploads', 'public');
-           
-            $user->id_back = $idBackPath;
-        }
+        
           // Handle profile picture upload
           if ($request->hasFile('profile_picture')) {
             $profilePicturePath = $request->file('profile_picture')->store('profile_pictures', 'public');
@@ -80,28 +68,39 @@ class ProfileController extends Controller
             $user->profile_picture = $profilePicturePath; // Save the path to the user's profile
         }
 
+         // Conditional validation for freelancers
+    if ($user->role === 'freelancer') {
+        $validatedData = array_merge($validatedData, $request->validate([
+            'valid_id_front' => 'required|image|mimes:jpg,jpeg,png|max:2048',
+            'valid_id_back' => 'required|image|mimes:jpg,jpeg,png|max:2048',
+        ]));
 
-        
-        // Mark the profile as completed
-        $user->profile_completed = true;
-      
-        $user->save();
+        if ($request->hasFile('valid_id_front')) {
+            $idFrontPath = $request->file('valid_id_front')->store('id_uploads', 'public');
+            $user->id_front = $idFrontPath;
+        }
+
+        if ($request->hasFile('valid_id_back')) {
+            $idBackPath = $request->file('valid_id_back')->store('id_uploads', 'public');
+            $user->id_back = $idBackPath;
+        }
 
         // Add category selection only if the user is a freelancer
-      if ($user->role === 'freelancer') {
         $validatedData['category'] = $request->validate([
             'category' => 'required|array|min:1',
             'category.*' => 'integer',
         ])['category'];
 
         $user->categories()->sync($validatedData['category']);
-      }
-        // $user->categories()->sync($request->category);
-        // $user->categories()->attach(
-        //     $request->category,
-        //     ['created_at' => now(), 'updated_at' => now()]
-        // );
-        // Set the session variable to indicate the profile is complete
+    }
+        
+        // Mark the profile as completed
+        $user->profile_completed = true;
+      
+        $user->save();
+
+     
+       
         session(['profile_completed' => true]);
 
 

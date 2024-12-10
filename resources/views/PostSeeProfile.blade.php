@@ -65,13 +65,15 @@
         @endforelse
       </div>
     </div>
+    <a href="{{ route('customer.dashboard') }}">
     <button onclick="goBack()" class="back-btn" >Back</button>
+    </a>
     <button class="book-now-btn" onclick="openBookingModal()">
       <i class='bx bx-calendar'></i> Book Now
   </button>
   
   </div>
-  
+
   
 <div id="booking-modal" class="modal">
   <div class="modal-content"> 
@@ -83,12 +85,14 @@
     @csrf
       
     <input type="hidden" name="freelancer_id" value="{{ $freelancer->id }}">
+    <input type="hidden" name="post_id" value="{{ $post->id ?? '' }}">
 
       <label for="date">Date:</label>
       <input type="date" id="date" name="date" required>
 
       <!-- Hidden input field for selected time -->
     <input type="hidden" id="selected-time" name="time">
+    
 
       <label>Time:</label>
       <div class="time-picker">
@@ -155,6 +159,12 @@
 </div>
 
 
+@if(session('success'))
+    <div class="alert alert-success">
+      {{ session('success') }}
+    </div>
+  @endif
+
   <script>
     // Function to open the booking modal
 function openBookingModal() {
@@ -189,11 +199,16 @@ document.addEventListener("DOMContentLoaded", () => {
       document.getElementById("selected-time").value = this.textContent.trim();
     });
   });
+
+  const alert = document.querySelector('.alert-success');
+            if (alert) {
+                setTimeout(() => {
+                    alert.remove();
+                }, 3000); // 3 seconds
+            }
 });
 
-function goBack() {
-            window.history.back(); // Go back to the previous page
-        }
+
 
   </script>
 </body>

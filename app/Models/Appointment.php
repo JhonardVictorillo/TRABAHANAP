@@ -18,6 +18,7 @@ class Appointment extends Model
         'address',
         'contact',
         'notes',
+        'post_id',
     ];
 
     public function customer()
@@ -32,6 +33,16 @@ class Appointment extends Model
     {
         return $this->belongsTo(User::class, 'freelancer_id');
     }
+    
+    public function post()
+    {
+         return $this->belongsTo(Post::class, 'post_id');
+     }
+
+    public function categories()
+    {
+        return $this->freelancer->categories();
+     }
 }
 
 
