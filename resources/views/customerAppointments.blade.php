@@ -56,10 +56,28 @@
                         </td>
                         <td>{{ ucfirst($appointment->status) }}</td>
                         <td>
-                            @if($appointment->status !== 'Canceled')
+                        @if($appointment->status === 'completed' && !$appointment->rating) <!-- Check if appointment is completed and no rating exists -->
+                                <form action="{{ route('customer.appointments.rate', $appointment->id) }}" method="POST">
+                                    @csrf
+                                    <label for="rating">Rate the service:</label>
+                                    <select name="rating" id="rating">
+                                        <option value="1">1 Star</option>
+                                        <option value="2">2 Stars</option>
+                                        <option value="3">3 Stars</option>
+                                        <option value="4">4 Stars</option>
+                                        <option value="5">5 Stars</option>
+                                    </select>
+                                    <button type="submit" class="rate-button">Submit Rating</button>
+                                </form>
+                            @elseif($appointment->rating)
+                                <p>Rated: {{ $appointment->rating }} Star(s)</p>
+                            @endif
+
+
+                                        {{-- Cancel button only shows if status is 'pending' --}}
+                            @if($appointment->status === 'pending')
                                 <form action="{{ route('customer.appointments.cancel', $appointment->id) }}" method="POST">
                                     @csrf
-                                    
                                     <button type="submit" class="cancel-button">Cancel</button>
                                 </form>
                             @endif

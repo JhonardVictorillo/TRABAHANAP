@@ -130,7 +130,7 @@
         @foreach ($posts as $post)
             <div class="freelancer-card">
                 <img src="{{ asset('storage/' . ($post->freelancer->profile_picture ?? 'defaultprofile.jpg')) }}" alt="Freelancer Photo" class="freelancer-photo">
-                <h3>{{ $post->freelancer->firstname ?? 'Unknown' }}{{ $post->freelancer->lastname ?? 'Unknown' }}</h3>
+                <h3>{{ $post->freelancer->firstname ?? 'Unknown' }} , {{ $post->freelancer->lastname ?? 'Unknown' }}</h3>
                 <p>  @if($post->freelancer->categories->isEmpty())
                     Category Not Assigned
                 @else
@@ -140,7 +140,30 @@
                 @endif
             </p>
                 <div class="rating">
-                    <i class="fas fa-star"></i> 5.0 (7,849) <!-- Example, replace with actual data if needed -->
+                                @php
+                        $averageRating = $post->averageRating(); // Calculate average rating
+                        $totalReviews = $post->totalReviews();   // Total number of reviews
+                        $starCount = floor($averageRating);      // Full stars
+                        $halfStar = ($averageRating - $starCount) >= 0.5; // Half-star logic
+                    @endphp
+
+                    <!-- Display full stars -->
+                    @for ($i = 0; $i < $starCount; $i++)
+                        <i class="fas fa-star"></i>
+                    @endfor
+
+                    <!-- Display half star if necessary -->
+                    @if ($halfStar)
+                        <i class="fas fa-star-half-alt"></i>
+                    @endif
+
+                    <!-- Display empty stars -->
+                    @for ($i = $starCount + ($halfStar ? 1 : 0); $i < 5; $i++)
+                        <i class="far fa-star"></i>
+                    @endfor
+
+                    <!-- Display average rating and total reviews -->
+                    <span>{{ number_format($averageRating, 1) }} / 5 • {{ $totalReviews }} reviews</span><!-- Example, replace with actual data if needed -->
                 </div>
 
                 <div class="sub-services">
@@ -209,6 +232,13 @@
                     @else
                         <!-- Display final status -->
                         <!-- <strong>Final Status:</strong> {{ ucfirst($appointment->status) }} -->
+                    @endif
+
+                    @if($appointment->status === 'accepted')
+                        <form action="{{ route('appointments.complete', $appointment->id) }}" method="POST" style="display:inline;">
+                            @csrf
+                            <button type="submit" class="btn btn-primary">Completed</button>
+                        </form>
                     @endif
 
                     <!-- View Details Button -->
@@ -306,15 +336,28 @@
         <div class="ratings-section">
             <h3>Ratings</h3>
             <div class="rating-stars">
-                <span class="star">★ ★ ★ ★ ★</span> <span class="rate">out of 5 • 0 reviews</span>
+            <span class="star">
+            <span class="star">
+                    @for($i = 0; $i < floor($averageRating); $i++)
+                        ★
+                    @endfor
+                    @if($averageRating - floor($averageRating) >= 0.5)
+                        ★
+                    @else
+                        ☆
+                    @endif
+                </span>
+                <span class="rate">
+                    {{ $averageRating }} / 5 • {{ $ratingBreakdown->sum() }} reviews
+                </span>
             </div>
             <ul class="rating-breakdown">
-                <li><span class="label">5 star:</span><span class="value">0</span></li>
-                <li><span class="label">4 star:</span><span class="value">0</span></li>
-                <li><span class="label">3 star:</span><span class="value">0</span></li>
-                <li><span class="label">2 star:</span><span class="value">0</span></li>
-                <li><span class="label">1 star:</span><span class="value">0</span></li>
-            </ul>
+            <li><span class="label">5 star:</span><span class="value">{{ $ratingBreakdown[5] }}</span></li>
+                <li><span class="label">4 star:</span><span class="value">{{ $ratingBreakdown[4] }}</span></li>
+                <li><span class="label">3 star:</span><span class="value">{{ $ratingBreakdown[3] }}</span></li>
+                <li><span class="label">2 star:</span><span class="value">{{ $ratingBreakdown[2] }}</span></li>
+                <li><span class="label">1 star:</span><span class="value">{{ $ratingBreakdown[1] }}</span></li>
+         </ul>
         </div>
         
 

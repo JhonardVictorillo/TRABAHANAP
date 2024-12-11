@@ -19,6 +19,7 @@ class Appointment extends Model
         'contact',
         'notes',
         'post_id',
+        'rating',
     ];
 
     public function customer()
@@ -43,6 +44,8 @@ class Appointment extends Model
     {
         return $this->freelancer->categories();
      }
+
+    
 }
 
 

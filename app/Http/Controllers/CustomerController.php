@@ -19,7 +19,13 @@ class CustomerController extends Controller
     {
         $user = Auth::user();
         $categories = Category::all(); 
-        $posts = Post::with(['freelancer', 'freelancer.categories'])->get();
+        $posts = Post::with(['freelancer', 'freelancer.categories'])
+        ->withCount(['appointments as review_count' => function ($query) {
+            $query->whereNotNull('rating');
+        }])
+        ->withAvg('appointments as average_rating', 'rating')
+        ->get();
+
         $notifications = auth()->user()->notifications; // Get all notifications
     
         // If profile is complete, show the dashboard without the modal
@@ -97,6 +103,64 @@ public function cancelAppointment($id)
     $appointment->save();
 
     return redirect()->route('customer.appointments')->with('success', 'Appointment canceled successfully.');
+}
+
+
+public function search(Request $request)
+{
+    $searchTerm = $request->query('q');
+
+    if (empty($searchTerm)) {
+        // If no search term is provided, fetch all posts
+        $posts = Post::with(['freelancer', 'freelancer.categories'])->get();
+    } else {
+        // Search posts based on the query
+        $posts = Post::with(['freelancer', 'freelancer.categories'])
+            ->where('description', 'LIKE', '%' . $searchTerm . '%')
+            ->orWhereHas('freelancer', function ($query) use ($searchTerm) {
+                $query->where('firstname', 'LIKE', '%' . $searchTerm . '%')
+                      ->orWhere('lastname', 'LIKE', '%' . $searchTerm . '%');
+            })
+            ->orWhereHas('freelancer.categories', function ($query) use ($searchTerm) {
+                $query->where('name', 'LIKE', '%' . $searchTerm . '%');
+            })
+            ->get();
+    }
+
+    // Fetch notifications for the logged-in user
+    $notifications = auth()->user()->unreadNotifications;
+    // Fetch the authenticated user
+    $user = auth()->user();
+
+    return view('dashboard.customer-dashboard', [
+        'posts' => $posts,
+        'searchTerm' => $searchTerm,
+        'user' => $user,
+        'notifications' => $notifications,
+    ]);
+}
+
+
+public function rateAppointment($appointmentId, Request $request)
+{
+    $appointment = Appointment::findOrFail($appointmentId);
+
+    // Check if the appointment belongs to the authenticated customer
+    if ($appointment->customer_id == Auth::id()) {
+        // Validate the rating input
+        $request->validate([
+            'rating' => 'required|integer|between:1,5',
+        ]);
+
+        // Update the appointment with the rating
+        $appointment->rating = $request->input('rating');
+        $appointment->save();
+
+        // Redirect back with a success message
+        return redirect()->route('customer.appointments')->with('success', 'Thank you for your rating!');
+    }
+
+    return redirect()->route('customer.appointments')->with('error', 'You cannot rate this appointment.');
 }
 
 }

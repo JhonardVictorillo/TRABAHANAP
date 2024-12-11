@@ -34,7 +34,22 @@ class Post extends Model
     public function getFreelancerCategoryAttribute()
     {
     return $this->freelancer->categories->first();
-    }   
+    } 
+    
+   
+    public function appointments()
+    {
+      return $this->hasMany(Appointment::class);
+    }
 
+            public function averageRating()
+        {
+            return $this->appointments()->whereNotNull('rating')->avg('rating') ?? 0;
+        }
+
+        public function totalReviews()
+        {
+            return $this->appointments()->whereNotNull('rating')->count();
+        }
    
 }

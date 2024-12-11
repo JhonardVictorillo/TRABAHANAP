@@ -90,3 +90,11 @@ Route::post('/book-appointment', [CustomerController::class, 'bookAppointment'])
 // notification routes
 Route::post('/appointments/accept/{id}', [FreelancerController::class, 'acceptAppointment'])->name('appointments.accept');
 Route::post('/appointments/decline/{id}', [FreelancerController::class, 'declineAppointment'])->name('appointments.decline');
+
+//Appointment done status
+Route::post('/appointments/{appointment}/complete', [FreelancerController::class, 'markAsCompleted'])->name('appointments.complete');
+
+//rating appointment
+Route::post('/appointments/{appointment}/rate', [CustomerController::class, 'rateAppointment'])->name('customer.appointments.rate');
+//search routes
+Route::get('/search', [CustomerController::class, 'search'])->name('search');

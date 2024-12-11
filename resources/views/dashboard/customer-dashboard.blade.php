@@ -19,10 +19,19 @@
 
     
     <div class="header-center">
-      <input type="text" placeholder="What service are you looking for today?" class="search-bar">
-      <button class="search-button">
-        <i class="fas fa-search"></i>
-      </button>
+    <form action="{{ route('search') }}" method="GET" style="display: flex; align-items: center; width: 100%;">
+        <input 
+            type="text" 
+            name="q" 
+            placeholder="What service are you looking for today?" 
+            class="search-bar"
+            value="{{ request('q') }}"
+            style="flex-grow: 1; border: none; padding: 10px; border-radius: 4px;"
+        >
+        <button type="submit" class="search-button">
+            <i class="fas fa-search"></i>
+        </button>
+    </form>
     </div>
 
 
@@ -75,6 +84,10 @@
 
   <main  id="main-content" class="freelancers-section">
     <h2>Top Freelancers</h2>
+
+     @if(isset($searchTerm))
+        <p>Search Results for: <strong>{{ $searchTerm }}</strong></p>
+    @endif
                 <div class="freelancer-cards">
                   
                 @foreach ($posts as $post)
@@ -89,7 +102,12 @@
                     @endforeach
                 @endif
                 <div class="rating">
-                  <i class="fas fa-star"></i> {{ $post->rating }} ({{ $post->review_count }})
+                  <i class="fas fa-star"></i>
+                    @if ($post->average_rating)
+                     {{ number_format($post->average_rating, 1) }} ({{ $post->review_count }})
+                    @else
+                        No ratings yet
+                    @endif
                 </div>
                 <div class="sub-services">
                 @foreach ($post->sub_services as $subService)
@@ -301,8 +319,19 @@
                 notificationSection.style.display = 'none';
             }
         });
-    }); 
 
+
+        
+        const searchBar = document.querySelector('.search-bar');
+        const searchForm = searchBar.closest('form');
+
+        searchBar.addEventListener('input', function () {
+            if (searchBar.value.trim() === '') {
+                searchForm.submit(); // Submit form to reload all posts
+            }
+        });
+      
+    }); 
 
      
 

@@ -28,8 +28,17 @@ class FreelancerController extends Controller
       ->orderBy('created_at', 'desc')
       ->get();
        
-     $posts = Post::where('freelancer_id', $user->id)->get(); // Adjust if your `Post` model has a different relationship or field name
+      $averageRating = $this->calculateAverageRating($user->id);
 
+      // Calculate the rating breakdown (e.g., 5-star, 4-star)
+      $ratingBreakdown = $this->getRatingBreakdown($user->id);
+
+      // Fetch posts related to the freelancer
+           $posts = Post::where('freelancer_id', $user->id)->get(); 
+
+           $posts = Post::where('freelancer_id', $user->id)
+           ->with('appointments') // Eager load appointments for ratings
+           ->get();
           
         // If profile is complete, show the dashboard without the modal
         return view('dashboard.freelancer-dashboard', [
@@ -40,6 +49,8 @@ class FreelancerController extends Controller
             'posts' => $posts, // Pass the posts data
             'unreadNotifications' => $unreadNotifications,
             'appointments' => $appointments,
+            'averageRating' => $averageRating,
+            'ratingBreakdown' => $ratingBreakdown
         ]);
 
 }   
@@ -84,6 +95,57 @@ public function declineAppointment($id)
      }
 
     return redirect()->back()->with('success', 'Appointment declined.');
+}
+
+public function markAsCompleted($appointmentId)
+{
+    // Find the appointment by its ID
+    $appointment = Appointment::find($appointmentId);
+
+    // Check if the appointment exists and if the freelancer is the owner
+    if ($appointment && $appointment->freelancer_id == Auth::id()) {
+        // Update the status to "completed"
+        $appointment->status = 'completed';
+        $appointment->completed_at = now();  // Optionally, track when it was completed
+        $appointment->save();
+
+        // Notify the customer about the completion status (optional)
+        $customer = $appointment->customer;
+        if ($customer) {
+            $customer->notify(new AppointmentStatusUpdated($appointment, 'completed'));
+        }
+
+        // Redirect back to the freelancer dashboard with a success message
+        return redirect()->back()->with('success', 'The appointment has been marked as completed.');
+    }
+
+    // Redirect back with an error message if something goes wrong
+    return redirect()->back()->with('error', 'Unable to mark the appointment as completed.');
+}
+
+    
+     // Method to calculate the average rating
+        private function calculateAverageRating($freelancerId)
+        {
+            $appointments = Appointment::where('freelancer_id', $freelancerId)
+                ->whereNotNull('rating') // Only consider appointments with a rating
+                ->get();
+
+            // Ensure there's at least one rating to avoid division by zero
+            return $appointments->isEmpty() ? 0 : round($appointments->avg('rating'), 1);
+        }
+
+        // Method to calculate the rating breakdown (1-5 stars)
+        private function getRatingBreakdown($freelancerId)
+        {
+            $appointments = Appointment::where('freelancer_id', $freelancerId)
+                ->whereNotNull('rating') // Only consider appointments with a rating
+                ->get();
+
+            // Group by rating and return the count for each rating
+            return collect([1, 2, 3, 4, 5])->mapWithKeys(function ($rating) use ($appointments) {
+                return [$rating => $appointments->where('rating', $rating)->count()];
+            });
 }
 
 }
