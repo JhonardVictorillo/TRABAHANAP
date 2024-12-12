@@ -11,6 +11,7 @@ body {
     margin: 20px auto;
     max-width: 800px;
      background-color: #fff; 
+     border: 2px solid #00b477;
     border-radius: 10px;
    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
   }
@@ -85,7 +86,7 @@ body {
 
 .social-media a {
     text-decoration: none;
-    color: #d8caca;
+    color: #00b477;
     font-size: 16px;
     transition: color 0.3s, transform 0.3s;
 }

@@ -17,13 +17,13 @@
         <div class="profile-section">
             <div class="profile-info">
                 <img src="{{ asset('storage/' . $user->profile_picture) }}" alt="Profile Picture" class="main-profile-picture">
-                <h2>{{ $user->firstname }} {{ $user->lastname }}</h2>
+                <h2> <span class="hi">Hi,</span> {{ $user->firstname }} {{ $user->lastname }}</h2>
                 <a href="#" class="edit-profile"><i class='bx bx-edit'></i>Edit Profile</a>
             </div>
 
             <div class="profile">
                 <div class="profile-header">
-                    <h3><i class='bx bx-user'></i><span>Profile</span></h3>
+                    <h3><span>Personal Details</span></h3>
                 </div>
                 <div class="profile-details">
                     <!-- <div class="service-category">
@@ -57,7 +57,7 @@
             <h3>Recent Freelancer</h3>
             <div class="work-gallery">
                 <img src="images/customer.jpg" alt="Work 1" class="work-item">
-                <div class="add-work"><span class="material-symbols-outlined">add</span>Add Work</div>
+                
             </div>
         </div>
     </main>

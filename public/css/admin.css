@@ -36,21 +36,14 @@ body {
 }
 
 .sidebar-header h2 {
-    font-size: 1.25rem;
+    color: #048e47;
+    font-size: 1.5rem;
     font-weight: 600;
     margin-left: 20px;
 }
-.sidehub{
-    background-color:#0AD48B;
-    color: #fff;
-    border-radius: 10px;
-    padding: 4px;
-}
-.sidework{
-    color: #fff;
-}
+
 .sidebar-links h4 {
-    color: #00c698;
+    color: #097a40;
     font-weight: 500;
     margin: 10px 0;  
     white-space: nowrap;  

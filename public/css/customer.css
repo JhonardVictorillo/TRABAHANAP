@@ -20,6 +20,7 @@ body {
   font-size: 32px;
   align-items: center;
    color: #118f39;
+    
    margin-left: 10px;
 }
 
@@ -38,7 +39,7 @@ body {
 .search-bar {
   width: 100%;
   padding: 10px;
-  border: 1px solid #ccc;
+  border: 1px solid #118f39;
   border-radius: 4px 0 0 4px;
 }
 
@@ -46,7 +47,7 @@ body {
   background-color: #118f39;
   color: white;
   border: none;
-  padding: 10px 15px;
+  padding: 11.5px;
   border-radius: 0 4px 4px 0;
   cursor: pointer;
 }
@@ -192,6 +193,9 @@ a i {
   height: 80px;
   border-radius: 50%;
   margin-bottom: 10px;
+}
+.freelancer-card h4{
+  color: #118f39;
 }
 
 .rating {
@@ -344,7 +348,7 @@ transform: scale(1.2);
 
 /* Footer Styling */
 .footer {
-background-color: #1e1e1e;
+background-color:  #065a22;
 color: #f9f9f9;
 padding: 40px 20px;
 }
@@ -634,7 +638,7 @@ font-size: 14px;
   right: 0;
 }
 
-/* Costumer appointments  */
+/* ************************************Costumer appointments ***************************/
 table {
   width: 100%;
   border-collapse: collapse;
@@ -650,4 +654,15 @@ table th, table td {
 table th {
   background-color: #f4f4f4;
   font-weight: bold;
+}
+.header a .back-btn{
+  color: #fff;
+  background: #2860c9;
+  padding: 10px 15px;
+  border-radius: 10px;
+  border: none;
+}
+.header a .back-btn:hover{
+  opacity: 0.9;
+
 }

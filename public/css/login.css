@@ -57,7 +57,7 @@
 }
 .form-img{
     flex-basis: 50%;
-    background: #118f39;
+    background: #079233;
     background-size: cover;
     padding: 40px;
     border-top-right-radius: 8px;
@@ -117,9 +117,11 @@ a{
     border: none;
     padding: 14px 15px;
     font-weight: 600;
-    transition: 0.3s ease;
+ 
 }
-
+.login-form button:hover{
+    opacity: 0.9;
+}
 
 p.account a{
     color: #4e34b6;
@@ -136,10 +138,11 @@ p.account a:hover{
     color: black;
     cursor: pointer;
    
+   
 }
 .close-icon:hover{
-    background-color: red;
-    color: #fff;
+    /* background-color: red; */
+    color: #ca1a1a;
     border-radius: 50%;
 }
 

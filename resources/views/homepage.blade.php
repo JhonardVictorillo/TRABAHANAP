@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <link rel="shortcut icon" type="x-icon" href="logo.png">
     <meta http-equiv="x-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=d-wievicedth, initial-scale=1.0">
     <title>HOME PAGE</title>
@@ -44,7 +43,7 @@
     </section>
 
     <section class="category-container" id="category">
-        <h2>Categories in TrabaHanap.</h2>
+        <h2>Categories in trabaHanap.</h2>
         <div class="categories">
             <div class="category">
                 <h3>Art & Media</h3>
@@ -176,6 +175,27 @@ serviceButtons.forEach(button => {
         } else {
           
             window.location.href = '/services-page.html'; 
+        }
+    });
+});
+
+
+
+const navLinks = document.querySelectorAll('.navbar a');
+
+navLinks.forEach(link => {
+    link.addEventListener('click', (e) => {
+        
+        navLinks.forEach(link => link.classList.remove('active'));
+        
+        link.classList.add('active');
+
+        
+        const sectionId = link.getAttribute('href').substring(1); 
+        const section = document.getElementById(sectionId);
+        if (section) {
+            e.preventDefault(); 
+            section.scrollIntoView({ behavior: 'smooth' }); 
         }
     });
 });

@@ -5,11 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Appointments</title>
     <link rel="stylesheet" href="{{ asset('css/customer.css') }}">
+    
 </head>
 <body>
     <header class="header">
         <h1>My Appointments</h1>
-        <a href="{{ route('customer.dashboard') }}">Back to Dashboard</a>
+        <a href="{{ route('customer.dashboard') }}">
+        <button class="back-btn" >Back to Dashboard</button> 
+        </a>
     </header>
 
     <main>
@@ -44,12 +47,21 @@
                             @endif
                         </td>
                         <td>
-                        @if($appointment->post && !empty($appointment->post->sub_services))
-                                <ul>
-                                    @foreach ($appointment->post->sub_services as $subService)
-                                        <li>{{ $subService }}</li>
-                                    @endforeach
-                                </ul>
+                             @if ($appointment->post && !empty($appointment->post->sub_services))
+                                @php
+                                    // Decode sub_services if it's a JSON string
+                                    $subServices = is_string($appointment->post->sub_services) ? json_decode($appointment->post->sub_services, true) : $appointment->post->sub_services;
+                                @endphp
+
+                                @if (is_array($subServices))
+                                    <ul>
+                                        @foreach ($subServices as $subService)
+                                            <li>{{ $subService }}</li>
+                                        @endforeach
+                                    </ul>
+                                @else
+                                    <p>No sub-services available.</p>
+                                @endif
                             @else
                                 <p>No sub-services available.</p>
                             @endif

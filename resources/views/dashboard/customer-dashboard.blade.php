@@ -15,18 +15,19 @@
 <body>
 
   <header class="header">
-      <h1>Trabahanap.</h1>
+      <h1>trabahanap.</h1>
 
     
     <div class="header-center">
     <form action="{{ route('search') }}" method="GET" style="display: flex; align-items: center; width: 100%;">
-        <input 
+       
+    <input 
             type="text" 
             name="q" 
             placeholder="What service are you looking for today?" 
             class="search-bar"
             value="{{ request('q') }}"
-            style="flex-grow: 1; border: none; padding: 10px; border-radius: 4px;"
+       
         >
         <button type="submit" class="search-button">
             <i class="fas fa-search"></i>
@@ -98,7 +99,7 @@
                     Category Not Assigned
                 @else
                     @foreach($post->freelancer->categories as $category)
-                        {{ $category->name }}
+                       <h4>{{ $category->name }}</h4> 
                     @endforeach
                 @endif
                 <div class="rating">
@@ -110,9 +111,17 @@
                     @endif
                 </div>
                 <div class="sub-services">
-                @foreach ($post->sub_services as $subService)
-                    <span>{{ $subService }}</span>
-                  @endforeach
+                                @php
+                        $subServices = is_string($post->sub_services) ? json_decode($post->sub_services, true) : $post->sub_services;
+                    @endphp
+
+                    @if(is_array($subServices))
+                        @foreach ($subServices as $subService)
+                            <span>{{ $subService }}</span>
+                        @endforeach
+                    @else
+                        <span>No sub-services available</span>
+                    @endif
                 </div>
                 <p class="description">{{ $post->description }}</p>
 

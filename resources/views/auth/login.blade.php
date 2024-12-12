@@ -22,7 +22,7 @@
             <div class="main">
                 <div class="content">
                    <a href="{{route('homepage')}}"><i class='bx bx-x close-icon'></i></a>
-                    <h2>LogIn</h2>
+                    <h2>Welcome Back!</h2>
 
                     <form action="{{ route('login.submit') }}" method="POST">
                     @csrf

@@ -167,9 +167,10 @@
                 </div>
 
                 <div class="sub-services">
-                @foreach ($post->sub_services as $subService)
-                    <span>{{ $subService }}</span>
-                  @endforeach
+                @foreach (is_string($post->sub_services) ? json_decode($post->sub_services ?? '[]') : $post->sub_services as $subServices)
+                        <span>{{ $subServices }}</span>
+                    @endforeach
+                        
                 </div>
 
                 <p class="description">

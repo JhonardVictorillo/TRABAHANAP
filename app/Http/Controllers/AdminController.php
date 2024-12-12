@@ -18,7 +18,7 @@ class AdminController extends Controller
      
            // Retrieve all categories for the Categories section
         $categories = Category::all();
-      
+         
         
     return View('dashboard.admin-dashboard', [
             'totalFreelancers' => $totalFreelancers,

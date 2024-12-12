@@ -9,7 +9,7 @@
 body {
     display: flex;
     min-height: 100vh;
-    background: #f4f4f4;
+    background: #e6e9ec;
 }
 
 
@@ -26,40 +26,49 @@ body {
     gap: 20px;
     margin-bottom: 20px;
 }
-
+.profile-header h3{
+    margin-right: 20px;
+    font-size: 25px;
+    color: #03351a;
+}
 .profile-info {
     width: 300px;
     text-align: center;
-    background: #fff;
+    background: #00b477;
     padding: 20px;
     border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 5px rgba(0, 0, 0.5, 0.5);
 }
-
+.profile-info h2{
+    color: #fff;
+}
+.profile-info h2 .hi{
+    color: #03351a;
+}
 .main-profile-picture {
     width: 200px;
     height: 200px;
     border-radius: 50%;
     margin-bottom: 10px;
-    border: 4px solid #030e0a;
+    border: 4px solid #fff;
 }
 
 .edit-profile {
     display: inline-flex;
     align-items: center;
-    color: #2c3e50;
+    border: 1px solid #ffffff;
+    color: #ffffff;
+    background-color: #0058b6;
     font-size: 0.9rem;
     text-decoration: none;
     margin-top: 10px;
-    border: 1px solid black;
     border-radius: 10px;
     padding: 5px;
     transition: 0.3s;
 }
 
 .edit-profile:hover {
-    background: #e2dddd;
-    color: #030e0a;
+    opacity: 0.9;
 }
 
 .profile-status {
@@ -109,12 +118,14 @@ body {
     flex: 1;
     padding: 20px;
     background: #fff;
+    border: 2px solid #00b477;
     border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 3px 5px rgba(0, 0, 0, 0.1);
     height: auto;
     display: flex;
     flex-direction: column; 
     justify-content: space-between;
+
 }
 
 .profile-header i {
@@ -155,19 +166,23 @@ body {
     
 }
 .personal-details {
-    margin-top: 20px;
+
+    margin-top: 25px;
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 15px;
 }
 
 .personal-details p {
+    color: #2c2b2b;
     margin: 5px 0;
 }
 
 .personal-details p span {
     font-weight: 500;
-    color: #555;
+    color: #707070;
+    border-radius: 10px;
+    padding: 10px;
 }
 
 .social-media {
@@ -185,56 +200,19 @@ body {
 
 .social-media a {
     text-decoration: none;
-    color: #007bff;
-    font-size: 1.2rem;
+    color: #00b477;
+    font-size: 16px;
+    padding: 10px;
+    border-radius: 50%;
     transition: color 0.3s, transform 0.3s;
 }
 
 .social-media a:hover {
+    background-color: #fff;
     color: #007bff; 
-    transform: scale(1.1); 
+    transform: scale(1); 
 }
 
-/********************************Ratings Section********************************/
-.rating-stars {
-    font-size: 1.2rem;
-    color: #f1c40f;
-}
-
-.rating-breakdown {
-    margin-top: 10px;
-    list-style: none;
-    padding-left: 0;
-}
-
-.rating-breakdown li {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 5px 10px;
-    background-color: #f9f9f9; 
-    border-radius: 5px; 
-    margin-bottom: 5px;
-    font-size: 0.9rem;
-    color: #555;
-}
-
-.rating-breakdown li:hover {
-    background-color: #f1f1f1; 
-}
-
-.rating-breakdown .label {
-    flex-grow: 1;
-    text-align: left;
-    color: #333;
-}
-
-.rating-breakdown .value {
-    flex-shrink: 0;
-    text-align: right;
-    color: #000;
-    font-weight: bold;
-}
 
 
 /********************************Recent Works********************************/
@@ -243,6 +221,11 @@ body {
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    border: 2px solid #00b477;
+    
+}
+.recent-works h3{
+    color:  #062b16;
 }
 
 .work-gallery {
@@ -256,41 +239,22 @@ body {
     height: 100px;
     border-radius: 5px;
     object-fit: cover;
-}
-
-.add-work {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100px;
-    height: 100px;
-    background: #2c3e50;
-    color: #fff;
-    border-radius: 5px;
-    font-weight: bold;
+    border: 2px solid #fff;
     cursor: pointer;
-    transition: background 0.3s;
 }
-
-.add-work:hover {
-    background: #1a2732;
-}
-
-.add-work span {
-    font-size: 20px;
-    margin-right: 5px;
-}
-
 
 
 .back-button {
-    background-color: #007bff; /* Bootstrap primary color */
+     background: #1c212e;
     color: white;
     border: none;
     padding: 10px 15px;
     border-radius: 5px;
     cursor: pointer;
     margin-bottom: 20px; /* Space below the button */
+}
+.back-button:hover{
+    opacity: 0.9;
 }
 
 .back-button i {
