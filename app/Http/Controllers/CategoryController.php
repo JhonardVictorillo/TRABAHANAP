@@ -23,4 +23,38 @@ class CategoryController extends Controller
         return redirect()->back()->with('success', 'Category created successfully!');
     }
    
+
+     // Edit method
+     public function edit($id)
+     {
+         $category = Category::findOrFail($id);
+         return response()->json($category); // Return the category data as JSON
+     }
+
+      // Update method
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255|unique:categories,name,' . $id,
+        ], [
+            'name.required' => 'The category name is required.',
+            'name.unique' => 'This category name is already taken.',
+        ]);
+
+        $category = Category::findOrFail($id);
+        $category->update([
+            'name' => $request->name,
+        ]);
+
+        return redirect()->back()->with('success', 'Category updated successfully!');
+    }
+
+     // Delete method
+     public function destroy($id)
+     {
+         $category = Category::findOrFail($id);
+         $category->delete();
+ 
+         return redirect()->back()->with('success', 'Category deleted successfully!');
+     }
 }

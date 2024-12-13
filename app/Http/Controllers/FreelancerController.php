@@ -21,6 +21,8 @@ class FreelancerController extends Controller
           // Get the freelancer's first category (or modify as needed)
      $freelancerCategory = $user->categories()->first();
      $unreadNotifications = $user->unreadNotifications;
+
+     $notifications = auth()->user()->notifications;
         
       // Fetch appointments related to the freelancer
       $appointments = Appointment::where('freelancer_id', $user->id)
@@ -39,6 +41,12 @@ class FreelancerController extends Controller
            $posts = Post::where('freelancer_id', $user->id)
            ->with('appointments') // Eager load appointments for ratings
            ->get();
+
+
+    // Fetch counts for posts and appointments
+    $totalPosts = $user->posts()->count(); // Assuming you have a posts relationship
+    $totalAppointments = $user->appointments()->count(); // Assuming you have an appointments relationship
+
           
         // If profile is complete, show the dashboard without the modal
         return view('dashboard.freelancer-dashboard', [
@@ -50,7 +58,10 @@ class FreelancerController extends Controller
             'unreadNotifications' => $unreadNotifications,
             'appointments' => $appointments,
             'averageRating' => $averageRating,
-            'ratingBreakdown' => $ratingBreakdown
+            'ratingBreakdown' => $ratingBreakdown,
+           'notifications' => $notifications,
+           'totalPosts' => $totalPosts,
+           'totalAppointments' => $totalAppointments
         ]);
 
 }   
@@ -79,7 +90,8 @@ public function acceptAppointment($id)
     if ($customer) {
         $customer->notify(new AppointmentStatusUpdated($appointment, 'accepted'));
     }
-    return redirect()->back()->with('success', 'Appointment accepted.');
+    
+    return redirect()->route('freelancer.dashboard', ['#appointments-section'])->with('success', 'Appointment accepted.');
 }
 
 public function declineAppointment($id)
@@ -94,7 +106,8 @@ public function declineAppointment($id)
          $customer->notify(new AppointmentStatusUpdated($appointment, 'declined'));
      }
 
-    return redirect()->back()->with('success', 'Appointment declined.');
+    
+    return redirect()->route('freelancer.dashboard', ['#appointments-section'])->with('success', 'Appointment declined.');
 }
 
 public function markAsCompleted($appointmentId)
@@ -116,11 +129,11 @@ public function markAsCompleted($appointmentId)
         }
 
         // Redirect back to the freelancer dashboard with a success message
-        return redirect()->back()->with('success', 'The appointment has been marked as completed.');
+        return redirect()->route('freelancer.dashboard', ['#appointments-section'])->with('success', 'The appointment has been marked as completed.');
     }
 
     // Redirect back with an error message if something goes wrong
-    return redirect()->back()->with('error', 'Unable to mark the appointment as completed.');
+    return redirect()->route('freelancer.dashboard', ['#appointments-section'])->with('error', 'Unable to mark the appointment as completed.');
 }
 
     
@@ -146,6 +159,19 @@ public function markAsCompleted($appointmentId)
             return collect([1, 2, 3, 4, 5])->mapWithKeys(function ($rating) use ($appointments) {
                 return [$rating => $appointments->where('rating', $rating)->count()];
             });
+}
+
+
+public function markNotificationsAsRead()
+{
+    $user = Auth::user();
+
+    // Ensure the user has unread notifications of the specific type
+    $user->unreadNotifications
+         ->where('type', 'App\Notifications\AppointmentNotification')
+         ->markAsRead();
+
+    return redirect()->back()->with('success', 'Notifications marked as read.');
 }
 
 }

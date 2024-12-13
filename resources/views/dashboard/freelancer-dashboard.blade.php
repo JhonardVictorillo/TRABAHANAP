@@ -36,12 +36,14 @@
         <li>
             <a href=""  id="appointment-link" class="">
                 <span class="material-symbols-outlined">event</span>Appointment
-               
+                @if($notifications->count() > 0)
+                <span class="notification-count">{{ $notifications->count() }}</span>
+                @endif
             </a>
         </li>
         <li>
             <a href=""  id="message-link" class="">
-                <span class="material-symbols-outlined">chat</span>Messages <span class="message-count">5</span>
+                <span class="material-symbols-outlined">chat</span>Messages <span class="message-count">1</span>
             </a>
         </li>
         <li>
@@ -62,15 +64,15 @@
                 <div class="stats-cards">
                     <div class="card">
                         <h3>Total Posts</h3>
-                        <p>15</p>
+                        <p>{{ $totalPosts }}</p>
                     </div>
                     <div class="card">
-                        <h3>Active Appointments</h3>
+                        <h3>Appointments</h3>
                         <p>3</p>
                     </div>
                     <div class="card">
                         <h3>New Messages</h3>
-                        <p>5</p>
+                        <p>{{ $totalAppointments }}</p>
                     </div>
                 </div>
             </section>
@@ -125,6 +127,7 @@
                 <button type="button" onclick="closeForm()">Close</button>
             </form>
                 <hr>
+                
                 <h2>Created Posts</h2>
        <div class="post-container">
         @foreach ($posts as $post)
@@ -192,7 +195,7 @@
                 @endif
                 </div>
 
-                <button class="edit-post">
+                <button class="edit-post" data-post-id="{{ $post->id }}">
                     <i class="fas fa-edit"></i> Edit Post
                 </button>
             </div>
@@ -200,21 +203,53 @@
     </div>
             </section>
 
+            <!--****************** edit post modal **************************-->
+            @foreach ($posts as $post)
+            <div id="modal-backdrop"></div>
+                <div id="edit-post-modal">
+                    <span class="close-btn" onclick="closeEditPostModal()">×</span>
+                    <h2>Edit Post</h2>
+                    <form id="edit-post-form" action = "{{ route('posts.update', ['id' => $post->id]) }}"     method="POST" enctype="multipart/form-data">
+                        @csrf
+                        @method('PUT') 
+                        <input type="hidden" id="edit-post-id" name="post_id"> <!-- Add this for post ID -->
+
+                        <label for="edit-description">Description:</label>
+                        <textarea id="edit-description" name="description" required></textarea>
+
+                        <label for="edit-sub-services">Sub-Services:</label>
+                        <div id="edit-sub-services-container"></div> <!-- Add this for sub-services -->
+
+                        <label for="edit-post-picture">Recent Works:</label>
+                        <input type="file" id="edit-post-picture" name="post_picture[]" accept="image/*" multiple>
+
+                        <button type="submit">Save Changes</button>
+                        <button type="button" onclick="closeEditPostModal()">Cancel</button>
+                    </form>
+                </div>
+                @endforeach
+
+
              <!-- Appointments Section -->
              <section id="appointments-section" class = "section">
                 <h2>Upcoming Appointments</h2>
-                <div class="calendar-view">
+
+                <form action="{{ route('notifications.markAsRead') }}" method="POST" style="display:inline;">
+                    @csrf
+                    <button type="submit" class="btn btn-secondary">Mark All Notifications as Read</button>
+                </form>
+                <!-- <div class="calendar-view"> -->
                     <!-- Placeholder for calendar -->
-                    <p>Calendar Widget</p>
-                </div>
+                    <!-- <p>Calendar Widget</p>
+                </div> -->
             <div class="appointments">
            <ul>
            @foreach($appointments as $appointment)
                 <li>
                      {{ $appointment->name ?? 'Unknown' }} booked an appointment on {{ $appointment->date }} at 
                     {{ $appointment->time }}<br>
-                    <strong>Status:</strong> 
-                    <span class="status {{ strtolower($appointment->status) }}">
+                    <strong style="color: #fff; background: #007bff; padding: 6px; border-radius: 8px;"  >Status:</strong> 
+                    <span class="status {{ strtolower($appointment->status) }}" >
                         {{ ucfirst($appointment->status) }}
                     </span>
 
@@ -236,9 +271,9 @@
                     @endif
 
                     @if($appointment->status === 'accepted')
-                        <form action="{{ route('appointments.complete', $appointment->id) }}" method="POST" style="display:inline;">
+                        <form action="{{ route('appointments.complete', $appointment->id )  }}" method="POST" style="display:inline;  ">
                             @csrf
-                            <button type="submit" class="btn btn-primary">Completed</button>
+                            <button type="submit" class="btn btn-primary" style=" color:#fff; background: #118f39;">Complete</button>
                         </form>
                     @endif
 
@@ -516,7 +551,72 @@
             createPostForm.style.display = 'none'; // Hide the form
             resetFormFields(); // Reset the form fields
         }
-});
+  
+       //////// edit post modal javascripts ///////////////////////
+       
+       
+          document.addEventListener('click', function (event) {
+    if (event.target.matches('.edit-post')) {
+        const postId = event.target.dataset.postId;
+        console.log('Edit Post button clicked, Post ID:', postId);
+        
+        fetch(`/posts/${postId}/edit`)
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Failed to fetch post data');
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.error) {
+                    alert('Error fetching post data: ' + data.error);
+                    return;
+                }
+        const post = data.post;
+
+         // Update the form action URL dynamically
+         const editForm = document.getElementById('edit-post-form');
+                editForm.action = `/posts/${postId}`;
+
+        document.getElementById('edit-post-id').value = post.id;
+        document.getElementById('edit-description').value = post.description;
+
+        const subServicesContainer = document.getElementById('edit-sub-services-container');
+        subServicesContainer.innerHTML = '';
+
+        (data.sub_services || []).forEach(service => {
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.name = 'sub_services[]';
+            input.value = service;
+            subServicesContainer.appendChild(input);
+        });
+
+        openEditPostModal();
+    })
+    .catch(error => {
+        console.error('Error fetching post data:', error);
+        let customAlert = 'An error occurred while fetching the post data.';
+        alert(customAlert);
+    });
+
+            function openEditPostModal() {
+                console.log("Opening Edit Post Modal");
+                document.getElementById('edit-post-modal').style.display = 'block';
+                document.getElementById('modal-backdrop').style.display = 'block';
+            }
+
+            function closeEditPostModal() {
+                document.getElementById('edit-post-modal').style.display = 'none';
+                document.getElementById('modal-backdrop').style.display = 'none';
+            }
+             // Attach event listeners to Cancel and Close buttons
+    document.querySelector('.close-btn').addEventListener('click', closeEditPostModal);
+    document.querySelector('#edit-post-modal button[type="button"]').addEventListener('click', closeEditPostModal);
+        }
+    })
+    
+    })
     </script>
 </body>
 </html>

@@ -135,8 +135,12 @@
                 <td>{{ $category->name }}</td>
                 <td>{{ $category->created_at->format('Y-m-d H:i') }}</td> <!-- Format created date -->
                 <td>
-                    <button class="verify-btn">Edit</button>
-                    <button class="delete-btn">Delete</button>
+                <button class="verify-btn edit-category-btn" data-id="{{ $category->id }}">Edit</button>
+                    <form action="{{ route('categories.destroy', $category->id) }}" method="POST" style="display:inline;">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="delete-btn">Delete</button>
+                </form>
                 </td>
             </tr>
         @endforeach
@@ -150,6 +154,24 @@
         </table>
     </div>
 
+    <div id="editCategoryModal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn">&times;</span>
+        <h3>Edit Category</h3>
+        <form id="editCategoryForm" method="POST">
+            @csrf
+            <input type="hidden" name="id" id="editCategoryId">
+            <div class="form-group">
+                <label for="name">Category Name:</label>
+                <input type="text" name="name" id="editCategoryName" required>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="cancel-btn">Cancel</button>
+                <button type="submit" class="save-btn">Update</button>
+            </div>
+        </form>
+    </div>
+</div>
 
     @if(session('success'))
      <div class="alert alert-success">
@@ -255,6 +277,8 @@
             alert.remove();
         }, 3000); // 3 seconds
     }
+
+    
 });
 
         //*************************** */ modal scirpt******************
@@ -287,6 +311,29 @@ document.addEventListener("DOMContentLoaded", function () {
         categoryModal.style.display = "flex"; // Keep modal open
     }
 });
+
+document.querySelectorAll('.edit-category-btn').forEach(button => {
+    button.addEventListener('click', function () {
+        const categoryId = this.getAttribute('data-id');
+        fetch(`/categories/${categoryId}/edit`)
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('editCategoryId').value = data.id;
+                document.getElementById('editCategoryName').value = data.name;
+                document.getElementById('editCategoryForm').action = `/categories/${data.id}/update`;
+                document.getElementById('editCategoryModal').style.display = 'flex';
+            });
+    });
+
+});
+        document.querySelector('.close-btn').addEventListener('click', function () {
+            document.getElementById('editCategoryModal').style.display = 'none';
+        });
+
+        // Cancel Button
+        document.querySelector('.cancel-btn').addEventListener('click', function () {
+            document.getElementById('editCategoryModal').style.display = 'none';
+        });
 
 
     </script>

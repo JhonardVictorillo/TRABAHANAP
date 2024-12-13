@@ -17,7 +17,7 @@
         </div>
         <nav class="navbar">
             <a href="#home" class="active">Home</a>
-            <a href="#team">Team</a>
+            <a href="#category">Categories</a>
             <a href="#Contact">Contact Us</a>
             <a href="{{route('login')}}"><button class="logbtn">Login</button></a>
             <a href="{{route('register')}}"><button class="regisbtn">Register</button></a>

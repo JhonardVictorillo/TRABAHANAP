@@ -74,5 +74,9 @@ public function posts()
     return $this->hasMany(Post::class, 'freelancer_id');
 }
 
+public function appointments()
+{
+    return $this->hasMany(Appointment::class, 'freelancer_id');
+}
      
 }

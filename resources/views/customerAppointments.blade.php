@@ -38,12 +38,12 @@
                 <tbody>
                 @foreach($appointments as $appointment)
                     <tr>
-                        <td>{{ $appointment->freelancer->firstname ?? 'Freelancer not found' }} {{ $appointment->freelancer->lastname ?? '' }}</td>
+                        <td style="color: #2860c9; font-weight: 600;"  >{{ $appointment->freelancer->firstname ?? 'Freelancer not found' }} {{ $appointment->freelancer->lastname ?? '' }}</td>
                         <td>
 
                             {{-- Display the categories --}}
                             @if($appointment->freelancer->categories->isNotEmpty())
-                              <li> {{ $appointment->freelancer->categories->pluck('name')->join(', ') }}</li>
+                              <li style="color: #3c763d; font-weight: 600;"> {{ $appointment->freelancer->categories->pluck('name')->join(', ') }}</li>
                             @endif
                         </td>
                         <td>
@@ -54,9 +54,9 @@
                                 @endphp
 
                                 @if (is_array($subServices))
-                                    <ul>
+                                    <ul >
                                         @foreach ($subServices as $subService)
-                                            <li>{{ $subService }}</li>
+                                            <li style="color: #3c763d; font-weight: 600;">{{ $subService }}</li>
                                         @endforeach
                                     </ul>
                                 @else

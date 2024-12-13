@@ -480,6 +480,7 @@ font-size: 14px;
     margin-bottom: 10px;
     font-size: 1.2em;
     color: #333;
+   
 }
 
 
@@ -494,6 +495,7 @@ font-size: 14px;
     cursor: pointer;
     transition: background-color 0.3s;
     margin-top: 20px;
+    
 }
 
 .modal-content button[type="submit"]:hover {
@@ -664,5 +666,19 @@ table th {
 }
 .header a .back-btn:hover{
   opacity: 0.9;
-
+}
+/* th .freelancer{
+  background: #065a22;
+  color: #fff;
+   padding: 10px; 
+} */
+.rate-button{
+  background: #0056b3;
+  padding: 7px ;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+}
+.rate-button:hover{
+  opacity: 0.9;
 }

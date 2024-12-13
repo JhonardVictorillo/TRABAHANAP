@@ -43,6 +43,9 @@ Route::get('/freelancer-dashboard', function () {
     return (new FreelancerController)->dashboard(); // or return view('freelancer.dashboard');
 })->name('freelancer.dashboard');
 
+// POST or PATCH route for handling updates
+// Route::post('/freelancer-dashboard/update', [FreelancerController::class, 'update'])->name('freelancer.dashboard.update');
+
 Route::prefix('profile')->middleware('auth')->group(function () {
     Route::get('/freelancer', [ProfileController::class, 'showFreelancerProfileForm'])
         ->name('profile.freelancer');
@@ -98,3 +101,14 @@ Route::post('/appointments/{appointment}/complete', [FreelancerController::class
 Route::post('/appointments/{appointment}/rate', [CustomerController::class, 'rateAppointment'])->name('customer.appointments.rate');
 //search routes
 Route::get('/search', [CustomerController::class, 'search'])->name('search');
+
+//edit category part
+Route::get('/categories/{id}/edit', [CategoryController::class, 'edit'])->name('categories.edit');
+Route::post('/categories/{id}/update', [CategoryController::class, 'update'])->name('categories.update');
+Route::delete('/categories/{id}', [CategoryController::class, 'destroy'])->name('categories.destroy');
+
+// post edit
+Route::get('/posts/{id}/edit', [PostController::class, 'edit'])->name('posts.edit');
+Route::put('/posts/{id}', [PostController::class, 'update'])->name('posts.update');
+
+Route::post('/freelancer/notifications/read', [FreelancerController::class, 'markNotificationsAsRead'])->name('notifications.markAsRead');
