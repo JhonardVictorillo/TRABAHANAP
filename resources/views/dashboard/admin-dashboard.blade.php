@@ -39,7 +39,7 @@
             <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
                     @csrf
                 </form>
-                <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                <a href="#"   id="logout-link" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                     <span class="material-symbols-outlined">logout</span>Logout
                 </a>
             </li>
@@ -217,58 +217,74 @@
 
 
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            const dashboardLink = document.getElementById('dashboard-link');
-            const usersLink = document.getElementById('users-link');
-            const categoryLink = document.getElementById('categories-link')
-            const dashboardSection = document.getElementById('dashboard');
-            const usersSection = document.getElementById('users');
-            const categorySection = document.getElementById('category');
+  document.addEventListener("DOMContentLoaded", function () {
+    const sections = {
+        dashboard: document.getElementById("dashboard"),
+        users: document.getElementById("users"),
+        category: document.getElementById("category")
+    };
 
+    const links = {
+        dashboard: document.getElementById("dashboard-link"),
+        users: document.getElementById("users-link"),
+        category: document.getElementById("categories-link")
+    };
 
+    const logoutLink = document.getElementById("logout-link"); // Assuming there's a logout button or link
 
-             // Set the default view to the dashboard
-          dashboardSection.style.display = 'block';
-         usersSection.style.display = 'none';
-        categorySection.style.display = 'none';
-
-
-            // Show the category section if it's in the URL (or after category creation)
-    if (window.location.href.includes('category=true') || {{ session('success') ? 'true' : 'false' }}) {
-        dashboardSection.style.display = 'none';
-        usersSection.style.display = 'none';
-        categorySection.style.display = 'block';
-    } else if ({!! $errors->any() ? 'true' : 'false' !!}) {
-        // Show category section if there are validation errors
-        dashboardSection.style.display = 'none';
-        usersSection.style.display = 'none';
-        categorySection.style.display = 'block';
+    // Function to show a specific section
+    function showSection(sectionKey) {
+        Object.values(sections).forEach((section) => (section.style.display = "none"));
+        if (sections[sectionKey]) {
+            sections[sectionKey].style.display = "block";
+        }
     }
-            // Toggle to Users section when "Users" is clicked
-            usersLink.addEventListener('click', function(event) {
-                event.preventDefault();
-                dashboardSection.style.display = 'none';
-                usersSection.style.display = 'block';
-                categorySection.style.display = 'none';
 
-            });
+    // Initially hide all sections
+    Object.values(sections).forEach((section) => (section.style.display = "none"));
 
-            // Toggle back to Dashboard section when "Dashboard" is clicked
-            dashboardLink.addEventListener('click', function(event) {
-                event.preventDefault();
-                usersSection.style.display = 'none';
-                categorySection.style.display = 'none';
-                dashboardSection.style.display = 'block';
-            });
-            categoryLink.addEventListener('click', function(event) {
-                event.preventDefault();
-                usersSection.style.display = 'none';
-                dashboardSection.style.display = 'none';
-                categorySection.style.display = 'block';
-
-            });
+    // Clear the last active section on logout
+    if (logoutLink) {
+        logoutLink.addEventListener("click", function () {
+            localStorage.removeItem("adminActiveSection"); // Clear saved section
         });
-       
+    }
+
+    // Determine the section to show
+    let lastActiveSection = localStorage.getItem("adminActiveSection");
+
+    // If no section is saved or login is detected, default to "dashboard"
+    if (!lastActiveSection || window.location.href.includes("login=true")) {
+        lastActiveSection = "dashboard";
+        localStorage.setItem("adminActiveSection", "dashboard"); // Set default section
+    }
+
+    // Show the determined section
+    showSection(lastActiveSection);
+
+    // Add click event listeners to navigation links
+    Object.keys(links).forEach((key) => {
+        links[key].addEventListener("click", function (event) {
+            event.preventDefault();
+            localStorage.setItem("adminActiveSection", key); // Save active section
+            showSection(key);
+        });
+    });
+
+    // Listen for form submissions to save the active section
+    const forms = document.querySelectorAll("form");
+    forms.forEach((form) => {
+        form.addEventListener("submit", function () {
+            const currentSection = Object.keys(sections).find(
+                (key) => sections[key].style.display === "block"
+            );
+            if (currentSection) {
+                localStorage.setItem("adminActiveSection", currentSection); // Save current section before submission
+            }
+        });
+    });
+});
+
         // success message time duration
         document.addEventListener('DOMContentLoaded', function () {
     const alert = document.querySelector('.alert-success');

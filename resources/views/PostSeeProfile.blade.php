@@ -81,7 +81,7 @@
     <span class="close" onclick="closeBookingModal()">&times;</span>
     <h2>Request Date & Time</h2>
 
-    <form method="POST" action="{{ route('book.appointment') }}">
+    <form   method="POST" action="{{ route('book.appointment') }}">
     @csrf
       
     <input type="hidden" name="freelancer_id" value="{{ $freelancer->id }}">
@@ -91,7 +91,7 @@
       <input type="date" id="date" name="date" required>
 
       <!-- Hidden input field for selected time -->
-    <input type="hidden" id="selected-time" name="time">
+    <input type="hidden" id="selected-time" name="time" required>
     
 
       <label>Time:</label>
@@ -119,22 +119,36 @@
         <button type="button" class="time-btn">07:00 PM</button>
         
       </div>
+      @if ($errors->has('time'))
+    <div class="alert alert-danger">
+        {{ $errors->first('time') }}
+    </div>
+@endif
 
 <div class="contact-info">
   <div class="input-group">
     <label for="name">Your Name:</label>
-    <input type="text" id="name" name="name" placeholder="Enter your full name" required>
+    <input type="text" id="name" name="name" value="{{ old('name') }}"  placeholder="Enter your full name" required>
+    @error('name')
+            <div class="text-danger">{{ $message }}</div>
+        @enderror
   </div>
   <div class="input-group">
     <label for="address">Your Address:</label>
-    <input type="text" id="address" name="address" placeholder="Enter your address" required>
+    <input type="text" id="address" name="address" value="{{ old('address') }}" placeholder="Enter your address" required>
+    @error('address')
+            <div class="text-danger">{{ $message }}</div>
+        @enderror
   </div>
 </div>
 
 <div class="contact-info">
   <div class="input-group">
     <label for="contact">Contact Number:</label>
-    <input type="text" id="contact" name="contact" placeholder="Enter your contact number" required>
+    <input type="text" id="contact" name="contact"  value="{{ old('contact') }}" placeholder="Enter your contact number" required>
+    @error('contact')
+            <div class="text-danger">{{ $message }}</div>
+        @enderror
   </div>
   <div class="input-group">
     <label for="notes">Appointment Request:</label>
@@ -166,15 +180,7 @@
   @endif
 
   <script>
-    // Function to open the booking modal
-function openBookingModal() {
-  document.getElementById("booking-modal").style.display = "block";
-}
-
-// Function to close the booking modal
-function closeBookingModal() {
-  document.getElementById("booking-modal").style.display = "none";
-}
+   
 
 // // Show freelancer profile and hide main content
 // function showFreelancerProfile() {
@@ -200,12 +206,24 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
+   // Function to open the booking modal
+function openBookingModal() {
+  document.getElementById("booking-modal").style.display = "block";
+}
+
+// Function to close the booking modal
+function closeBookingModal() {
+  document.getElementById("booking-modal").style.display = "none";
+}
+
   const alert = document.querySelector('.alert-success');
             if (alert) {
                 setTimeout(() => {
                     alert.remove();
                 }, 3000); // 3 seconds
             }
+
+
 });
 
 

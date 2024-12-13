@@ -60,8 +60,12 @@ public function bookAppointment(Request $request)
         'time' => 'required|string',
         'name' => 'required|string|max:255',
         'address' => 'required|string|max:255',
-        'contact' => 'required|string|max:20',
+        'contact' =>  'required|string|regex:/^[0-9]{10}$/', 
         'notes' => 'nullable|string',
+    ],[
+      
+        'contact.regex' => 'The contact number must be 10 digits.',
+        'time.required' => 'The appointment time is required.',
     ]);
    
    $appointment = Appointment::create([

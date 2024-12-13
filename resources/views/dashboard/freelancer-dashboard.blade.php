@@ -50,7 +50,7 @@
             <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
                 @csrf
             </form>
-            <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+            <a href="#" id ="logout-button" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                 <span class="material-symbols-outlined">logout</span>Logout
             </a>
         </li>
@@ -68,11 +68,11 @@
                     </div>
                     <div class="card">
                         <h3>Appointments</h3>
-                        <p>3</p>
+                        <p>{{ $totalAppointments }}</p>
                     </div>
                     <div class="card">
                         <h3>New Messages</h3>
-                        <p>{{ $totalAppointments }}</p>
+                        <p>0</p>
                     </div>
                 </div>
             </section>
@@ -437,24 +437,63 @@
         profile: document.getElementById("profile-section")
     };
 
-            const links = {
-                dashboard: document.getElementById("dashboard-link"),
-                posts: document.getElementById("post-link"),
-                appointments: document.getElementById("appointment-link"),
-                messages: document.getElementById("message-link"),
-                profile: document.getElementById("profile-link")
-            };
+    const links = {
+        dashboard: document.getElementById("dashboard-link"),
+        posts: document.getElementById("post-link"),
+        appointments: document.getElementById("appointment-link"),
+        messages: document.getElementById("message-link"),
+        profile: document.getElementById("profile-link")
+    };
 
-            Object.values(sections).forEach((section) => (section.style.display = "none"));
-            sections.dashboard.style.display = "block";
+    // Function to show a section
+    function showSection(sectionKey) {
+        Object.values(sections).forEach((section) => (section.style.display = "none"));
+        if (sections[sectionKey]) {
+            sections[sectionKey].style.display = "block";
+        }
+    }
 
-            Object.keys(links).forEach((key) => {
-                links[key].addEventListener("click", function (event) {
-                    event.preventDefault();
-                    Object.values(sections).forEach((section) => (section.style.display = "none"));
-                    sections[key].style.display = "block";
-                });
-            });
+    // Initially hide all sections
+    Object.values(sections).forEach((section) => (section.style.display = "none"));
+
+    // Get the last active section from local storage or default to dashboard
+    const lastActiveSection = localStorage.getItem("activeSection") || "dashboard";
+    showSection(lastActiveSection);
+
+    // Add click event listeners for section links
+    Object.keys(links).forEach((key) => {
+        links[key].addEventListener("click", function (event) {
+            event.preventDefault();
+            localStorage.setItem("activeSection", key); // Save the active section
+            showSection(key);
+        });
+    });
+
+    // Listen for form submissions to save the active section
+    const forms = document.querySelectorAll("form");
+    forms.forEach((form) => {
+        form.addEventListener("submit", function () {
+            const currentSection = Object.keys(sections).find(
+                (key) => sections[key].style.display === "block"
+            );
+            if (currentSection) {
+                localStorage.setItem("activeSection", currentSection); // Save the active section before submission
+            }
+        });
+    });
+
+    // Function to handle logout
+    const logoutButton = document.getElementById("logout-button"); // Replace with your actual logout button's ID
+    if (logoutButton) {
+        logoutButton.addEventListener("click", function () {
+            localStorage.removeItem("activeSection"); // Clear the active section from local storage
+            // Optionally, redirect to the login page or home page
+            window.location.href = "/login"; // Update the URL to match your application's login page
+        });
+    }
+// });
+
+
             
         
 
