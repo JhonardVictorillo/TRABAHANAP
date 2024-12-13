@@ -34,16 +34,16 @@ body {
 .profile-info {
     width: 300px;
     text-align: center;
-    background: #00b477;
+    background: #fff;
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 2px 5px rgba(0, 0, 0.5, 0.5);
 }
 .profile-info h2{
-    color: #fff;
+    color:  #1d1a1a;
 }
 .profile-info h2 .hi{
-    color: #03351a;
+    color: #0f502d;
 }
 .main-profile-picture {
     width: 200px;
@@ -118,7 +118,6 @@ body {
     flex: 1;
     padding: 20px;
     background: #fff;
-    border: 2px solid #00b477;
     border-radius: 8px;
     box-shadow: 0 3px 5px rgba(0, 0, 0, 0.1);
     height: auto;
@@ -180,7 +179,7 @@ body {
 
 .personal-details p span {
     font-weight: 500;
-    color: #707070;
+    color: #426d50;
     border-radius: 10px;
     padding: 10px;
 }
@@ -196,11 +195,11 @@ body {
     margin-right: 15px;
     font-size: 1rem;
     font-weight: bold;
-}
+}   
 
 .social-media a {
     text-decoration: none;
-    color: #00b477;
+    color: #6da07e;  
     font-size: 16px;
     padding: 10px;
     border-radius: 50%;
@@ -208,8 +207,8 @@ body {
 }
 
 .social-media a:hover {
-    background-color: #fff;
-    color: #007bff; 
+    background-color:  #6da07e; ;
+    color: #fff; 
     transform: scale(1); 
 }
 
@@ -220,8 +219,8 @@ body {
     background: #fff;
     padding: 20px;
     border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    border: 2px solid #00b477;
+    box-shadow: 0 3px 5px rgba(0, 0, 0, 0.1);
+
     
 }
 .recent-works h3{

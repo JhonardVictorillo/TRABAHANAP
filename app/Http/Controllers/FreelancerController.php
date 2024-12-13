@@ -90,8 +90,9 @@ public function acceptAppointment($id)
     if ($customer) {
         $customer->notify(new AppointmentStatusUpdated($appointment, 'accepted'));
     }
-    
-    return redirect()->route('freelancer.dashboard', ['#appointments-section'])->with('success', 'Appointment accepted.');
+    return redirect()->to(url()->previous() . '#appointments-section')
+                 ->with('success', 'Appointment accepted.');
+    // return redirect()->back()->with('success', 'Appointment accepted.');
 }
 
 public function declineAppointment($id)
@@ -106,8 +107,7 @@ public function declineAppointment($id)
          $customer->notify(new AppointmentStatusUpdated($appointment, 'declined'));
      }
 
-    
-    return redirect()->route('freelancer.dashboard', ['#appointments-section'])->with('success', 'Appointment declined.');
+    return redirect()->back()->with('success', 'Appointment declined.');
 }
 
 public function markAsCompleted($appointmentId)
@@ -129,11 +129,11 @@ public function markAsCompleted($appointmentId)
         }
 
         // Redirect back to the freelancer dashboard with a success message
-        return redirect()->route('freelancer.dashboard', ['#appointments-section'])->with('success', 'The appointment has been marked as completed.');
+        return redirect()->back()->with('success', 'The appointment has been marked as completed.');
     }
 
     // Redirect back with an error message if something goes wrong
-    return redirect()->route('freelancer.dashboard', ['#appointments-section'])->with('error', 'Unable to mark the appointment as completed.');
+    return redirect()->back()->with('error', 'Unable to mark the appointment as completed.');
 }
 
     
