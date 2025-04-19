@@ -14,7 +14,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\PostController;
 use Illuminate\Support\Facades\Auth;
-
+use Illuminate\Support\Facades\Session;
 // Home Route
 Route::get('/', function () {
     return view('homepage'); // Ensure you have 'home.blade.php'
@@ -58,6 +58,8 @@ Route::prefix('profile')->middleware('auth')->group(function () {
 });
 
 
+
+
 // Customer Dashboard Route
 Route::get('/customer-dashboard', function () {
     if (!Auth::check() || Auth::user()->role !== 'customer') {
@@ -67,11 +69,20 @@ Route::get('/customer-dashboard', function () {
 })->name('customer.dashboard');
 
 
-
+//Admin routes
 Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+Route::put('/admin/posts/{id}/approve', [AdminController::class, 'approvePost'])->name('admin.approvePost');
+Route::put('/admin/posts/{id}/reject', [AdminController::class, 'rejectPost'])->name('admin.rejectPost');
 
+    
+Route::post('/admin/freelancer/{id}/verify', [AdminController::class, 'verifyFreelancer'])->name('admin.verifyFreelancer');
+Route::post('/admin/freelancer/{id}/reject', [AdminController::class, 'rejectFreelancer'])->name('admin.rejectFreelancer');
+
+
+//complete profile route
 Route::post('/profile/complete', [ProfileController::class, 'submitCompleteProfileForm'])->name('profile.complete');
 
+//category routes
 Route::post('/categories/store', [CategoryController::class, 'store'])->name('categories.store');
 
 //    customer profile
@@ -98,17 +109,27 @@ Route::post('/appointments/decline/{id}', [FreelancerController::class, 'decline
 Route::post('/appointments/{appointment}/complete', [FreelancerController::class, 'markAsCompleted'])->name('appointments.complete');
 
 //rating appointment
-Route::post('/appointments/{appointment}/rate', [CustomerController::class, 'rateAppointment'])->name('customer.appointments.rate');
+Route::post('/customer/appointments/rate/{appointmentId}', [CustomerController::class, 'rateAppointment'])->name('customer.appointments.rate');
 //search routes
 Route::get('/search', [CustomerController::class, 'search'])->name('search');
 
 //edit category part
+Route::post('/categories', [CategoryController::class, 'store'])->name('categories.store');
 Route::get('/categories/{id}/edit', [CategoryController::class, 'edit'])->name('categories.edit');
-Route::post('/categories/{id}/update', [CategoryController::class, 'update'])->name('categories.update');
+Route::put('/categories/{id}', [CategoryController::class, 'update'])->name('categories.update');
 Route::delete('/categories/{id}', [CategoryController::class, 'destroy'])->name('categories.destroy');
 
 // post edit
 Route::get('/posts/{id}/edit', [PostController::class, 'edit'])->name('posts.edit');
 Route::put('/posts/{id}', [PostController::class, 'update'])->name('posts.update');
+Route::delete('posts/{id}/', [PostController::class, 'delete'])->name('posts.delete');
 
 Route::post('/freelancer/notifications/read', [FreelancerController::class, 'markNotificationsAsRead'])->name('notifications.markAsRead');
+Route::post('/freelancer/notifications/read/{id}', [FreelancerController::class, 'markSingleNotificationAsRead']);
+Route::get('/freelancer/notifications', [FreelancerController::class, 'getNotifications'])->name('notifications.get');
+//appointment routes
+Route::get('/freelancer/appointments', [FreelancerController::class, 'getAppointments'])->name('appointments.get');
+Route::get('/freelancer/appointments/{id}', [FreelancerController::class, 'show'])->name('appointments.show');
+
+//freelancer updateprofile
+Route::put('/freelancer/profile/update', [FreelancerController::class, 'update'])->name('freelancer.updateProfile');

@@ -1,184 +1,23 @@
 
+@include("admin.header")
+@include("admin.homeSection")
+@include('admin.sidebar&Header')
+@include('admin.dashboard-admin')  
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin</title>
-    <link rel="stylesheet" href="{{asset('css/admin.css')}}">
-        <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
-</head> 
-<body>
+@include('admin.categorySection') 
 
-    <aside class="sidebar">
-        <div class="sidebar-header">
-            <h2>trabahanap.</h2>
-        </div>
-        <ul class="sidebar-links">
-            <h4><span>Main Menu</span></h4>
-            <li>
-                <a href=""  id="dashboard-link"><span class="material-symbols-outlined">dashboard</span>Dashboard</a>
-            </li>
-            <li>
-                <a href=""  id="users-link"><span class="material-symbols-outlined">group</span>Users</a>
-            </li>
-            <li>
-                <a href="" id="categories-link"><span class="material-symbols-outlined">category</span>Categories</a>
-            </li>
-           
-            <h4><span>Account</span></h4>
-            <li>
-                <a href="#" ><span class="material-symbols-outlined">account_circle</span>Profile</a>
-            </li>
-            <li>
-                <a href="#" ><span class="material-symbols-outlined">settings</span>Settings</a>
-            </li>
-            <li>
-            <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
-                    @csrf
-                </form>
-                <a href="#"   id="logout-link" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                    <span class="material-symbols-outlined">logout</span>Logout
-                </a>
-            </li>
-        </ul>
-        <div class="user-account">
-            <div class="user-profile">
-                <div class="user-detail">
-                    <h3> Hi,  {{ Auth::user()->firstname }}</h3>
-                    <span>{{ Auth::user()->role }}</span>
-                </div>
-            </div>
-        </div>
-    </aside>
-
-    <main class="main-content">
-    <div id="dashboard" class="content-section"> 
-        <div class="content-header">
-           <h2>Dashboard</h2>
-        </div>
-        <div class="cards">
-            <div class="card">
-                <span class="material-symbols-outlined">people</span> 
-                <h3>Total Freelancers</h3>
-                <p>{{ $totalFreelancers }}</p>
-            </div>
-            <div class="card">
-                <span class="material-symbols-outlined">groups</span> 
-                <h3>Total Clients</h3>
-                <p>{{ $totalCustomers }}</p>
-            </div>
-            <div class="card">
-                <span class="material-symbols-outlined">pending</span> 
-                <h3>Pending Accounts</h3>
-                <p>{{ $pendingAccounts ?? 0 }}</p>
-            </div>
-        </div>
-        </div>
-        </div>
         
-        
-        <div id="users" class="section" style="display: none;"> <!-- Initially hidden -->
-        <h2>All Users</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Role</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-            @if(isset($users) && $users->count() > 0)
-                @foreach($users as $user) <!-- Loop through users -->
-                    <tr>
-                        <td>{{ $user->firstname }} {{ $user->lastname }}</td>
-                        <td>{{ $user->email }}</td>
-                        <td>{{ $user->role }}</td>
-                        <td>
-                            <button class="verify-btn">Verify</button>
-                            <button class="delete-btn">Delete</button>
-                        </td>
-                    </tr>
-                @endforeach
-                @else
-                <tr>
-                    <td colspan="4">No users found.</td>
-                </tr>
-            @endif
-            </tbody>
-        </table>
-    </div>
+       
 
-    <div id="category" class="section" style="display: none;"> <!-- Initially hidden -->
-        <h2>All Category</h2>
-        <button id="createCategoryBtn" class="create-btn">+ Create Category</button>
-        <hr>
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>CATEGORY NAME</th>
-                    <th>CREATED</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-           
-            @if($categories->count() > 0)
-        @foreach($categories as $category)
-            <tr>
-                <td>{{ $category->id }}</td>
-                <td>{{ $category->name }}</td>
-                <td>{{ $category->created_at->format('Y-m-d H:i') }}</td> <!-- Format created date -->
-                <td>
-                <button class="verify-btn edit-category-btn" data-id="{{ $category->id }}">Edit</button>
-                    <form action="{{ route('categories.destroy', $category->id) }}" method="POST" style="display:inline;">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="delete-btn">Delete</button>
-                </form>
-                </td>
-            </tr>
-        @endforeach
-    @else
-        <tr>
-            <td colspan="4">No categories found.</td>
-        </tr>
-    @endif
-            
-            </tbody>
-        </table>
-    </div>
-
-    <div id="editCategoryModal" class="modal">
-    <div class="modal-content">
-        <span class="close-btn">&times;</span>
-        <h3>Edit Category</h3>
-        <form id="editCategoryForm" method="POST">
-            @csrf
-            <input type="hidden" name="id" id="editCategoryId">
-            <div class="form-group">
-                <label for="name">Category Name:</label>
-                <input type="text" name="name" id="editCategoryName" required>
-            </div>
-            <div class="modal-actions">
-                <button type="button" class="cancel-btn">Cancel</button>
-                <button type="submit" class="save-btn">Update</button>
-            </div>
-        </form>
-    </div>
-</div>
-
-    @if(session('success'))
+    
+@if(session('success'))
      <div class="alert alert-success">
        {{ session('success') }}
      </div>
         @endif
 
+
+   
 
         <!-- @if ($errors->any())
     <div class="alert alert-danger">
@@ -190,168 +29,302 @@
     </div>
 @endif -->
    
-    </main>
-
-        <!-- Modal -->
-    <div id="categoryModal" class="modal" style="display: none;">
-        <div class="modal-content">
-            <span class="close-modal">&times;</span>
-            <h3>Create New Category</h3>
-            <form action="{{ route('categories.store') }}" method="POST">
-                @csrf
-                <div class="form-group">
-                    <label for="categoryName">Category Name:</label>
-                    <input type="text" id="categoryName"  name="name" value="{{ old('name') }}"  class="{{ $errors->has('name') ? 'input-error' : '' }}" required>
-                    @error('name')
-                     <div class="error-message" style="color: red; margin-top: 5px;">{{ $message }}</div>
-                  @enderror
-                </div>
-                <button type="submit" class="verify-btn">Create</button>
-            </form>
-        </div>
-    </div>
-</div>
-
-
-
-
-
+   
     <script>
-  document.addEventListener("DOMContentLoaded", function () {
-    const sections = {
-        dashboard: document.getElementById("dashboard"),
-        users: document.getElementById("users"),
-        category: document.getElementById("category")
-    };
+//   document.addEventListener("DOMContentLoaded", function () {
+//     const sections = {
+//         dashboard: document.getElementById("dashboard"),
+//         users: document.getElementById("users"),
+//         category: document.getElementById("category"),
+//         posts: document.getElementById("posts") 
+//     };
 
-    const links = {
-        dashboard: document.getElementById("dashboard-link"),
-        users: document.getElementById("users-link"),
-        category: document.getElementById("categories-link")
-    };
+//     const links = {
+//         dashboard: document.getElementById("dashboard-link"),
+//         users: document.getElementById("users-link"),
+//         category: document.getElementById("categories-link"),
+//         posts: document.getElementById("posts-link")
+//     };
 
-    const logoutLink = document.getElementById("logout-link"); // Assuming there's a logout button or link
+//     const logoutLink = document.getElementById("logout-link"); // Assuming there's a logout button or link
 
-    // Function to show a specific section
-    function showSection(sectionKey) {
-        Object.values(sections).forEach((section) => (section.style.display = "none"));
-        if (sections[sectionKey]) {
-            sections[sectionKey].style.display = "block";
-        }
-    }
+//     // Function to show a specific section
+//     function showSection(sectionKey) {
+//         Object.values(sections).forEach((section) => (section.style.display = "none"));
+//         if (sections[sectionKey]) {
+//             sections[sectionKey].style.display = "block";
+//         }
+//     }
 
-    // Initially hide all sections
-    Object.values(sections).forEach((section) => (section.style.display = "none"));
+//     // Initially hide all sections
+//     Object.values(sections).forEach((section) => (section.style.display = "none"));
 
-    // Clear the last active section on logout
-    if (logoutLink) {
-        logoutLink.addEventListener("click", function () {
-            localStorage.removeItem("adminActiveSection"); // Clear saved section
-        });
-    }
+//     // Clear the last active section on logout
+//     if (logoutLink) {
+//         logoutLink.addEventListener("click", function () {
+//             localStorage.removeItem("adminActiveSection"); // Clear saved section
+//         });
+//     }
 
-    // Determine the section to show
-    let lastActiveSection = localStorage.getItem("adminActiveSection");
+//     // Determine the section to show
+//     let lastActiveSection = localStorage.getItem("adminActiveSection");
 
-    // If no section is saved or login is detected, default to "dashboard"
-    if (!lastActiveSection || window.location.href.includes("login=true")) {
-        lastActiveSection = "dashboard";
-        localStorage.setItem("adminActiveSection", "dashboard"); // Set default section
-    }
+//     // If no section is saved or login is detected, default to "dashboard"
+//     if (!lastActiveSection || window.location.href.includes("login=true")) {
+//         lastActiveSection = "dashboard";
+//         localStorage.setItem("adminActiveSection", "dashboard"); // Set default section
+//     }
 
-    // Show the determined section
-    showSection(lastActiveSection);
+//     // Show the determined section
+//     showSection(lastActiveSection);
 
-    // Add click event listeners to navigation links
-    Object.keys(links).forEach((key) => {
-        links[key].addEventListener("click", function (event) {
-            event.preventDefault();
-            localStorage.setItem("adminActiveSection", key); // Save active section
-            showSection(key);
-        });
-    });
+//     // Add click event listeners to navigation links
+//     Object.keys(links).forEach((key) => {
+//         links[key].addEventListener("click", function (event) {
+//             event.preventDefault();
+//             localStorage.setItem("adminActiveSection", key); // Save active section
+//             showSection(key);
+//         });
+//     });
 
-    // Listen for form submissions to save the active section
-    const forms = document.querySelectorAll("form");
-    forms.forEach((form) => {
-        form.addEventListener("submit", function () {
-            const currentSection = Object.keys(sections).find(
-                (key) => sections[key].style.display === "block"
-            );
-            if (currentSection) {
-                localStorage.setItem("adminActiveSection", currentSection); // Save current section before submission
-            }
-        });
-    });
-});
+//     // Listen for form submissions to save the active section
+//     const forms = document.querySelectorAll("form");
+//     forms.forEach((form) => {
+//         form.addEventListener("submit", function () {
+//             const currentSection = Object.keys(sections).find(
+//                 (key) => sections[key].style.display === "block"
+//             );
+//             if (currentSection) {
+//                 localStorage.setItem("adminActiveSection", currentSection); // Save current section before submission
+//             }
+//         });
+//     });
+// });
 
-        // success message time duration
-        document.addEventListener('DOMContentLoaded', function () {
-    const alert = document.querySelector('.alert-success');
-    if (alert) {
-        setTimeout(() => {
-            alert.remove();
-        }, 3000); // 3 seconds
-    }
+//         // success message time duration
+//         document.addEventListener('DOMContentLoaded', function () {
+//     const alert = document.querySelector('.alert-success');
+//     if (alert) {
+//         setTimeout(() => {
+//             alert.remove();
+//         }, 3000); // 3 seconds
+//     }
 
     
-});
+// });
 
-        //*************************** */ modal scirpt******************
-document.addEventListener("DOMContentLoaded", function () {
-    const createCategoryBtn = document.getElementById("createCategoryBtn");
-    const categoryModal = document.getElementById("categoryModal");
-    const closeModal = document.querySelector(".close-modal");
+//         //*************************** */ modal scirpt******************
+// document.addEventListener("DOMContentLoaded", function () {
+//     const createCategoryBtn = document.getElementById("createCategoryBtn");
+//     const categoryModal = document.getElementById("categoryModal");
+//     const closeModal = document.querySelector(".close-modal");
   
 
 
-    // Show the modal
-    createCategoryBtn.addEventListener("click", function () {
-        categoryModal.style.display = "flex";
+//     // Show the modal
+//     createCategoryBtn.addEventListener("click", function () {
+//         categoryModal.style.display = "flex";
        
-    });
+//     });
 
-    // Hide the modal
-    closeModal.addEventListener("click", function () {
-        categoryModal.style.display = "none";
-    });
+//     // Hide the modal
+//     closeModal.addEventListener("click", function () {
+//         categoryModal.style.display = "none";
+//     });
 
-    // Hide modal on clicking outside the modal content
-    window.addEventListener("click", function (event) {
-        if (event.target === categoryModal) {
-            categoryModal.style.display = "none";
-        }
-    });
-    const hasErrors = document.querySelector(".error-message"); // Checks if there are error messages
-    if (hasErrors) {
-        categoryModal.style.display = "flex"; // Keep modal open
+//     // Hide modal on clicking outside the modal content
+//     window.addEventListener("click", function (event) {
+//         if (event.target === categoryModal) {
+//             categoryModal.style.display = "none";
+//         }
+//     });
+//     const hasErrors = document.querySelector(".error-message"); // Checks if there are error messages
+//     if (hasErrors) {
+//         categoryModal.style.display = "flex"; // Keep modal open
+//     }
+// });
+
+// document.querySelectorAll('.edit-category-btn').forEach(button => {
+//     button.addEventListener('click', function () {
+//         const categoryId = this.getAttribute('data-id');
+//         fetch(`/categories/${categoryId}/edit`)
+//             .then(response => response.json())
+//             .then(data => {
+//                 document.getElementById('editCategoryId').value = data.id;
+//                 document.getElementById('editCategoryName').value = data.name;
+//                 document.getElementById('editCategoryForm').action = `/categories/${data.id}/update`;
+//                 document.getElementById('editCategoryModal').style.display = 'flex';
+//             });
+//     });
+
+// });
+//         document.querySelector('.close-btn').addEventListener('click', function () {
+//             document.getElementById('editCategoryModal').style.display = 'none';
+//         });
+
+//         // Cancel Button
+//         document.querySelector('.cancel-btn').addEventListener('click', function () {
+//             document.getElementById('editCategoryModal').style.display = 'none';
+//         });
+
+// Sidebar links and sections toggle
+const links = document.querySelectorAll('.sidebar-links li a');
+const sections = document.querySelectorAll('main > div');
+
+links.forEach(link => {
+  link.addEventListener('click', function (event) {
+    event.preventDefault();
+
+    links.forEach(link => link.classList.remove('active'));
+    this.classList.add('active');
+
+    sections.forEach(section => section.style.display = 'none');
+
+    const targetSelector = this.getAttribute('href');
+    if (targetSelector && targetSelector !== "#") {
+      const targetSection = document.querySelector(targetSelector);
+      if (targetSection) {
+        targetSection.style.display = 'block';
+        // Save active section to localStorage
+        localStorage.setItem('activeSection', targetSelector);
+      }
+    }
+  });
+});
+
+// Home Link
+document.getElementById('homeLink').addEventListener('click', function () {
+  setActiveSection('#homeSection');
+});
+
+// Dashboard Link
+document.getElementById('dashboardLink').addEventListener('click', function () {
+  setActiveSection('#dashboardSection');
+  toggleDashboardCards('totalFreelancers');
+});
+
+// Card Click Events
+document.getElementById('totalFreelancersCard').addEventListener('click', () => toggleDashboardCards('totalFreelancers'));
+document.getElementById('totalClientsCard').addEventListener('click', () => toggleDashboardCards('totalClients'));
+document.getElementById('pendingAccountsCard').addEventListener('click', () => toggleDashboardCards('pendingAccounts'));
+document.getElementById('pendingPostsCard').addEventListener('click', () => toggleDashboardCards('pendingPosts'));
+
+
+// Categories Link
+document.getElementById('categoriesLink').addEventListener('click', function () {
+  setActiveSection('#categoriesSection');
+});
+
+// Reusable function to activate a section
+function setActiveSection(selector) {
+  sections.forEach(section => section.style.display = 'none');
+  links.forEach(link => link.classList.remove('active'));
+
+  const targetSection = document.querySelector(selector);
+  if (targetSection) {
+    targetSection.style.display = 'block';
+    const correspondingLink = document.querySelector(`a[href="${selector}"]`);
+    if (correspondingLink) correspondingLink.classList.add('active');
+    localStorage.setItem('activeSection', selector);
+  }
+}
+
+// Reusable function to toggle dashboard cards
+function toggleDashboardCards(activeCard) {
+  const cards = ['totalFreelancers', 'totalClients', 'pendingAccounts', 'pendingPosts'];
+
+  cards.forEach(card => {
+    const cardElement = document.getElementById(`${card}Card`);
+    const sectionElement = document.getElementById(`${card}Section`);
+    if (card === activeCard) {
+      cardElement.classList.add('active');
+      sectionElement.style.display = 'block';
+    } else {
+      cardElement.classList.remove('active');
+      sectionElement.style.display = 'none';
+    }
+  });
+
+  localStorage.setItem('activeSection', '#dashboardSection');
+}
+
+// On Page Load: Restore active section
+window.addEventListener('DOMContentLoaded', () => {
+  const savedSection = localStorage.getItem('activeSection') || '#homeSection';
+  setActiveSection(savedSection);
+});
+
+// Success message hide after 3 seconds
+document.addEventListener('DOMContentLoaded', function () {
+  const alert = document.querySelector('.alert-success');
+  if (alert) {
+    setTimeout(() => {
+      alert.remove();
+    }, 3000);
+  }
+});
+
+// Add Category Modal Handling
+document.addEventListener("DOMContentLoaded", function () {
+  const modal = document.getElementById("categoryModal");
+  const addCategoryBtn = document.getElementById("addCategoryBtn");
+  const closeModal = document.querySelector(".close");
+
+  addCategoryBtn.addEventListener("click", function () {
+    modal.style.display = "flex";
+  });
+
+  closeModal.addEventListener("click", function () {
+    modal.style.display = "none";
+  });
+
+  window.addEventListener("click", function (event) {
+    if (event.target === modal) {
+      modal.style.display = "none";
+    }
+  });
+});
+
+// Edit Category Modal Handling
+const editCategoryBtns = document.querySelectorAll('.edit-category-btn');
+const editCategoryModal = document.getElementById('editCategoryModal');
+const editCategoryIdField = document.getElementById('editCategoryId');
+const editCategoryNameField = document.getElementById('editCategoryName');
+const updateCategoryBtn = document.getElementById('updateCategory');
+const cancelEditCategoryBtn = document.getElementById('cancelEditCategory');
+
+// Open edit modal
+document.querySelector("#categoriesSection table tbody").addEventListener("click", function (e) {
+    if (e.target && e.target.classList.contains("edit-category-btn")) {
+        const categoryId = e.target.getAttribute("data-id");
+        const categoryRow = e.target.closest('tr');
+        const categoryName = categoryRow.querySelector('td:nth-child(2)').textContent.trim();
+
+        // Set values in your modal form fields
+        editCategoryIdField.value = categoryId;
+        editCategoryNameField.value = categoryName;
+
+        // Show the modal
+        editCategoryModal.style.display = 'flex';
     }
 });
-
-document.querySelectorAll('.edit-category-btn').forEach(button => {
-    button.addEventListener('click', function () {
-        const categoryId = this.getAttribute('data-id');
-        fetch(`/categories/${categoryId}/edit`)
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById('editCategoryId').value = data.id;
-                document.getElementById('editCategoryName').value = data.name;
-                document.getElementById('editCategoryForm').action = `/categories/${data.id}/update`;
-                document.getElementById('editCategoryModal').style.display = 'flex';
-            });
-    });
-
+// Close edit modal
+cancelEditCategoryBtn.addEventListener('click', (e) => {
+  e.preventDefault();
+  editCategoryModal.style.display = 'none';
 });
-        document.querySelector('.close-btn').addEventListener('click', function () {
-            document.getElementById('editCategoryModal').style.display = 'none';
-        });
 
-        // Cancel Button
-        document.querySelector('.cancel-btn').addEventListener('click', function () {
-            document.getElementById('editCategoryModal').style.display = 'none';
-        });
+// Close edit modal when clicking outside
+window.addEventListener('click', (e) => {
+  if (e.target === editCategoryModal) {
+    editCategoryModal.style.display = 'none';
+  }
+});
 
 
+
+   
+       
     </script>
     </body>
 </html>

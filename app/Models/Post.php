@@ -10,13 +10,12 @@ class Post extends Model
     use HasFactory;
     protected $fillable = [
         'freelancer_id',
-        'sub_services',
         'description',
-         'post_picture',
+         'status',
     ];
 
     protected $casts = [
-        'sub_services' => 'array', // If it's stored as a JSON or array type in the database
+     
     ];
 
    
@@ -52,4 +51,13 @@ class Post extends Model
             return $this->appointments()->whereNotNull('rating')->count();
         }
    
+        public function pictures()
+        {
+            return $this->hasMany(PostPicture::class, 'post_id');
+        }
+    
+        public function subServices()
+        {
+            return $this->hasMany(PostSubService::class, 'post_id');
+        }
 }

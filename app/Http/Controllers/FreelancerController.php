@@ -18,9 +18,19 @@ class FreelancerController extends Controller
         $user = Auth::user();
         $categories = Category::all(); 
         $userCategories = $user->categories; // Fetch user's selected categories
-          // Get the freelancer's first category (or modify as needed)
-     $freelancerCategory = $user->categories()->first();
-     $unreadNotifications = $user->unreadNotifications;
+       $freelancerCategory = $user->categories()->first();
+       $unreadNotifications = $user->unreadNotifications; // Get unread notifications
+
+
+        // Fetch notifications separately
+        $appointmentNotifications = $user->notifications()
+            ->where('type', 'App\Notifications\AppointmentNotification')
+            ->get();
+
+        $postNotifications = $user->notifications()
+            ->where('type', 'App\Notifications\PostApprovalNotification')
+            ->get();
+
 
      $notifications = auth()->user()->notifications;
         
@@ -29,6 +39,20 @@ class FreelancerController extends Controller
       ->with('customer') // Load related customer data
       ->orderBy('created_at', 'desc')
       ->get();
+
+      $clientAppointments = Appointment::where('freelancer_id', $user->id)
+    ->whereIn('status', ['accepted', 'completed'])
+    ->with('customer') // eager load customer
+    ->get();
+    
+            // Collect unique customers from these appointments
+        $clients = $clientAppointments->pluck('customer')->unique('id')->values();
+
+        // Optional count of total clients
+        $totalClients = $clients->count();
+
+     
+      $reviews = $appointments->whereNotNull('rating');
        
       $averageRating = $this->calculateAverageRating($user->id);
 
@@ -61,7 +85,12 @@ class FreelancerController extends Controller
             'ratingBreakdown' => $ratingBreakdown,
            'notifications' => $notifications,
            'totalPosts' => $totalPosts,
-           'totalAppointments' => $totalAppointments
+           'totalAppointments' => $totalAppointments,
+           'appointmentNotifications' => $appointmentNotifications,
+            'postNotifications' => $postNotifications,
+             'reviews' => $reviews,
+            'clients' => $clients, // pass filtered clients
+            'totalClients' => $totalClients // pass total count
         ]);
 
 }   
@@ -90,15 +119,18 @@ public function acceptAppointment($id)
     if ($customer) {
         $customer->notify(new AppointmentStatusUpdated($appointment, 'accepted'));
     }
-    return redirect()->to(url()->previous() . '#appointments-section')
-                 ->with('success', 'Appointment accepted.');
-    // return redirect()->back()->with('success', 'Appointment accepted.');
+    return response()->json([
+        'success' => true,
+        'message' => 'Appointment accepted.',
+        'status' => 'accepted'
+    ]);
 }
 
-public function declineAppointment($id)
+public function declineAppointment(Request $request, $id)
 {
     $appointment = Appointment::findOrFail($id);
     $appointment->status = 'declined';
+    $appointment->decline_reason = $request->input('reason');
     $appointment->save();
 
      // Notify the customer about the appointment status update
@@ -107,32 +139,84 @@ public function declineAppointment($id)
          $customer->notify(new AppointmentStatusUpdated($appointment, 'declined'));
      }
 
-    return redirect()->back()->with('success', 'Appointment declined.');
+     return response()->json([
+        'success' => true,
+        'message' => 'Appointment declined.',
+        'status' => 'declined'
+    ]);
+}
+
+public function getAppointments(Request $request)
+{
+    // Get the current freelancer's appointments (adjust this as needed)
+    $appointments = Appointment::where('freelancer_id', auth()->id())->get();
+
+    // Format appointments for FullCalendar
+    $events = $appointments->map(function ($appointment) {
+        return [
+            'id' => $appointment->id,
+            'title' => $appointment->name . ' (' . ucfirst($appointment->status) . ')', 
+            'start' => $appointment->date,
+            'color' => $this->getStatusColor($appointment->status), 
+        ];
+    });
+
+    return response()->json($events);
+}
+
+// Optional helper for color-coding by status
+private function getStatusColor($status)
+{
+    return match ($status) {
+        'pending'   => '#fbbf24', // yellow
+        'scheduled' => '#3b82f6', // blue
+        'completed' => '#10b981', // green
+        'decline'  => '#ef4444', // red
+        default     => '#6b7280', // gray
+    };
+}
+
+
+public function show($id)
+{
+    $appointment = Appointment::findOrFail($id);
+
+    return response()->json([
+        'name' => $appointment->name ?? 'N/A',
+        'date' => $appointment->date,
+        'time' => $appointment->time,
+        'address' => $appointment->address,
+        'contact' => $appointment->contact ?? 'N/A',
+        'notes' => $appointment->notes,
+        'status' => ucfirst($appointment->status),
+    ]);
 }
 
 public function markAsCompleted($appointmentId)
 {
-    // Find the appointment by its ID
+    
     $appointment = Appointment::find($appointmentId);
 
-    // Check if the appointment exists and if the freelancer is the owner
+   
     if ($appointment && $appointment->freelancer_id == Auth::id()) {
         // Update the status to "completed"
         $appointment->status = 'completed';
         $appointment->completed_at = now();  // Optionally, track when it was completed
         $appointment->save();
 
-        // Notify the customer about the completion status (optional)
+       
         $customer = $appointment->customer;
         if ($customer) {
             $customer->notify(new AppointmentStatusUpdated($appointment, 'completed'));
         }
 
-        // Redirect back to the freelancer dashboard with a success message
-        return redirect()->back()->with('success', 'The appointment has been marked as completed.');
+        return response()->json([
+            'success' => true,
+            'message' => 'The appointment has been marked as completed.',
+            'status' => 'completed'
+        ]);
     }
 
-    // Redirect back with an error message if something goes wrong
     return redirect()->back()->with('error', 'Unable to mark the appointment as completed.');
 }
 
@@ -162,16 +246,77 @@ public function markAsCompleted($appointmentId)
 }
 
 
+
 public function markNotificationsAsRead()
 {
     $user = Auth::user();
 
-    // Ensure the user has unread notifications of the specific type
-    $user->unreadNotifications
-         ->where('type', 'App\Notifications\AppointmentNotification')
-         ->markAsRead();
+    // Mark both types of notifications as read
+    $user->unreadNotifications()
+        ->whereIn('type', [
+            'App\Notifications\AppointmentNotification',
+            'App\Notifications\PostApprovalNotification'
+        ])
+        ->update(['read_at' => now()]);
 
-    return redirect()->back()->with('success', 'Notifications marked as read.');
+        return response()->json([
+            'success' => true,
+            'message' => 'Notifications marked as read.',
+            'unread_count' => $user->unreadNotifications()->count(), // This should now be 0
+            'notifications' => $user->notifications // Return all notifications (both read and unread)
+        ]);
+}
+                public function markSingleNotificationAsRead($id)
+                {
+                    $user = Auth::user();
+                    $notification = $user->notifications()->where('id', $id)->first();
+
+                    if ($notification && is_null($notification->read_at)) {
+                        $notification->markAsRead(); // Use markAsRead() instead of update()
+
+                        return response()->json([
+                            'success' => true,
+                            'message' => 'Notification marked as read.',
+                            'unread_count' => $user->unreadNotifications()->count()
+                        ]);
+                    }
+
+                    return response()->json(['success' => false, 'message' => 'Notification not found.'], 404);
+                }
+public function getNotifications() {
+    return response()->json(Auth::user()->notifications);
+}
+
+public function update(Request $request)
+{
+    $user = Auth::user();
+
+    $request->validate([
+        'firstname' => 'required|string|max:255',
+        'lastname' => 'required|string|max:255',
+        'email' => 'required|email|unique:users,email,' . $user->id,
+        'contact_number' => 'nullable|string',
+        'province' => 'nullable|string',
+        'city' => 'nullable|string',
+        'profile_picture' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+    ]);
+
+    $user->firstname = $request->firstname;
+    $user->lastname = $request->lastname;
+    $user->email = $request->email;
+    $user->contact_number = $request->contact_number;
+    $user->province = $request->province;
+    $user->city = $request->city;
+
+    // Profile picture upload
+    if ($request->hasFile('profile_picture')) {
+        $imagePath = $request->file('profile_picture')->store('profile_pictures', 'public');
+        $user->profile_picture = $imagePath;
+    }
+
+    $user->save();
+
+    return redirect()->back()->with('success', 'Profile updated successfully!');
 }
 
 }

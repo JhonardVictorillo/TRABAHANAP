@@ -19,12 +19,17 @@ class CustomerController extends Controller
     {
         $user = Auth::user();
         $categories = Category::all(); 
-        $posts = Post::with(['freelancer', 'freelancer.categories'])
+        $posts = Post::where('status', 'approved')
+        ->whereHas('freelancer', function ($query) {
+            $query->where('is_verified', true);  // Only include verified freelancers
+        })
+        ->with(['freelancer', 'freelancer.categories'])
         ->withCount(['appointments as review_count' => function ($query) {
             $query->whereNotNull('rating');
         }])
         ->withAvg('appointments as average_rating', 'rating')
         ->get();
+
 
         $notifications = auth()->user()->notifications; // Get all notifications
     
@@ -48,9 +53,21 @@ class CustomerController extends Controller
 
 public function showFreelancerProfile($id)
 {
-    $freelancer = User::with('posts')->findOrFail($id); // Assuming 'posts' is the relationship for recent works
-    return view('PostSeeProfile', compact('freelancer'));
+     $freelancer = User::where('id', $id)
+        ->where('is_verified', true)  // Only allow verified freelancers
+        ->with(['posts'])
+        ->firstOrFail();
+
+    $user = Auth::user(); 
+         // Fetch only reviews where a rating and review exist
+    $reviews = Appointment::where('freelancer_id', $id)
+    ->whereNotNull('rating') // Ensure there's a rating
+    ->with('customer:id,firstname,lastname') // Load only customer name details
+    ->get();
+   
+    return view('PostSeeProfile', compact('freelancer', 'user','reviews' ));
 }
+
 public function bookAppointment(Request $request)
 {
     $validated = $request->validate([
@@ -116,19 +133,31 @@ public function search(Request $request)
 
     if (empty($searchTerm)) {
         // If no search term is provided, fetch all posts
-        $posts = Post::with(['freelancer', 'freelancer.categories'])->get();
+        $posts = Post::where('status', 'approved')
+        ->whereHas('freelancer', function ($query) {
+            $query->where('is_verified', true);  // Only verified freelancers
+        })
+        ->with(['freelancer', 'freelancer.categories'])
+        ->get();
     } else {
         // Search posts based on the query
-        $posts = Post::with(['freelancer', 'freelancer.categories'])
-            ->where('description', 'LIKE', '%' . $searchTerm . '%')
-            ->orWhereHas('freelancer', function ($query) use ($searchTerm) {
-                $query->where('firstname', 'LIKE', '%' . $searchTerm . '%')
-                      ->orWhere('lastname', 'LIKE', '%' . $searchTerm . '%');
-            })
-            ->orWhereHas('freelancer.categories', function ($query) use ($searchTerm) {
-                $query->where('name', 'LIKE', '%' . $searchTerm . '%');
-            })
-            ->get();
+        $posts = Post::where('status', 'approved')
+        ->whereHas('freelancer', function ($query) {
+            $query->where('is_verified', true); // Only verified freelancers
+        })
+        ->where(function ($query) use ($searchTerm) {
+            $query->where('description', 'LIKE', '%' . $searchTerm . '%')
+                ->orWhereHas('freelancer', function ($subQuery) use ($searchTerm) {
+                    $subQuery->where('firstname', 'LIKE', '%' . $searchTerm . '%')
+                             ->orWhere('lastname', 'LIKE', '%' . $searchTerm . '%');
+                })
+                ->orWhereHas('freelancer.categories', function ($subQuery) use ($searchTerm) {
+                    $subQuery->where('name', 'LIKE', '%' . $searchTerm . '%');
+                });
+        })
+        ->with(['freelancer', 'freelancer.categories'])
+        ->get();
+    
     }
 
     // Fetch notifications for the logged-in user
@@ -147,24 +176,27 @@ public function search(Request $request)
 
 public function rateAppointment($appointmentId, Request $request)
 {
-    $appointment = Appointment::findOrFail($appointmentId);
-
-    // Check if the appointment belongs to the authenticated customer
-    if ($appointment->customer_id == Auth::id()) {
-        // Validate the rating input
+    
         $request->validate([
             'rating' => 'required|integer|between:1,5',
+            'review' => 'nullable|string|max:500',
         ]);
 
-        // Update the appointment with the rating
-        $appointment->rating = $request->input('rating');
-        $appointment->save();
+        $appointment = Appointment::findOrFail($appointmentId);
 
-        // Redirect back with a success message
-        return redirect()->route('customer.appointments')->with('success', 'Thank you for your rating!');
+        if ($appointment->customer_id == Auth::id()) {
+            $request->validate([
+                'rating' => 'required|integer|between:1,5',
+                'review' => 'nullable|string|max:500',
+            ]);
+    
+            $appointment->rating = $request->input('rating');
+            $appointment->review = $request->input('review');
+            $appointment->save();
+    
+            return response()->json(['success' => 'Review updated successfully!']);
+        }
+    
+        return response()->json(['error' => 'You cannot edit this review.'], 403);
     }
-
-    return redirect()->route('customer.appointments')->with('error', 'You cannot rate this appointment.');
-}
-
 }

@@ -3,24 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="x-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=d-wievicedth, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HOME PAGE</title>
     <link rel="stylesheet" href="{{asset('css/home.css')}}">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
-   
+    
+    
+
 </head>
 <body>
 <header class="header">
-        <div class="logo">
-            <h1><span class="traba">traba</span><span class="hanap">hanap.</span></h1>
-        </div>
+       
+        <div class="home-header">
+        <h2 class="logo-header">
+            <span class="logo-icon">MG</span>
+            Mingla<span class="brand-span">Gawa</span>
+        </h2>          
+    </div>
+       
         <nav class="navbar">
             <a href="#home" class="active">Home</a>
             <a href="#category">Categories</a>
             <a href="#Contact">Contact Us</a>
             <a href="{{route('login')}}"><button class="logbtn">Login</button></a>
-            <a href="{{route('register')}}"><button class="regisbtn">Register</button></a>
+            <a href="{{route('register.form')}}"><button class="regisbtn">Register</button></a>
         </nav>
     </header>
     
@@ -43,7 +50,7 @@
     </section>
 
     <section class="category-container" id="category">
-        <h2>Categories in trabaHanap.</h2>
+        <h2>Categories in MinglaGawa.</h2>
         <div class="categories">
             <div class="category">
                 <h3>Art & Media</h3>
@@ -95,8 +102,8 @@
             </div>
         </div>        
     </section>
-    
-    
+
+            
     
     <footer class="footer" id="footer">
         <div class="container">
@@ -111,11 +118,11 @@
                 <div class="footer-col" id="team">
                     <h4>Team</h4>
                     <ul>
-                        <li><a href="#">Aya</a></li>
-                        <li><a href="#">Rohanna</a></li>
                         <li><a href="#">Jhonard</a></li>
-                        <li><a href="#">Eljohn</a></li>
+                        <li><a href="#">Cristian</a></li>
+                        <li><a href="#">ELjohn</a></li>
                         <li><a href="#">Aljun</a></li>
+                        <li><a href="#">Kathlen</a></li>
                     </ul>
                 </div>
     
@@ -141,6 +148,8 @@
             </div>
         </div>
     </footer>
+
+          
     
         <script>
             ///////////////////////////////////////////////for View Services/////////////////////////////
@@ -199,9 +208,11 @@ navLinks.forEach(link => {
         }
     });
 });
-        </script>
-
-
+    //login and register modal script///
+    
+  
+    
+</script>
 
 </body>
 </html>

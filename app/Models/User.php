@@ -78,5 +78,9 @@ public function appointments()
 {
     return $this->hasMany(Appointment::class, 'freelancer_id');
 }
+public function reviews()
+{
+    return $this->hasMany(Appointment::class, 'freelancer_id');
+}
      
 }

@@ -1,146 +1,216 @@
 <?php
 
 namespace App\Http\Controllers;
-use Illuminate\Support\Facades\Auth;
-use App\Models\Post; // Add this for the Post model
-use Illuminate\Support\Facades\DB; // Add this for database transactions
 
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
+use App\Models\Post;
+use App\Models\PostPicture;
+use App\Models\PostSubService;
+use Illuminate\Support\Facades\Storage;
 
 class PostController extends Controller
 {
     public function store(Request $request)
     {  
-        // dd($request->all());
-
-        $request->validate([
+        $validator = \Validator::make($request->all(), [
             'description' => 'required|string',
             'sub_services' => 'required|array|min:1',
             'sub_services.*' => 'required|string|max:255',
             'post_picture' => 'required|array|min:1',
             'post_picture.*' => 'required|image|mimes:jpg,jpeg,png|max:2048',
         ]);
-    
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'errors' => $validator->errors()
+            ]);
+        }
+
         try {
             DB::beginTransaction();
-    
+
             // Create Post
             $post = Post::create([
                 'freelancer_id' => Auth::id(),
                 'description' => $request->description,
-                'sub_services' => json_encode($request->sub_services),
+                'status' => 'pending',
             ]);
-    
-            if (empty($request->sub_services) || count(array_filter($request->sub_services)) === 0) {
-                return back()->withErrors(['sub_services' => 'At least one sub-service is required.']);
+
+            // Store SubServices
+            foreach ($request->sub_services as $sub_service) {
+                PostSubService::create([
+                    'post_id' => $post->id,
+                    'sub_service' => $sub_service,
+                ]);
             }
-            
-            if (!$request->hasFile('post_picture')) {
-                return back()->withErrors(['post_picture' => 'At least one post picture is required.']);
-            }
-            // File Upload
+
+            // Store Post Pictures
             if ($request->hasFile('post_picture')) {
-                $uploadedPaths = [];
                 foreach ($request->file('post_picture') as $file) {
                     $path = $file->store('post_pictures', 'public');
-                    $uploadedPaths[] = $path;
+                    PostPicture::create([
+                        'post_id' => $post->id,
+                        'image_path' => $path,
+                    ]);
                 }
-                $post->post_picture = json_encode($uploadedPaths);
-                $post->save();
             }
-    
+
             DB::commit();
-    
-            return redirect()->route('freelancer.dashboard')->with('success', 'Post created successfully!')->with('post-section');
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Post created successfully!'
+            ]);
+
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()->with('error', 'Error creating post: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'error' => 'Error creating post: ' . $e->getMessage()
+            ]);
         }
     }
-    
 
     public function index()
-{
-    $posts = Post::with('freelancer')->get(); // Retrieve posts with related freelancer data
-    return view('posts.index', compact('posts'));
-}
+    {
+        $posts = Post::with(['freelancer', 'categories', 'subServices', 'pictures'])->get();
+        return view('posts.index', compact('posts'));
+    }
 
-public function edit($id)
-{
-    try {
-        \Log::info('Fetching post data for Post ID: ' . $id);
+    public function edit($id)
+    {
+        try {
+            \Log::info('Fetching post data for Post ID: ' . $id);
+            $post = Post::with(['pictures', 'subServices'])->findOrFail($id);
+
+            if ($post->freelancer_id !== Auth::id()) {
+                \Log::error('Unauthorized access to post ID: ' . $id);  
+                return response()->json(['error' => 'Unauthorized'], 403);
+            }
+
+            return response()->json([
+                'post' => $post,
+                'sub_services' => $post->subServices->pluck('sub_service'),
+                'post_pictures' => $post->pictures->pluck('image_path'),
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Error fetching post data: ' . $e->getMessage());
+            return response()->json(['error' => 'Failed to fetch post data'], 500);
+        }
+    }
+
+    public function update(Request $request, $id)
+    {
         $post = Post::findOrFail($id);
 
-        // Ensure the logged-in freelancer owns the post
-        if ($post->freelancer_id !== Auth::id()) {
-            \Log::error('Unauthorized access to post ID: ' . $id);  
-            return response()->json(['error' => 'Unauthorized'], 403);
+        if ($post->freelancer_id !== auth()->id()) { 
+            return response()->json(['success' => false, 'error' => 'Unauthorized action.'], 403);
         }
 
-        // Check if sub_services is already an array, no need to decode
-        $sub_services = $post->sub_services;
-        if (is_string($sub_services)) {
-            $sub_services = json_decode($sub_services, true);
-            // Handle JSON decode errors
-            if (json_last_error() !== JSON_ERROR_NONE) {
-                \Log::error('Invalid JSON for sub_services of post ID: ' . $id);
-                $sub_services = [];  // If invalid JSON, return empty array
-            }
-        }
-        return response()->json([
-            'post' => $post,
-            'sub_services' => $sub_services
+        $validator = \Validator::make($request->all(), [
+            'description' => 'required|string',
+            'sub_services' => 'required|array|min:1',
+            'sub_services.*' => 'required|string|max:255',
+            'post_picture.*' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
-    } catch (\Exception $e) {
-        // Log the error
-        \Log::error('Error fetching post data: ' . $e->getMessage());
-        return response()->json(['error' => 'Failed to fetch post data'], 500);
-    }
-}
 
-public function update(Request $request, $id)
-{
-    \Log::info('Updating post: ', $request->all());
-    $post = Post::findOrFail($id);
-
-    // Ensure the logged-in freelancer owns the post
-    if ($post->freelancer_id !== Auth::id()) {
-        abort(403, 'Unauthorized action.');
-    }
-
-    $request->validate([
-        'description' => 'required|string',
-        'sub_services' => 'required|array|min:1',
-        'sub_services.*' => 'required|string|max:255',
-        'post_picture.*' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-    ]);
-
-    try {
-        DB::beginTransaction();
-
-        $post->description = $request->description;
-        $post->sub_services = json_encode($request->sub_services);
-
-        // Update post pictures if new images are uploaded
-        if ($request->hasFile('post_picture')) {
-            $uploadedPaths = [];
-            foreach ($request->file('post_picture') as $file) {
-                $path = $file->store('post_pictures', 'public');
-                $uploadedPaths[] = $path;
-            }
-            $post->post_picture = json_encode($uploadedPaths);
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'errors' => $validator->errors()
+            ]);
         }
 
-        $post->save();
+        try {
+            DB::beginTransaction();
 
-        DB::commit();
+            $post->description = $request->description;
+            $post->save();
 
-        return redirect()->route('freelancer.dashboard')->with('success', 'Post updated successfully!');
-    } catch (\Exception $e) {
-        DB::rollBack();
-        return redirect()->back()->with('error', 'Error updating post: ' . $e->getMessage());
+            // Update SubServices
+            PostSubService::where('post_id', $post->id)->delete();
+            foreach ($request->sub_services as $sub_service) {
+                PostSubService::create([
+                    'post_id' => $post->id,
+                    'sub_service' => $sub_service,
+                ]);
+            }
+
+            // Handle Image Deletion
+
+            if ($request->has('delete_images')) {
+                $deleteImages = explode(',', $request->delete_images);
+                foreach ($deleteImages as $imagePath) {
+                    // Delete image from storage
+                    $imagePath = ltrim($imagePath, 'public/'); // Ensure correct path format
+                    if (Storage::exists('public/post_pictures/' . $imagePath)) {
+                        Storage::delete('public/post_pictures/' . $imagePath);
+                    }
+                }
+    
+                // Remove the deleted images from the post's relationship table (e.g., pictures)
+                foreach ($deleteImages as $imagePath) {
+                    $post->pictures()->where('image_path', $imagePath)->delete();
+                }
+            }
+    
+            // Handle Image Uploads
+            if ($request->hasFile('post_picture')) {
+                foreach ($request->file('post_picture') as $file) {
+                    $path = $file->store('post_pictures', 'public');
+                    PostPicture::create([
+                        'post_id' => $post->id,
+                        'image_path' => $path,
+                    ]);
+                }
+            }
+
+            DB::commit();
+
+            return response()->json(['success' => true, 'message' => 'Post updated successfully!']);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false, 
+                'error' => 'Failed to update post.', 
+            ], 500);
+        }
     }
-}
 
+    public function delete($id)
+    {
+        try {
+            $post = Post::findOrFail($id);
 
+            if ($post->freelancer_id !== Auth::id()) {
+                return response()->json(['error' => 'Unauthorized action.'], 403);
+            }
+
+            // Delete related subservices and pictures
+            PostSubService::where('post_id', $post->id)->delete();
+            $postPictures = PostPicture::where('post_id', $post->id)->get();
+
+            foreach ($postPictures as $picture) {
+                \Storage::disk('public')->delete($picture->image_path);
+                $picture->delete();
+            }
+
+            $post->delete(); 
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Post deleted successfully.'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error deleting post: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }

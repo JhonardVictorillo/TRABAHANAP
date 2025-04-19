@@ -9,6 +9,63 @@
     <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
 
   <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+  <style>
+       
+        
+       .review-container {
+            width: 100%;
+            margin: auto;
+        }
+
+        .button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+        }
+
+        .button:hover {
+            background-color: #0056b3;
+        }
+
+        .reviews {
+            display: none; /* Initially hidden */
+            margin-top: 10px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+            text-align: left;
+        }
+
+        .review {
+            padding: 5px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .review:last-child {
+            border-bottom: none;
+        }
+
+        .customer-name {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .stars {
+            color: gold;
+            font-size: 18px;
+        }
+
+        .comment {
+            margin-top: 5px;
+            font-style: italic;
+        }
+    </style>
 </head>
 <body>
 
@@ -65,6 +122,32 @@
         @endforelse
       </div>
     </div>
+
+    <div class="review-container">
+        <button class="button" onclick="toggleReviews()">Reviews</button>
+
+        <div class="reviews" id="reviewsContainer">
+        @if ($reviews->isNotEmpty())
+        @foreach ($reviews as $review)
+                  <div class="review">
+                      <p class="customer-name">
+                          {{ $review->customer->firstname ?? 'Unknown' }} {{ $review->customer->lastname ?? '' }}
+                      </p> 
+                      <p class="stars">
+                          @for ($i = 0; $i < $review->rating; $i++)
+                              ★
+                          @endfor
+                      </p>
+                     
+                      <p class="comment">{{ $review->review }}</p>
+                  </div>
+              @endforeach
+          @else
+              <p>No reviews yet.</p>
+          @endif
+        </div>
+    </div>
+
     <a href="{{ route('customer.dashboard') }}">
     <button onclick="goBack()" class="back-btn" >Back</button>
     </a>
@@ -73,6 +156,7 @@
   </button>
   
   </div>
+
 
   
 <div id="booking-modal" class="modal">
@@ -128,14 +212,14 @@
 <div class="contact-info">
   <div class="input-group">
     <label for="name">Your Name:</label>
-    <input type="text" id="name" name="name" value="{{ old('name') }}"  placeholder="Enter your full name" required>
+    <input type="text" id="name" name="name" value="{{ old('name', isset($user) ? $user->firstname .' '. $user->lastname:'') }}"  placeholder="Enter your full name" required>
     @error('name')
             <div class="text-danger">{{ $message }}</div>
         @enderror
   </div>
   <div class="input-group">
     <label for="address">Your Address:</label>
-    <input type="text" id="address" name="address" value="{{ old('address') }}" placeholder="Enter your address" required>
+    <input type="text" id="address" name="address" value="{{ old('address', isset($user) ? $user->province.','.$user->city:'') }}" placeholder="Enter your address" required>
     @error('address')
             <div class="text-danger">{{ $message }}</div>
         @enderror
@@ -145,7 +229,7 @@
 <div class="contact-info">
   <div class="input-group">
     <label for="contact">Contact Number:</label>
-    <input type="text" id="contact" name="contact"  value="{{ old('contact') }}" placeholder="Enter your contact number" required>
+    <input type="text" id="contact" name="contact"  value="{{ old('contact', isset($user) ? $user->contact_number:'') }}" placeholder="Enter your contact number" required>
     @error('contact')
             <div class="text-danger">{{ $message }}</div>
         @enderror
@@ -180,8 +264,24 @@
   @endif
 
   <script>
-   
+     // Function to open the booking modal
+function openBookingModal() {
+  document.getElementById("booking-modal").style.display = "block";
+}
 
+// Function to close the booking modal
+function closeBookingModal() {
+  document.getElementById("booking-modal").style.display = "none";
+}
+
+function toggleReviews() {
+        var reviewsContainer = document.getElementById("reviewsContainer");
+        if (reviewsContainer.style.display === "none" || reviewsContainer.style.display === "") {
+            reviewsContainer.style.display = "block"; // Show reviews
+        } else {
+            reviewsContainer.style.display = "none"; // Hide reviews
+        }
+    }
 // // Show freelancer profile and hide main content
 // function showFreelancerProfile() {
 //   document.getElementById('main-content').style.display = 'none';
@@ -206,15 +306,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-   // Function to open the booking modal
-function openBookingModal() {
-  document.getElementById("booking-modal").style.display = "block";
-}
-
-// Function to close the booking modal
-function closeBookingModal() {
-  document.getElementById("booking-modal").style.display = "none";
-}
+ 
 
   const alert = document.querySelector('.alert-success');
             if (alert) {
@@ -224,6 +316,9 @@ function closeBookingModal() {
             }
 
 
+
+        // Show reviews when button is clicked
+       
 });
 
 

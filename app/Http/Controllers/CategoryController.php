@@ -16,11 +16,15 @@ class CategoryController extends Controller
             'name.unique' => 'This category name is already taken.'
         ]);
 
-        Category::create([
+        $category = Category::create([
             'name' => $request->name,
         ]);
 
-        return redirect()->back()->with('success', 'Category created successfully!');
+        return response()->json([
+            'success' => true,
+            'message' => 'Category created successfully!',
+            'category' => $category
+        ]);
     }
    
 
@@ -46,7 +50,11 @@ class CategoryController extends Controller
             'name' => $request->name,
         ]);
 
-        return redirect()->back()->with('success', 'Category updated successfully!');
+        return response()->json([
+            'success' => true,
+            'message' => 'Category updated successfully!',
+            'category' => $category
+        ]);
     }
 
      // Delete method
@@ -55,6 +63,9 @@ class CategoryController extends Controller
          $category = Category::findOrFail($id);
          $category->delete();
  
-         return redirect()->back()->with('success', 'Category deleted successfully!');
+         return response()->json([
+            'success' => true,
+            'message' => 'Category deleted successfully!'
+        ]);
      }
 }

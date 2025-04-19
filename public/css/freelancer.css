@@ -691,6 +691,26 @@ hr{
   .edit-post i {
     margin-right: 5px; 
   }
+  .delete-post {
+    margin-top: 10px;
+    padding: 10px;
+    border: none;
+    border-radius: 4px;  
+    cursor: pointer;
+    border: 1px solid #df0404;
+    color:#da0214; 
+    transition: 0.3s;
+  }
+  .delete-post:hover{
+    background: #da0909; 
+    color: #fff;
+    opacity: 0.9;
+
+  }
+  .delete-post i {
+    margin-right: 5px; 
+  }
+
 
   .description {
     margin: 10px 0; /* Add margin for spacing */
@@ -739,6 +759,7 @@ hr{
     }
 
     #create-post-form button {
+
         padding: 10px 20px;
         border: none;
         border-radius: 5px;
@@ -804,7 +825,20 @@ hr{
         box-sizing: border-box;
         font-size: 14px;
     }
-
+.managepost{
+    display: flex;
+    margin-top: -40px;
+}
+.new-post-btn{
+    background-color: #007bff;
+    color: #ffffff;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    margin-right: 10px;
+}
 
     /*****************8 edit post modal ********************/
     /* Modal container */
@@ -905,4 +939,124 @@ hr{
     font-size: 0.8rem;
     font-weight: 600;
     color: white;
+}
+
+/* notification container css */
+/* Wrapper to position the button & dropdown */
+.notification-wrapper {
+    position: relative;
+    display: flex;
+    justify-content: flex-end; /* Move to the right */
+    margin-right: 20px; /* Adjust spacing from the edge */
+}
+
+/* Notification button */
+.notification-toggle-btn {
+    /* background: #007bff; */
+    color: #0e0a0a;
+    border: none;
+    padding: 5px;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 23px;
+    transition: background 0.3s ease;
+   background: none;
+}
+ .notification-toggle-btn span{
+
+    color: #fff;
+    background-color: rgb(212, 13, 13);
+    border-radius: 50%;
+    padding: 4px 8px; 
+    font-size: 10px;
+    position: absolute;
+    margin-top: 4px;
+    margin-left: 5px;
+    font-weight: 600;
+} 
+/* .notification-toggle-btn:hover {
+    background: #0056b3;
+} */
+
+/* Notification dropdown container */
+.notification-container {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 40px;
+    background: white;
+    border: 1px solid #ccc;
+    padding: 10px;
+    width: 300px;
+    z-index: 1000;
+}
+
+.notification-container.show {
+    display: block;
+}
+/* Notification header */
+.notification-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: bold;
+}
+
+/* Close button */
+.notification-header button {
+    background: red;
+    color: white;
+    border: none;
+    padding: 5px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+/* Each notification message */
+.notification-message {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+}
+
+.unread {
+    background-color: #f2f2f2; /* Light gray for unread notifications */
+    font-weight: bold;
+}
+
+.read {
+    background-color: #ffffff; /* White for read notifications */
+    color: #666; /* Lighter text for read notifications */
+}
+
+.notification-message p {
+    margin: 0;
+}
+
+.mark-as-read {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 3px;
+    margin-top: 5px;
+}
+
+.mark-as-read:hover {
+    background: #0056b3;
+}
+
+/* Dismiss button */
+.mark-as-read {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 3px;
+    font-size: 12px;
+}
+
+.mark-as-read:hover {
+    background-color: #0056b3;
 }

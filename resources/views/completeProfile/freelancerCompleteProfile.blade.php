@@ -74,6 +74,11 @@
                             <div class="error-message">{{ $message }}</div>
                         @enderror
                     </div>
+                    <!-- Preview map -->
+                    <div id="mapPreview" style="display:none; margin-top: 10px;">
+                        <h4>Map Preview</h4>
+                        <iframe id="embeddedMap" width="100%" height="300" frameborder="0" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+                    </div>
 
                     <h3>Upload Profile Picture</h3>
                    <div class="form-row">
@@ -129,10 +134,67 @@
     
 </body>
         <script>
-             document.getElementById("completeAccountBtn").addEventListener("click", function() {
-            document.getElementById("completeAccountModal").style.display = 'block'; // Hide the first modal
-            document.getElementById("completeProfileModal").style.display = 'block'; // Show the second modal
-        });
+    // Show the first modal when the page loads
+    document.getElementById("completeAccountBtn").addEventListener("click", function() {
+        document.getElementById("completeAccountModal").style.display = 'none';
+        document.getElementById("completeProfileModal").style.display = 'block';
+    });
 
-        </script>
+   document.addEventListener('DOMContentLoaded', function () {
+    const mapInput = document.querySelector('input[name="google_map_link"]');
+    const mapPreview = document.getElementById('mapPreview');
+    const embeddedMap = document.getElementById('embeddedMap');
+
+    mapInput.addEventListener('input', function () {
+        const url = mapInput.value;
+
+        // Handle goo.gl links (Google Maps shortened links)
+        if (url.includes('maps.app.goo.gl')) {
+            const embedUrl = convertToEmbedURL(url);
+            embeddedMap.src = embedUrl;
+            mapPreview.style.display = 'block';
+        } 
+        // Handle regular Google Maps links
+        else if (url.includes("google.com/maps")) {
+            try {
+                const embedUrl = convertToEmbedURL(url);
+                embeddedMap.src = embedUrl;
+                mapPreview.style.display = 'block';
+            } catch (e) {
+                mapPreview.style.display = 'none';
+                embeddedMap.src = '';
+            }
+        } else {
+            mapPreview.style.display = 'none';
+            embeddedMap.src = '';
+        }
+    });
+
+    function convertToEmbedURL(url) {
+        if (url.includes("maps.app.goo.gl")) {
+            // Convert the short goo.gl URL to the corresponding Google Maps embed URL
+            const shortUrl = new URL(url);
+            const placeId = shortUrl.pathname.split('/').pop(); // Extract place ID
+            return `https://www.google.com/maps/embed/v1/place?q=place_id:${placeId}`;
+        }
+
+        if (url.includes("google.com/maps")) {
+            const match = url.match(/@(.*),(.*),([\d\.]*)z/);
+            if (match) {
+                const lat = match[1];
+                const lng = match[2];
+                return `https://www.google.com/maps/embed/v1/view?center=${lat},${lng}&zoom=14&maptype=roadmap`;
+            } else if (url.includes("place")) {
+                return url.replace("/maps/place/", "/maps/embed/v1/place?q=");
+            } else if (url.includes("embed")) {
+                return url;
+            }
+        }
+
+        throw new Error("Invalid map URL");
+    }
+});
+
+</script>
+        
 </html>
