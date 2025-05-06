@@ -1,5 +1,3 @@
-
-
 <?php
 
 
@@ -13,6 +11,10 @@ use App\Http\Controllers\adminController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\PostController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
+use App\Http\Controllers\Auth\ResetPasswordController;
+
+
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 // Home Route
@@ -23,6 +25,9 @@ Route::get('/', function () {
 // Registration Routes
 Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register.form');
 Route::post('/register', [RegisterController::class, 'register'])->name('register');
+
+// Email Verification Route
+Route::get('/email/verify/{token}', [RegisterController::class, 'verifyEmail'])->name('register.verifyEmail');
 
 // Login Routes
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
@@ -70,7 +75,9 @@ Route::get('/customer-dashboard', function () {
 
 
 //Admin routes
-Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+Route::middleware(['auth'])->group(function () {
+    Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+});
 Route::put('/admin/posts/{id}/approve', [AdminController::class, 'approvePost'])->name('admin.approvePost');
 Route::put('/admin/posts/{id}/reject', [AdminController::class, 'rejectPost'])->name('admin.rejectPost');
 
@@ -89,9 +96,16 @@ Route::post('/categories/store', [CategoryController::class, 'store'])->name('ca
 Route::get('/profile', [CustomerController::class, 'showProfile'])->name('customer.profile');
 
 //customer appointments
-Route::get('/appointments', [CustomerController::class, 'showAppointments'])->name('customer.appointments');
-Route::post('/customer/appointments/{id}/cancel', [CustomerController::class, 'cancelAppointment'])->name('customer.appointments.cancel');
+// Render the calendar page
+Route::get('/appointments', [CustomerController::class, 'showAppointments'])->name('customer.appointments.view');
+Route::get('/customer/appointments', [CustomerController::class, 'getAppointments'])->name('customer.appointments.data');
+Route::get('/customer/appointments/{id}', [CustomerController::class, 'getAppointmentDetails'])->name('customer.appointment.details');
+Route::post('/customer/appointments/cancel/{id}', [CustomerController::class, 'cancelAppointment'])->name('customer.appointments.cancel');
+Route::post('/customer/appointments/reschedule/{id}', [CustomerController::class, 'rescheduleAppointment'])->name('customer.appointments.reschedule');
 
+//customer notifications
+Route::post('/notifications/mark-as-read/{id}', [CustomerController::class, 'markNotificationAsRead'])->name('notifications.mark-as-read');
+Route::post('/notifications/mark-all-as-read', [CustomerController::class, 'markAllNotificationsAsRead'])->name('notifications.mark-all-as-read');
 // post store
 Route::post('/posts', [PostController::class, 'store'])->name('posts.store');
 Route::get('/posts', [PostController::class, 'index'])->name('posts.index');
@@ -109,7 +123,7 @@ Route::post('/appointments/decline/{id}', [FreelancerController::class, 'decline
 Route::post('/appointments/{appointment}/complete', [FreelancerController::class, 'markAsCompleted'])->name('appointments.complete');
 
 //rating appointment
-Route::post('/customer/appointments/rate/{appointmentId}', [CustomerController::class, 'rateAppointment'])->name('customer.appointments.rate');
+Route::post('/customer/appointments/review/{id}', [CustomerController::class, 'rateAppointment'])->name('customer.appointments.review');
 //search routes
 Route::get('/search', [CustomerController::class, 'search'])->name('search');
 
@@ -124,8 +138,8 @@ Route::get('/posts/{id}/edit', [PostController::class, 'edit'])->name('posts.edi
 Route::put('/posts/{id}', [PostController::class, 'update'])->name('posts.update');
 Route::delete('posts/{id}/', [PostController::class, 'delete'])->name('posts.delete');
 
-Route::post('/freelancer/notifications/read', [FreelancerController::class, 'markNotificationsAsRead'])->name('notifications.markAsRead');
-Route::post('/freelancer/notifications/read/{id}', [FreelancerController::class, 'markSingleNotificationAsRead']);
+Route::post('/freelancer/notifications/mark-all-as-read', [FreelancerController::class, 'markNotificationsAsRead'])->name('freelancer.notifications.markAllAsRead');
+Route::post('/freelancer/notifications/{id}/mark-as-read', [FreelancerController::class, 'markSingleNotificationAsRead'])->name('freelancer.notifications.markSingleAsRead');
 Route::get('/freelancer/notifications', [FreelancerController::class, 'getNotifications'])->name('notifications.get');
 //appointment routes
 Route::get('/freelancer/appointments', [FreelancerController::class, 'getAppointments'])->name('appointments.get');
@@ -133,3 +147,20 @@ Route::get('/freelancer/appointments/{id}', [FreelancerController::class, 'show'
 
 //freelancer updateprofile
 Route::put('/freelancer/profile/update', [FreelancerController::class, 'update'])->name('freelancer.updateProfile');
+
+// Forgot Password Form
+Route::get('password/reset', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
+
+// Send Reset Link Email
+Route::post('password/email', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
+
+// Reset Password Form
+Route::get('password/reset/{token}', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
+
+// Handle Password Reset
+Route::post('password/reset', [ResetPasswordController::class, 'reset'])->name('password.update');
+
+Route::post('/validate-email', [ForgotPasswordController::class, 'validateEmail'])->name('validate.email');
+
+// customer edit profile
+Route::put('/customer/profile/update', [CustomerController::class, 'updateProfile'])->name('customer.profile.update');

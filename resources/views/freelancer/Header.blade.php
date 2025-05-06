@@ -76,8 +76,8 @@
   <!-- FullCalendar CSS -->
   <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet">
    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"rel="stylesheet"/>
- <!-- FullCalendar CSS -->
- <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet">
+ 
+ 
  <!-- Tailwind CSS (Optional for better styling) -->
  <script src="https://cdn.tailwindcss.com"></script>
 </head>
@@ -87,8 +87,7 @@
   <aside class="sidebar">
     <div class="sidebar-header">
         <h2 class="logo-header">
-            <span class="logo-icon">MG</span>
-            Mingla<span class="brand-span">Gawa</span>
+            MinglaGawa
         </h2>          
     </div>
     <ul class="sidebar-links">
@@ -123,15 +122,34 @@
 
     <div class="user-area">
       <div class="notification">
-        <span class="material-symbols-outlined">notifications</span>
-        <span class="count">3</span>
+      <span class="material-symbols-outlined" id="notificationIcon">notifications</span>
+        <span class="count" id="notificationCount">{{ $unreadNotifications->count() }}</span>
+
+        <!-- Notification Dropdown -->
+    <div class="notification-container" id="notificationContainer" style="display: none;">
+        <h3>Notifications</h3>
+        <ul>
+                @forelse($notifications as $notification)
+                    <li class="{{ $notification->read_at ? 'read' : '' }}">
+                        <p>{{ $notification->data['message'] ?? 'No message available' }}</p>
+                        <small>{{ $notification->created_at->diffForHumans() }}</small>
+                        <button class="mark-single-read" data-id="{{ $notification->id }}" {{ $notification->read_at ? 'disabled' : '' }}>
+                            {{ $notification->read_at ? 'Read' : 'Mark as Read' }}
+                        </button>
+                    </li>
+                @empty
+                    <li>No new notifications</li>
+                @endforelse
+        </ul>
+        <button id="markAllAsRead" class="mark-read-btn">Mark All as Read</button>
+    </div>
       </div>
       <div class="message">
         <span class="material-symbols-outlined">email</span>
         <span class="count">5</span>
       </div>
       <!-- Profile Picture in Header -->
-       <img src="{{ asset('storage/' . $user->profile_picture) }}" alt="User Avatar" class="avatar cursor-pointer" id="profilePic" />
+       <img src="{{ Auth::user()->profile_picture ? asset('storage/' . Auth::user()->profile_picture) : asset('images/defaultprofile.jpg') }}"  alt="User Avatar" class="avatar cursor-pointer" id="profilePic" />
       <div class="user-info">
         <span class="user-name">{{ Auth::user()->firstname }}</span>
         <p class="freelancer">{{ Auth::user()->role }}</p>
@@ -139,3 +157,61 @@
     
     </div>
   </header>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const notificationIcon = document.getElementById('notificationIcon');
+        const notificationContainer = document.getElementById('notificationContainer');
+        const markAllAsRead = document.getElementById('markAllAsRead');
+        const notificationCount = document.getElementById('notificationCount');
+
+        // Toggle notification dropdown
+        notificationIcon.addEventListener('click', function () {
+            notificationContainer.style.display =
+                notificationContainer.style.display === 'none' ? 'block' : 'none';
+        });
+
+        // Mark all notifications as read
+        markAllAsRead.addEventListener('click', function () {
+            fetch('{{ route("freelancer.notifications.markAllAsRead") }}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Content-Type': 'application/json',
+                },
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        notificationCount.textContent = '0';
+                        document.querySelectorAll('.notification-container ul li').forEach(item => {
+                        item.classList.add('read'); // Add "read" class to all notifications
+                    });
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        });
+
+        // Mark a single notification as read
+        document.querySelectorAll('.mark-single-read').forEach(button => {
+            button.addEventListener('click', function () {
+                const notificationId = this.getAttribute('data-id');
+                fetch(`/freelancer/notifications/${notificationId}/mark-as-read`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Content-Type': 'application/json',
+                    },
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            this.parentElement.classList.add('read');// Remove the notification from the list
+                            notificationCount.textContent = data.unread_count;
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+            });
+        });
+    });
+</script>

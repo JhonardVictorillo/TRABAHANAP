@@ -6,7 +6,11 @@
         <div class="hero-content">
           <div class="hero-text">
             
-            <h2> {{ Auth::user()->firstname }}, {{ Auth::user()->lastname }}!</h2>
+          @if(Auth::check())
+                <h2>Welcome, {{ Auth::user()->firstname }}, {{ Auth::user()->lastname }}!</h2>
+            @else
+                <h2>Welcome, Guest!</h2>
+            @endif
             <p>
                 Explore the dashboard to monitor system activity, manage user accounts, 
                 and review reports. Use the sidebar to quickly navigate to your desired section.

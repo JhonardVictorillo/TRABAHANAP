@@ -53,6 +53,8 @@
   .logo-header {
     display: flex;
     align-items: center;
+    color: #118f39
+
   }
   
   .logo-icon {
@@ -1256,9 +1258,21 @@ label {
 
 .image-preview-container {
   display: flex;
-  gap: 10px;
+  gap: 20px;
+  align-items: center;
   margin-top: 10px;
-  flex-wrap: wrap;
+}
+
+.image-preview {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #ccc;
+}
+
+.image-preview.hidden {
+  display: none;
 }
 
 .image-preview-container img {
@@ -1285,4 +1299,127 @@ label {
   .modal-content {
       width: 95%;
   }
+}
+
+.alert-success {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #d4edda; /* Light green background */
+  color: #155724; /* Dark green text */
+  border: 1px solid #c3e6cb; /* Green border */
+  padding: 15px 20px;
+  border-radius: 5px;
+  font-size: 1rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  width: 90%; /* Adjust width as needed */
+  max-width: 600px;
+  animation: slideDown 0.5s ease-in-out;
+}
+
+/* Icon inside the success message */
+.alert-success i {
+  font-size: 1.2rem;
+  color: #155724;
+}
+
+/* Slide Down Animation */
+@keyframes slideDown {
+  from {
+      transform: translateX(-50%) translateY(-100%);
+      opacity: 0;
+  }
+  to {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+  }
+}
+
+/* notification css */
+.notification-container {
+  position: absolute;
+  top: 50px;
+  right: 10px;
+  width: 350px;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 15px;
+  z-index: 1000;
+}
+
+.notification-container h3 {
+  font-size: 1.2rem;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.notification-container ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.notification-container ul li {
+  padding: 5px;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.notification-container ul li:last-child {
+  border-bottom: none;
+}
+.notification-container ul li p {
+  font-size: 0.9rem;
+  line-height: 1.2; 
+  color: #333;
+  margin: 0; 
+  word-wrap: break-word; 
+}
+
+.notification-container ul li small {
+  font-size: 0.8rem; 
+  color: #666; 
+  display: block;
+  margin-top: 5px; 
+}
+
+.notification-container ul li.read {
+  opacity: 0.6; /* Make the notification appear dimmed */
+  background-color: #f8f9fa; /* Optional: Change the background color */
+  pointer-events: none; /* Disable interactions for read notifications */
+}
+
+/* Style for the "No new notifications" text */
+.notification-container ul li {
+  font-size: 0.9rem; 
+  color: #999; 
+  text-align: center;
+}
+.notification-container .mark-read-btn,
+.notification-container .mark-single-read {
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  padding: 5px 10px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.notification-container .mark-read-btn:hover,
+.notification-container .mark-single-read:hover {
+  background-color: #0056b3;
 }

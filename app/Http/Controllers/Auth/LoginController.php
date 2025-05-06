@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Str;
 
 
 class LoginController extends Controller
@@ -21,13 +23,34 @@ class LoginController extends Controller
             'email' => 'required|email',
             'password' => 'required',
         ]);
+            // Throttle key based on the user's email and IP address
+        $throttleKey = Str::lower($request->input('email')) . '|' . $request->ip();
+
+        // Check if the user has exceeded the maximum login attempts
+        if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
+            $seconds = RateLimiter::availableIn($throttleKey);
+            return back()->withErrors([
+                'email' => 'Too many login attempts. Please try again in ' . ceil($seconds / 60) . ' minutes.',
+            ])->withInput();
+        }
+
+
         $credentials = $request->only('email', 'password');
 
         // Attempt to log the user in...
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
 
-       
+      // Get the authenticated user
+      $user = Auth::user();  // This will get the currently authenticated user
+
+      // Check if the user's email is verified
+      if (is_null($user->email_verified_at)) {
+          Auth::logout(); // Log the user out
+          return redirect()->back()->withErrors([
+              'email' => 'Your email is not verified. Please check your inbox and verify your email.',
+          ])->withInput();
+      }
 
             // Check if the user has a role assigned
             if (Auth::user()->role === null) {
@@ -47,6 +70,10 @@ class LoginController extends Controller
     } 
 
     }
+
+     // Increment the throttle key on failed login
+     RateLimiter::hit($throttleKey, 60); // Lockout for 60 seconds after 5 attempts
+
              return back()->withErrors([
                 'email' => 'The provided credentials do not match our records.',
                 ])->withInput()

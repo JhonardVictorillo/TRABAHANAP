@@ -20,6 +20,7 @@ class Appointment extends Model
         'notes',
         'post_id',
         'rating',
+        'decline_reason',
     ];
 
     public function customer()

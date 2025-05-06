@@ -327,7 +327,14 @@ document.addEventListener('DOMContentLoaded', () => {
         // Close modals when clicking the close button
         document.querySelectorAll('.close-modal').forEach(button => {
             button.addEventListener('click', function () {
-                toggleModal(this.closest('.con-modal').id, false);
+                const modalId = this.closest('.con-modal').id;
+
+                // Reset the Create Post Modal if it's being closed
+                if (modalId === 'createPostModal') {
+                    resetCreatePostModal();
+                }
+
+                toggleModal(modalId, false);
             });
         });
 
@@ -338,6 +345,10 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.con-modal').forEach(modal => {
             modal.addEventListener('click', (event) => {
                 if (event.target === modal) {
+                    // Reset the Create Post Modal if it's being closed
+                    if (modal.id === 'createPostModal') {
+                        resetCreatePostModal();
+                    }
                     toggleModal(modal.id, false);
                 }
             });
@@ -460,6 +471,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+
   
     // Handle Delete Post
     document.querySelectorAll('.delete-btn').forEach(button => {
@@ -507,4 +519,21 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('create-post-form')?.prepend(errorContainer);
     }
 });
+
+        function resetCreatePostModal() {
+            const createPostForm = document.getElementById('create-post-form');
+            const subservicesContainer = document.getElementById('subservices-container');
+            const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+
+            // Reset the form fields
+            createPostForm.reset();
+
+            // Clear dynamically added sub-services
+            subservicesContainer.innerHTML = `
+                <input type="text" name="sub_services[]" class="form-control" placeholder="Enter subservice">
+            `;
+
+            // Clear image previews
+            imagePreviewContainer.innerHTML = '';
+        }
 </script>

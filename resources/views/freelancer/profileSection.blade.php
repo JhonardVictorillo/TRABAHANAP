@@ -98,7 +98,7 @@
       <div class="profile-container">
         <!-- Sidebar -->
         <div class="profile-card">
-          <img src="{{ asset('storage/' . $user->profile_picture) }}" alt="Profile Picture" class="profile-image" />
+          <img src="{{ Auth::user()->profile_picture ? asset('storage/' . Auth::user()->profile_picture) : asset('images/defaultprofile.jpg') }}"  alt="Profile Picture" class="profile-image" />
           <h2 class="profile-name">{{ $user->firstname }} {{ $user->lastname }}</h2>
           <p class="profile-role">{{ Auth::user()->role }}</p>
         
@@ -141,6 +141,7 @@
             <p><strong>Email:</strong> <a href="">{{ $user->email }}</a></p>
             <p><strong>Contact No:</strong>{{$user->contact_number }}</p>
             <p><strong>Location:</strong> {{ $user->province }} , {{ $user->city }}</p>
+            <p><strong>Experience Level:</strong> {{ $user->experience_level ?? 'Not specified' }}</p> 
           </div>
     
           <!-- Ratings Section -->
@@ -224,6 +225,18 @@
               <input type="email" id="email" name="email" value="{{ $user->email }}" readonly>
             </div>
           </div>
+              
+          <!-- Experience Level -->
+          <div class="form-group">
+          <label for="experience_level"><i class='bx bxs-briefcase'></i> Experience Level</label>
+          <select id="experience_level" name="experience_level" required
+              class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+              <option value="" disabled {{ !$user->experience_level ? 'selected' : '' }}>Select Experience Level</option>
+              <option value="Beginner" {{ $user->experience_level === 'Beginner' ? 'selected' : '' }}>Beginner</option>
+              <option value="Intermediate" {{ $user->experience_level === 'Intermediate' ? 'selected' : '' }}>Intermediate</option>
+              <option value="Expert" {{ $user->experience_level === 'Expert' ? 'selected' : '' }}>Expert</option>
+          </select>
+      </div>
 
         </div>
 

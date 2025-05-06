@@ -49,8 +49,9 @@ class PostApprovedNotification extends Notification
     public function toArray(object $notifiable): array
     {
         return [
-            'message' => 'Your post titled "' . $this->post->title . '" has been approved!',
-            'post_id' => $this->post->id
+            'post_id' => $this->post->id,
+             'message' => 'Your post "' . $this->post->title . '" has been approved.',
+           
         ];
     }
 }

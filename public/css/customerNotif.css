@@ -1,0 +1,123 @@
+#notification-dropdown {
+    width: 20rem;
+    max-height: 16rem;
+    overflow-y: auto;
+}
+
+.notification-section h3 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #374151;
+}
+
+.notification-section ul li {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.notification-section ul li:hover {
+    background-color: #f9fafb;
+}
+
+.notification-count {
+    font-size: 0.75rem;
+    font-weight: 600;
+    background-color: #ef4444;
+    color: #fff;
+    border-radius: 9999px;
+    padding: 0.25rem 0.5rem;
+}
+
+/* Success message styling */
+.alert-success {
+    position: fixed;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #d4edda; /* Light green background */
+    color: #155724; /* Dark green text */
+    border: 1px solid #c3e6cb; /* Green border */
+    padding: 15px 20px;
+    border-radius: 5px;
+    font-size: 1rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    width: 90%; /* Adjust width as needed */
+    max-width: 600px;
+    animation: slideDown 0.5s ease-in-out;
+  }
+  
+  /* Icon inside the success message */
+  .alert-success i {
+    font-size: 1.2rem;
+    color: #155724;
+  }
+  
+  /* Slide Down Animation */
+  @keyframes slideDown {
+    from {
+        transform: translateX(-50%) translateY(-100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
+    }
+  }
+
+  /* categories css */
+
+#categories-container {
+    display: flex;
+    gap: 10px;
+    padding: 10px 20px;
+    background-color: #ffffff;
+    border-bottom: 1px solid #fcfcfc;
+    overflow-x: auto; /* Enable horizontal scrolling */
+    white-space: nowrap; /* Prevent wrapping */
+    scrollbar-width: thin; /* Firefox: Thin scrollbar */
+    scrollbar-color: #118f39 #f3f4f6; /* Firefox: Thumb and track colors */
+  }
+  
+  /* Custom scrollbar for WebKit browsers (Chrome, Safari, Edge) */
+  #categories-container::-webkit-scrollbar {
+    height: 5px; /* Height of the horizontal scrollbar */
+  }
+  
+  #categories-container::-webkit-scrollbar-thumb {
+    background-color: #118f39; /* Green scrollbar thumb */
+    border-radius: 4px; /* Rounded corners for the thumb */
+  }
+  
+  #categories-container::-webkit-scrollbar-thumb:hover {
+    background-color: #0d6e2a; /* Darker green on hover */
+  }
+  
+  #categories-container::-webkit-scrollbar-track {
+    background-color: #f3f4f6; /* Light gray track */
+    border-radius: 4px; /* Rounded corners for the track */
+  }
+  /* Category button */
+ 
+  b#categories-container button:hover {
+    background-color: #e6f4fa; /* Light blue background on hover */
+    color: #118f39; /* Green text on hover */
+  }
+  
+  /* Active category button */
+  #categories-container button.active {
+    background-color: #e6f4fa; /* Light blue background */
+    color: #118f39; /* Green text */
+    border: 1px solid #118f39; /* Green border */
+  }
+  
+  /* Icon color for active and hover states */
+  #categories-container button.active .w-4.h-4 i,
+  #categories-container button:hover .w-4.h-4 i {
+    color: #118f39; /* Green icon */
+  }

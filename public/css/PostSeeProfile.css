@@ -1,46 +1,177 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 body {
   margin: 0;
   font-family: Arial, sans-serif;
   background-color: #f9f9f9;
 }
 
-.freelancer-profile {
-    padding: 20px;
-    font-family: Arial, sans-serif;
-    margin: 20px auto;
-    max-width: 800px;
-     background-color: #fff; 
-     /* border: 2px solid #00b477; */
-    border-radius: 10px;
-   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
-  }
-   .profile-header {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-  }
-  
+/* Header Styles */
+#main-header {
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
 
-  .profile-photo {
-    margin-top: -8rem;
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-  }
-  
+#main-header a {
+  color: #118f39;
+  text-decoration: none;
+  font-family: 'Pacifico', cursive;
+}
+
+#main-header .search-bar {
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  padding: 10px;
+  border: 1px solid #ccc;
+}
+
+#main-header .search-bar:focus {
+  outline: none;
+  border-color: #118f39;
+}
+
+.notification-section {
+  position: absolute;
+  top: 50px;
+  right: 20px;
+  width: 250px;
+  background-color: white;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 10px;
+  border-radius: 5px;
+  z-index: 1000;
+}
+
+.notification-section h3 {
+  margin: 0;
+  font-size: 16px;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 5px;
+}
+
+.notification-section ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.notification-section li {
+  padding: 5px 0;
+  border-bottom: 1px solid #ddd;
+}
+
+.notification-section li:last-child {
+  border-bottom: none;
+}
+
+.notification-count {
+  background-color: red;
+  color: white;
+  border-radius: 50%;
+  padding: 2px 5px;
+  font-size: 12px;
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+
+#dropdownMenu {
+  font-family: 'Inter', sans-serif; /* Use a clean sans-serif font */
+}
+
+/* Ensure dropdown menu items inherit the correct font */
+#dropdownMenu ul li a {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.875rem; /* Adjust font size if needed */
+  color: #333; /* Ensure consistent text color */
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  padding: 10px 15px;
+  transition: background-color 0.2s ease;
+}
+
+#dropdownMenu ul li a:hover {
+  background-color: #f9f9f9;
+  color: #118f39; /* Match the primary color */
+}
+/* Profile Section Styles */
+
+.freelancer-profile {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin: 20px auto;
+  max-width: 800px;
+}
+
+.freelancer-profile h2 {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #333;
+}
+
+.freelancer-profile .profile-photo {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #118f39;
+  margin-bottom: 10px;
+}
+
+.freelancer-profile .service-category span {
+  background-color: #118f39;
+  color: #fff;
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-size: 0.875rem;
+  margin-right: 5px;
+}
+
+.freelancer-profile .personal-details p {
+  font-size: 0.9rem;
+  color: #555;
+  margin: 5px 0;
+}
+
+.freelancer-profile .social-media a {
+  color: #118f39;
+  font-size: 1.2rem;
+  margin-right: 10px;
+  transition: color 0.3s ease;
+}
+
+.freelancer-profile .social-media a:hover {
+  color: #0d6e2a;
+}
   .profile-description,
   .portfolio {
     margin-top: 20px;
   }
   
-  .portfolio-items img {
-    width: 150px;
-    height: 150px;
-    margin-right: 10px;
-    border-radius: 10px;
-    transition: transform 0.3s ease, box-shadow 0.3s ease; 
+  .portfolio-items {
+    display: flex;
+    gap: 1rem; /* Space between images */
+    overflow-x: auto; /* Enable horizontal scrolling for smaller screens */
+    padding-bottom: 1rem;
   }
+  .portfolio-items::-webkit-scrollbar {
+    height: 8px; /* Customize scrollbar height */
+}
+
+.portfolio-items::-webkit-scrollbar-thumb {
+    background-color: #ccc; /* Customize scrollbar color */
+    border-radius: 4px;
+}
+.portfolio-items img{
+  width: 100px;
+  height: 100px; /* Maintain aspect ratio */
+}
+
   
   .portfolio-items img:hover {
     transform: scale(1.1); 
@@ -62,7 +193,7 @@ body {
     gap: 15px;
 }
 
-.personal-details p {
+/* .personal-details p {
     margin: 5px 0;
 }
 
@@ -70,7 +201,7 @@ body {
   margin-left: 7px;
     font-weight: 600;
     color: #426d50; 
-}
+} */
 
 .social-media {
     display: flex;
@@ -265,13 +396,124 @@ textarea::placeholder {
   margin-left: 20px;
 }
 
+.time-select {
+  display: flex;
+  gap: 10px;
+}
+
+.time-select select {
+  padding: 5px;
+  font-size: 16px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+.review-container {
+  width: 100%;
+  margin: auto;
+}
+
+.button {
+  background-color: #007bff;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  width: 100%;
+}
+
+.button:hover {
+  background-color: #0056b3;
+}
+
+.reviews {
+  display: none; /* Initially hidden */
+  margin-top: 10px;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+  text-align: left;
+}
+
+.review {
+  padding: 5px;
+  border-bottom: 1px solid #ddd;
+}
+
+.review:last-child {
+  border-bottom: none;
+}
+
+.customer-name {
+  font-weight: bold;
+  color: #333;
+}
+
+.stars {
+  color: gold;
+  font-size: 18px;
+}
+
+.comment {
+  margin-top: 5px;
+  font-style: italic;
+}
 
 /* success message css */
 
-  .alert {
-    padding: 15px;
-    background-color: #4CAF50;
-    color: white;
-    margin: 10px 0;
-    border-radius: 5px;
+.alert-success {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #d4edda; /* Light green background */
+  color: #155724; /* Dark green text */
+  border: 1px solid #c3e6cb; /* Green border */
+  padding: 15px 20px;
+  border-radius: 5px;
+  font-size: 1rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  width: 90%; /* Adjust width as needed */
+  max-width: 600px;
+  animation: slideDown 0.5s ease-in-out;
+}
+
+/* Icon inside the success message */
+.alert-success i {
+  font-size: 1.2rem;
+  color: #155724;
+}
+
+/* Slide Down Animation */
+@keyframes slideDown {
+  from {
+      transform: translateX(-50%) translateY(-100%);
+      opacity: 0;
   }
+  to {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+  }
+}
+
+.time-btn {
+  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+}
+
+.time-btn.bg-green-600 {
+  background-color: #16a34a; /* Green background */
+  color: white; /* White text */
+}
+
+.time-btn:hover {
+  border-color: #d1d5db; /* Light gray border on hover */
+}

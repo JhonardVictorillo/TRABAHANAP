@@ -47,6 +47,7 @@
             <p><strong>Email:</strong> <a href="">{{ $user->email }}</a></p>
             <p><strong>Contact No:</strong>{{$user->contact_number }}</p>
             <p><strong>Location:</strong> {{ $user->province }} , {{ $user->city }}</p>
+            <p><strong>Experience Level:</strong> {{ $user->experience_level ?? 'Not specified' }}</p> 
           </div>
     
           <!-- Ratings Section -->
@@ -99,9 +100,13 @@
             <label for="profile_picture"><i class='bx bxs-camera'></i> Profile Picture</label>
             <input type="file" id="profile_picture" name="profile_picture" accept="image/*" onchange="previewImage(event)">
             
-            <!-- Preview Image -->
-            <div class="image-preview">
-              <img id="profilePicturePreview" src="{{ asset('storage/' . $user->profile_picture) }}" alt="Profile Preview">
+           
+              <!-- Preview Images -->
+            <div class="image-preview-container">
+                <!-- Current Profile Picture -->
+                <img id="currentProfilePicture" src="{{ asset('storage/' . $user->profile_picture) }}" alt="Current Profile Picture" class="image-preview">
+                <!-- New Profile Picture Preview -->
+                <img id="newProfilePicturePreview" src="#" alt="New Profile Picture Preview" class="image-preview hidden">
             </div>
           </div>
           <!-- First Name -->
@@ -130,6 +135,19 @@
               <input type="email" id="email" name="email" value="{{ $user->email }}" readonly>
             </div>
           </div>
+
+          <!-- Experience Level -->
+          <div class="form-group">
+          <label for="experience_level"><i class='bx bxs-briefcase'></i> Experience Level</label>
+          <select id="experience_level" name="experience_level" required
+              class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+              <option value="" disabled {{ !$user->experience_level ? 'selected' : '' }}>Select Experience Level</option>
+              <option value="Beginner" {{ $user->experience_level === 'Beginner' ? 'selected' : '' }}>Beginner</option>
+              <option value="Intermediate" {{ $user->experience_level === 'Intermediate' ? 'selected' : '' }}>Intermediate</option>
+              <option value="Expert" {{ $user->experience_level === 'Expert' ? 'selected' : '' }}>Expert</option>
+          </select>
+      </div>
+
 
         </div>
 
@@ -346,6 +364,33 @@ document.addEventListener("DOMContentLoaded", function () {
     window.addEventListener("click", function (event) {
         if (event.target === modal) {
             closeUpdateProfileModal();
+        }
+    });
+});
+
+document.addEventListener('DOMContentLoaded', function () {
+    const profilePictureInput = document.getElementById('profile_picture');
+    const currentProfilePicture = document.getElementById('currentProfilePicture');
+    const newProfilePicturePreview = document.getElementById('newProfilePicturePreview');
+
+    profilePictureInput.addEventListener('change', function (event) {
+        const file = event.target.files[0];
+
+        if (file) {
+            const reader = new FileReader();
+
+            reader.onload = function (e) {
+                newProfilePicturePreview.src = e.target.result;
+                newProfilePicturePreview.classList.remove('hidden');
+                currentProfilePicture.classList.add('hidden');
+            };
+
+            reader.readAsDataURL(file);
+        } else {
+            // If no file is selected, reset the preview
+            newProfilePicturePreview.src = '#';
+            newProfilePicturePreview.classList.add('hidden');
+            currentProfilePicture.classList.remove('hidden');
         }
     });
 });

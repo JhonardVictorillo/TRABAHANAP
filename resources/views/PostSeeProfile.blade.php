@@ -1,329 +1,808 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Trabahanap - Client</title>
-  <link rel="stylesheet" href="{{ asset('css/PostSeeProfile.css') }}">
-  <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
-    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
-
-  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
-  <style>
-       
-        
-       .review-container {
-            width: 100%;
-            margin: auto;
-        }
-
-        .button {
-            background-color: #007bff;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            width: 100%;
-        }
-
-        .button:hover {
-            background-color: #0056b3;
-        }
-
-        .reviews {
-            display: none; /* Initially hidden */
-            margin-top: 10px;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            background-color: #f9f9f9;
-            text-align: left;
-        }
-
-        .review {
-            padding: 5px;
-            border-bottom: 1px solid #ddd;
-        }
-
-        .review:last-child {
-            border-bottom: none;
-        }
-
-        .customer-name {
-            font-weight: bold;
-            color: #333;
-        }
-
-        .stars {
-            color: gold;
-            font-size: 18px;
-        }
-
-        .comment {
-            margin-top: 5px;
-            font-style: italic;
-        }
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Freelancer Profile</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}" />
+    <link rel ="stylesheet" href="{{asset ('css/PostSeeProfile.css')}}" />
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"rel="stylesheet"/>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Pacifico&family=Inter:wght@400;500;600&family=Poppins:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css"
+      rel="stylesheet"
+    />
+    
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: "#118f39",
+              secondary: "#64748B",
+            },
+            borderRadius: {
+              none: "0px",
+              sm: "4px",
+              DEFAULT: "8px",
+              md: "12px",
+              lg: "16px",
+              xl: "20px",
+              "2xl": "24px",
+              "3xl": "32px",
+              full: "9999px",
+              button: "8px",
+            },
+            fontFamily: {
+              inter: ["Inter", "sans-serif"],
+              poppins: ["Poppins", "sans-serif"],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      :where([class^="ri-"])::before { content: "\f3c2"; }
+      .search-input:focus {
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+      }
+      .service-card:hover {
+      transform: translateY(-2px);
+      transition: all 0.2s ease-in-out;
+      }
     </style>
-</head>
-<body>
-
-  
-  <!-- Freelancer Profile -->
-  <div class="freelancer-profile">
-    <div class="profile-header">
-      <img src="{{ asset('storage/' . $freelancer->profile_picture) }}" alt="Freelancer Photo" class="profile-photo">
-      <div class="profile-details">
-        <h2>{{ $freelancer->firstname }} {{ $freelancer->lastname }}</h2>
-        <div class="service-category">
-        @if($freelancer->categories->isEmpty())
-                        <span>No categories selected</span>
-                    @else
-                        @foreach($freelancer->categories as $category)
-                            <span>{{ $category->name }}</span>
-                        @endforeach
-                    @endif
-      </div>
-        <div class="personal-details">
-          <p><strong>First Name:</strong> <span>{{ $freelancer->firstname }}</span></p>
-          <p><strong>Last Name:</strong> <span>{{ $freelancer->lastname }}</span></p>
-          <p><strong>Email:</strong> <span>{{ $freelancer->email }}</span></p>
-          <p><strong>Contact No:</strong> <span>{{ $freelancer->contact_number }}</span></p>
-          <p><strong>Address:</strong> <span>{{ $freelancer->province }},{{ $freelancer->city }},{{ $freelancer->zipcode }}</span></p>
-          
-          <div class="social-media">
-              <p><strong>Social Media:</strong></p>
-              <a href="#"><i class="fab fa-facebook-f"></i></a>
-              <a href="#"><i class="fab fa-twitter"></i></a>
-              <a href="#"><i class="fab fa-instagram"></i></a>
-              <a href="#"><i class="fab fa-linkedin-in"></i></a>
+  </head>
+  <body class="bg-[#F8F9FA] font-inter">
+    <header class="sticky top-0 z-50 bg-white shadow-sm">
+      <div class="flex items-center justify-between px-8 h-16">
+        <a href="/" class="font-['Pacifico'] text-2xl text-primary">MinglaGawa</a>
+        <div class="flex items-center flex-1 max-w-xl mx-8">
+          <div class="relative w-full">
+          <form action="{{ route('search') }}" method="GET" style="display: flex; align-items: center; width: 100%;">
+            <input
+              type="text"
+              name="q" 
+              class="search-bar w-full h-10 pl-10 pr-4 text-sm bg-gray-50 border-none !rounded-button"
+              placeholder="Search for services or freelancers..."
+              value="{{ request('q') }}"
+            />
+            <div
+              class="absolute left-3 top-0 w-4 h-10 flex items-center justify-center text-gray-400"
+            >
+              <i class="ri-search-line"></i>
+            </div>
+            </form>
           </div>
-      </div>
-      </div>
-    </div>
-    
-    <div class="profile-description">
-      <h3>About Me</h3>
-      <p>
-        I specialize in art and media design, offering services like flyer design, photo editing, and branding.
-      </p>
-    </div>
-    
-    <div class="portfolio">
-      <h3>Recent Works</h3>
-      <div class="portfolio-items">
-      @forelse ($freelancer->posts as $post)
-            @foreach (json_decode($post->post_picture ?? '[]') as $imagePath)
-                <img src="{{ asset('storage/' . $imagePath) }}" alt="Work Image" class="work-item">
-            @endforeach
-        @empty
-            <p>No recent works available.</p>
-        @endforelse
-      </div>
-    </div>
-
-    <div class="review-container">
-        <button class="button" onclick="toggleReviews()">Reviews</button>
-
-        <div class="reviews" id="reviewsContainer">
-        @if ($reviews->isNotEmpty())
-        @foreach ($reviews as $review)
-                  <div class="review">
-                      <p class="customer-name">
-                          {{ $review->customer->firstname ?? 'Unknown' }} {{ $review->customer->lastname ?? '' }}
-                      </p> 
-                      <p class="stars">
-                          @for ($i = 0; $i < $review->rating; $i++)
-                              ★
-                          @endfor
-                      </p>
-                     
-                      <p class="comment">{{ $review->review }}</p>
-                  </div>
-              @endforeach
-          @else
-              <p>No reviews yet.</p>
-          @endif
         </div>
-    </div>
+        <div class="flex items-center gap-6">
+        <div class="relative inline-block text-left">
+    <!-- Notification Icon -->
+    <button id="notification-icon" class="flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-primary">
+        <div class="relative w-6 h-6 flex items-center justify-center">
+            <i class="ri-notification-line"></i>
+            @if(auth()->user()->unreadNotifications->count() > 0)
+                <span class="absolute -top-1 -right-2 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
+                    {{ auth()->user()->unreadNotifications->count() }}
+                </span>
+            @endif
+        </div>
+        <span>Notifications</span>
+    </button>
 
-    <a href="{{ route('customer.dashboard') }}">
-    <button onclick="goBack()" class="back-btn" >Back</button>
-    </a>
-    <button class="book-now-btn" onclick="openBookingModal()">
-      <i class='bx bx-calendar'></i> Book Now
-  </button>
-  
-  </div>
-
-
-  
-<div id="booking-modal" class="modal">
-  <div class="modal-content"> 
-  
-    <span class="close" onclick="closeBookingModal()">&times;</span>
-    <h2>Request Date & Time</h2>
-
-    <form   method="POST" action="{{ route('book.appointment') }}">
-    @csrf
-      
-    <input type="hidden" name="freelancer_id" value="{{ $freelancer->id }}">
-    <input type="hidden" name="post_id" value="{{ $post->id ?? '' }}">
-
-      <label for="date">Date:</label>
-      <input type="date" id="date" name="date" required>
-
-      <!-- Hidden input field for selected time -->
-    <input type="hidden" id="selected-time" name="time" required>
-    
-
-      <label>Time:</label>
-      <div class="time-picker">
-        <button type="button" class="time-btn">09:00 AM</button>
-        <button type="button" class="time-btn">09:30 AM</button>
-        <button type="button" class="time-btn">10:00 AM</button>
-        <button type="button" class="time-btn">10:30 PM</button>
-        <button type="button" class="time-btn">11:00 AM</button>
-        <button type="button" class="time-btn">11:30 AM</button>
-        <button type="button" class="time-btn">12:00 PM</button>
-        <button type="button" class="time-btn">12:30 PM</button>
-        <button type="button" class="time-btn">01:00 PM</button>
-        <button type="button" class="time-btn">01:30 PM</button>
-        <button type="button" class="time-btn">02:00 PM</button>
-        <button type="button" class="time-btn">02:30 PM</button>
-        <button type="button" class="time-btn">03:00 PM</button>
-        <button type="button" class="time-btn">03:30 PM</button>
-        <button type="button" class="time-btn">04:00 PM</button>
-        <button type="button" class="time-btn">04:30 PM</button>
-        <button type="button" class="time-btn">05:00 PM</button>
-        <button type="button" class="time-btn">05:30 PM</button>
-        <button type="button" class="time-btn">06:00 PM</button>
-        <button type="button" class="time-btn">06:30 PM</button>
-        <button type="button" class="time-btn">07:00 PM</button>
-        
-      </div>
-      @if ($errors->has('time'))
-    <div class="alert alert-danger">
-        {{ $errors->first('time') }}
-    </div>
-@endif
-
-<div class="contact-info">
-  <div class="input-group">
-    <label for="name">Your Name:</label>
-    <input type="text" id="name" name="name" value="{{ old('name', isset($user) ? $user->firstname .' '. $user->lastname:'') }}"  placeholder="Enter your full name" required>
-    @error('name')
-            <div class="text-danger">{{ $message }}</div>
-        @enderror
-  </div>
-  <div class="input-group">
-    <label for="address">Your Address:</label>
-    <input type="text" id="address" name="address" value="{{ old('address', isset($user) ? $user->province.','.$user->city:'') }}" placeholder="Enter your address" required>
-    @error('address')
-            <div class="text-danger">{{ $message }}</div>
-        @enderror
-  </div>
-</div>
-
-<div class="contact-info">
-  <div class="input-group">
-    <label for="contact">Contact Number:</label>
-    <input type="text" id="contact" name="contact"  value="{{ old('contact', isset($user) ? $user->contact_number:'') }}" placeholder="Enter your contact number" required>
-    @error('contact')
-            <div class="text-danger">{{ $message }}</div>
-        @enderror
-  </div>
-  <div class="input-group">
-    <label for="notes">Appointment Request:</label>
-    <textarea id="notes" name="notes" placeholder="Any special requests  (Optional)"></textarea>
-  </div>
-</div>
-
-
-      
-      <button type="submit" class="submit-btn">Request Appointment</button>
-      @if ($errors->any())
-    <div class="alert alert-danger">
-        <ul>
-            @foreach ($errors->all() as $error)
-                <li>{{ $error }}</li>
+    <!-- Notification Dropdown -->
+    <div id="notification-dropdown" class="hidden absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg z-50">
+        <div class="p-4 border-b">
+            <h3 class="text-lg font-semibold text-gray-700">Notifications</h3>
+        </div>
+        <ul id="notification-list" class="max-h-64 overflow-y-auto">
+            @foreach(auth()->user()->notifications as $notification)
+                <li class="flex items-start justify-between px-4 py-3 border-b hover:bg-gray-50 {{ $notification->read_at ? 'bg-gray-100' : '' }}">
+                    <div>
+                        <p class="text-sm {{ $notification->read_at ? 'text-gray-500' : 'text-gray-600' }}">
+                            {{ $notification->data['message'] }}
+                        </p>
+                        <p class="text-xs text-gray-400">{{ $notification->created_at->diffForHumans() }}</p>
+                    </div>
+                    @if(!$notification->read_at)
+                        <button
+                            class="text-sm text-primary hover:underline mark-as-read"
+                            data-id="{{ $notification->id }}"
+                        >
+                            Mark as Read
+                        </button>
+                    @endif
+                </li>
             @endforeach
         </ul>
+        @if(auth()->user()->unreadNotifications->count() > 0)
+            <div class="p-4 border-t">
+                <button id="mark-all-read" class="w-full py-2 text-sm font-medium text-white bg-primary hover:bg-primary/90 rounded-lg">
+                    Mark All as Read
+                </button>
+            </div>
+        @endif
     </div>
-@endif
-    </form>
-  </div>
 </div>
+                    <button
+            class="flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-primary !rounded-button"
+            >
+            <div class="relative w-6 h-6 flex items-center justify-center">
+                <i class="ri-message-3-line"></i>
+                <span class="absolute -top-1 -right-2 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
+                3
+                </span>
+            </div>
+            Messages
+            </button>
+           
+<div class="relative inline-block text-left">
+
+  <button id="profileBtn" class="w-12 h-12 rounded-full overflow-hidden focus:outline-none">
+    <img  src="{{ $user->profile_picture ? asset('storage/' . $user->profile_picture) : asset('images/defaultprofile.png') }}" alt="User" class="w-full h-full object-cover" />
+  </button>
 
 
-@if(session('success'))
-    <div class="alert alert-success">
-      {{ session('success') }}
+  <div id="dropdownMenu" class="hidden absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg z-50">
+
+    <div class="flex items-center gap-3 p-4 border-b">
+      <img src="{{ $user->profile_picture ? asset('storage/' . $user->profile_picture) : asset('images/defaultprofile.png') }}" alt="User" class="w-12 h-12 rounded-full object-cover" />
+      <div>
+        <p class="font-bold leading-tight">{{ $user->firstname }} {{ $user->lastname }}</p>
+      
+      </div>
     </div>
-  @endif
-
-  <script>
-     // Function to open the booking modal
-function openBookingModal() {
-  document.getElementById("booking-modal").style.display = "block";
-}
-
-// Function to close the booking modal
-function closeBookingModal() {
-  document.getElementById("booking-modal").style.display = "none";
-}
-
-function toggleReviews() {
-        var reviewsContainer = document.getElementById("reviewsContainer");
-        if (reviewsContainer.style.display === "none" || reviewsContainer.style.display === "") {
-            reviewsContainer.style.display = "block"; // Show reviews
-        } else {
-            reviewsContainer.style.display = "none"; // Hide reviews
-        }
-    }
-// // Show freelancer profile and hide main content
-// function showFreelancerProfile() {
-//   document.getElementById('main-content').style.display = 'none';
-//   document.getElementById('freelancer-profile').style.display = 'block';
-// }
-
-// // Hide freelancer profile and show main content
-// function hideFreelancerProfile() {
-//   document.getElementById('freelancer-profile').style.display = 'none';
-//   document.getElementById('main-content').style.display = 'block'
-// }
-
-document.addEventListener("DOMContentLoaded", () => {
-  document.querySelectorAll(".time-btn").forEach((btn) => {
-    btn.addEventListener("click", function () {
-      // Remove 'selected' class from other buttons
-      document.querySelectorAll(".time-btn").forEach((b) => b.classList.remove("selected"));
-      // Add 'selected' class to clicked button
-      this.classList.add("selected");
-      // Update the value of the hidden input field
-      document.getElementById("selected-time").value = this.textContent.trim();
-    });
-  });
 
  
+    <!-- Menu Items -->
+<ul class="py-2 text-sm text-gray-700">
+  <li>
+    <a href="{{ route('customer.profile') }}" class="flex items-center px-4 py-2 hover:bg-gray-100">
+      <!-- Profile Icon -->
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-3 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A4 4 0 017 16h10a4 4 0 011.879.804M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+      </svg>
+      Profile
+    </a>
+  </li>
+  
+  <li>
+    <a href="{{ route('customer.appointments.view') }}" class="flex items-center px-4 py-2 hover:bg-gray-100">
+      <!-- Appointment Icon -->
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-3 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10m-13 5h16a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v7a2 2 0 002 2z" />
+      </svg>
+      Appointment
+    </a>
+  </li>
 
-  const alert = document.querySelector('.alert-success');
-            if (alert) {
-                setTimeout(() => {
-                    alert.remove();
-                }, 3000); // 3 seconds
+  <li>
+    <a href="#" class="flex items-center px-4 py-2 hover:bg-gray-100">
+      <!-- Settings Icon -->
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-3 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+      </svg>
+      Settings
+    </a>
+  </li>
+  
+  <li>
+    <a href="#" class="flex items-center px-4 py-2 hover:bg-gray-100">
+      <!-- Help Icon -->
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-3 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16h6m2 4H7a2 2 0 01-2-2V6a2 2 0 012-2h4l2 2h6a2 2 0 012 2v10a2 2 0 01-2 2z" />
+      </svg>
+      Help
+    </a>
+  </li>
+  
+  <li>
+  <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+                @csrf
+      </form>
+    <a href="#"onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="flex items-center px-4 py-2 text-red-600 hover:bg-gray-100">
+      <!-- Logout Icon -->
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-3 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7" />
+      </svg>
+      Logout
+    </a>
+  </li>
+</ul>
+
+  </div>
+</div>
+   </div>
+     </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-8 py-8">
+    <div class="mb-4">
+        <a href="{{ route('customer.dashboard') }}">
+            <button class="px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary/90 rounded-lg shadow-md">
+                Back to Dashboard
+            </button>
+        </a>
+    </div>
+    <div class="grid grid-cols-3 gap-8">
+        <!-- Left Section -->
+        <div class="col-span-2">
+            <div class="bg-white rounded-lg p-8 mb-8">
+                <!-- Profile Section -->
+                <div class="flex gap-6 mb-6">
+                    <img
+                        src="{{ $freelancer->profile_picture ? asset('storage/' . $freelancer->profile_picture) : asset('images/defaultprofile.jpg') }}"
+                        alt="{{ $freelancer->firstname }}"
+                        class="w-40 h-40 rounded-full object-cover"
+                    />
+                    <div class="flex-1">
+                        <div class="flex items-start justify-between mb-4">
+                            <div>
+                                <h2 class="text-2xl font-semibold mb-1">{{ $freelancer->firstname }} {{ $freelancer->lastname }}</h2>
+                                @if($freelancer->categories->isEmpty())
+                                    <p class="text-gray-600">No categories selected</p>
+                                @else
+                                    @foreach($freelancer->categories as $category)
+                                        <p class="text-gray-600">{{ $category->name }}</p>
+                                    @endforeach
+                                @endif
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <div class="w-5 h-5 flex items-center justify-center text-blue-500">
+                                    <i class="ri-verified-badge-fill"></i>
+                                </div>
+                                <span class="text-sm font-medium text-blue-500">Verified</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-6 mb-4">
+                            <div class="flex items-center gap-1">
+                                <div class="w-4 h-4 flex items-center justify-center text-yellow-400">
+                                    <i class="ri-star-fill"></i>
+                                </div>
+                                <span class="font-medium">{{ $totalStars }}</span>
+                                <span class="text-gray-400">({{ $totalReviews }} reviews)</span>
+                            </div>
+                            <div class="flex items-center gap-1 text-gray-600">
+                                <div class="w-4 h-4 flex items-center justify-center">
+                                    <i class="ri-map-pin-line"></i>
+                                </div>
+                                <span>{{ $freelancer->province }}, {{ $freelancer->city }}, {{ $freelancer->zipcode }}</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <button class="flex-1 py-2 text-sm font-medium text-white bg-primary hover:bg-primary/90 !rounded-button">
+                                Message
+                            </button>
+                            <button class="flex-1 py-2 text-sm font-medium text-primary bg-blue-50 hover:bg-blue-100 !rounded-button">
+                                Contact
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <!-- Stats Section -->
+                <div class="grid grid-cols-4 gap-4 p-4 bg-gray-50 rounded-lg mb-6">
+                    <div class="text-center">
+                        <div class="text-2xl font-semibold mb-1">98%</div>
+                        <p class="text-sm text-gray-600">Job Success</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl font-semibold mb-1">156</div>
+                        <p class="text-sm text-gray-600">Projects</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl font-semibold mb-1">2 hrs</div>
+                        <p class="text-sm text-gray-600">Avg. Response</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl font-semibold mb-1">5+ yrs</div>
+                        <p class="text-sm text-gray-600">Experience</p>
+                    </div>
+                </div>
+               
+            <p class="text-gray-600 leading-relaxed mb-8">
+              I'm a results-driven digital marketing specialist with over 5
+              years of experience helping businesses grow their online presence.
+              My expertise spans across SEO, social media marketing, content
+              strategy, and paid advertising. I take a data-driven approach to
+              create comprehensive marketing strategies that deliver measurable
+              results.
+            </p>
+                <!-- Portfolio Section -->
+                <div class="border-t pt-8">
+                    <h3 class="text-lg font-semibold mb-6">Portfolio</h3>
+                    <div class="grid grid-cols-2 gap-6">
+                        @forelse ($freelancer->posts as $post)
+                            @forelse ($post->pictures as $picture)
+                                <div class="bg-white rounded-lg overflow-hidden shadow-sm">
+                                    <img
+                                        src="{{ asset('storage/' . $picture->image_path) }}"
+                                        alt="Portfolio"
+                                        class="w-full h-48 object-cover"
+                                    />
+                                </div>
+                            @empty
+                                <p>No images available for this post.</p>
+                            @endforelse
+                        @empty
+                            <p>No recent works available.</p>
+                        @endforelse
+                    </div>
+                </div>
+            </div>
+            <!-- Client Reviews Section -->
+            <div class="bg-white rounded-lg p-8">
+                <h3 class="text-lg font-semibold mb-6">Client Reviews</h3>
+                <div class="space-y-6">
+                    @if ($reviews->isNotEmpty())
+                        @foreach ($reviews as $review)
+                            <div class="pb-6 border-b">
+                                <div class="flex items-start justify-between mb-4">
+                                    <div class="flex items-center gap-4">
+                                        <img
+                                            src="{{ $review->customer->profile_picture ?? asset('images/defaultprofile.jpg') }}"
+                                            alt="Client"
+                                            class="w-10 h-10 rounded-full object-cover"
+                                        />
+                                        <div>
+                                            <h4 class="font-medium">{{ $review->customer->firstname ?? 'Unknown' }} {{ $review->customer->lastname ?? '' }}</h4>
+                                            <p class="text-sm text-gray-600">{{ $review->customer->job_title ?? 'Client' }}</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-1 text-yellow-400">
+                                        @for ($i = 0; $i < $review->rating; $i++)
+                                            <i class="ri-star-fill"></i>
+                                        @endfor
+                                    </div>
+                                </div>
+                                <p class="text-gray-600">{{ $review->review }}</p>
+                            </div>
+                        @endforeach
+                    @else
+                        <p>No reviews yet.</p>
+                    @endif
+                </div>
+            </div>
+        </div>
+        <!-- Right Section -->
+        <div class="col-span-1">
+            <div class="bg-white rounded-lg p-6">
+                <h3 class="text-lg font-semibold mb-6">Book Appointment Here</h3>
+                <p class="text-sm text-gray-600 mb-6">
+                    Book a consultation to discuss your digital marketing needs and goals.
+                </p>
+                <button
+                    id="bookButton"
+                    class="w-full py-2 text-sm font-medium text-white bg-primary hover:bg-primary/90 !rounded-button"
+                >
+                    Book Appointment
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <div
+    id="bookingModal"
+    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50"
+>
+    <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+        <div class="flex justify-between items-center mb-6">
+            <h3 class="text-xl font-semibold">Book an Appointment</h3>
+            <button id="closeModal" class="text-gray-400 hover:text-gray-600">
+                <div class="w-6 h-6 flex items-center justify-center">
+                    <i class="ri-close-line"></i>
+                </div>
+            </button>
+        </div>
+        <form id="bookingForm" method="POST" action="{{ route('book.appointment') }}">
+            @csrf
+            <input type="hidden" name="freelancer_id" value="{{ $freelancer->id }}">
+            <input type="hidden" name="post_id" value="{{ $post->id ?? '' }}">
+            <input type="hidden" id="selectedDate" name="date" required>
+            <input type="hidden" id="selectedTime" name="time" required>
+
+            <!-- Calendar Section -->
+            <div class="mb-6">
+                <div class="flex items-center justify-between mb-4">
+                    <button
+                        type="button"
+                        id="prevMonthButton"
+                        class="text-gray-400 hover:text-gray-600"
+                    >
+                        <div class="w-6 h-6 flex items-center justify-center">
+                            <i class="ri-arrow-left-s-line"></i>
+                        </div>
+                    </button>
+                    <h4 id="monthTitle" class="text-base font-medium"></h4>
+                    <button
+                        type="button"
+                        id="nextMonthButton"
+                        class="text-gray-400 hover:text-gray-600"
+                    >
+                        <div class="w-6 h-6 flex items-center justify-center">
+                            <i class="ri-arrow-right-s-line"></i>
+                        </div>
+                    </button>
+                </div>
+                <div class="grid grid-cols-7 gap-1 text-center mb-2">
+                    <div class="text-sm text-gray-600">Sun</div>
+                    <div class="text-sm text-gray-600">Mon</div>
+                    <div class="text-sm text-gray-600">Tue</div>
+                    <div class="text-sm text-gray-600">Wed</div>
+                    <div class="text-sm text-gray-600">Thu</div>
+                    <div class="text-sm text-gray-600">Fri</div>
+                    <div class="text-sm text-gray-600">Sat</div>
+                </div>
+                <div
+                    id="calendarGrid"
+                    class="grid grid-cols-7 gap-1 text-center"
+                ></div>
+            </div>
+
+            <!-- Time Slots Section -->
+            <div class="mb-6">
+                <h5 class="text-sm font-medium mb-4">Available Time Slots</h5>
+                <div class="grid grid-cols-3 gap-3">
+                    <button
+                        type="button"
+                        class="time-btn text-sm py-2 border border-gray-200 rounded hover:border-gray-300"
+                        data-time="8:00 AM"
+                    >
+                        8:00 AM
+                    </button>
+                    <button
+                        type="button"
+                        class="time-btn text-sm py-2 border border-gray-200 rounded hover:border-gray-300"
+                        data-time="9:00 AM"
+                    >
+                        9:00 AM
+                    </button>
+                    <button
+                        type="button"
+                        class="time-btn text-sm py-2 border border-gray-200 rounded hover:border-gray-300"
+                        data-time="10:00 AM"
+                    >
+                        10:00 AM
+                    </button>
+                    <button
+                        type="button"
+                        class="time-btn text-sm py-2 border border-gray-200 rounded hover:border-gray-300"
+                        data-time="11:00 AM"
+                    >
+                        11:00 AM
+                    </button>
+                    <button
+                        type="button"
+                        class="time-btn text-sm py-2 border border-gray-200 rounded hover:border-gray-300"
+                        data-time="12:00 PM"
+                    >
+                        12:00 PM
+                    </button>
+                    <button
+                        type="button"
+                        class="time-btn text-sm py-2 border border-gray-200 rounded hover:border-gray-300"
+                        data-time="1:00 PM"
+                    >
+                        1:00 PM
+                    </button>
+                    <button
+                        type="button"
+                        class="time-btn text-sm py-2 border border-gray-200 rounded hover:border-gray-300"
+                        data-time="2:00 PM"
+                    >
+                        2:00 PM
+                    </button>
+                    <button
+                        type="button"
+                        class="time-btn text-sm py-2 border border-gray-200 rounded hover:border-gray-300"
+                        data-time="3:00 PM"
+                    >
+                        3:00 PM
+                    </button>
+                    <button
+                        type="button"
+                        class="time-btn text-sm py-2 border border-gray-200 rounded hover:border-gray-300"
+                        data-time="4:00 PM"
+                    >
+                        4:00 PM
+                    </button>
+                </div>
+            </div>
+            <!-- Notes Section -->
+              <div class="mb-6">
+                  <label for="notes" class="block text-sm font-medium text-gray-700">Notes (Optional)</label>
+                  <textarea id="notes" name="notes" rows="3" class="w-full mt-1 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"  placeholder="Add any additional details or instructions for the freelancer..."
+                  ></textarea>
+              </div>
+            
+
+            <!-- Submit Button -->
+            <button
+                type="submit"
+                class="w-full py-3 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded"
+            >
+                Book Appointment
+            </button>
+        </form>
+    </div>
+</div>
+</main>
+      <!-- Success message -->
+      @if(session('success'))
+        <div class="alert alert-success">
+        <i class='bx bx-check-circle'></i> 
+        {{ session('success') }}
+        </div>
+        @endif
+    <footer class="bg-gray-50 py-8">
+      <div class="max-w-7xl mx-auto px-8">
+        <div class="text-sm text-center text-gray-600">
+          <!-- <p>&copy; 2024 MinglaGawa. All rights reserved.</p> -->
+        </div>
+      </div>
+    </footer>
+
+    <script>
+
+const profileBtn = document.getElementById('profileBtn');
+          const dropdownMenu = document.getElementById('dropdownMenu');
+
+          profileBtn.addEventListener('click', () => {
+            dropdownMenu.classList.toggle('hidden');
+          });
+
+          document.addEventListener('click', (e) => {
+            if (!profileBtn.contains(e.target) && !dropdownMenu.contains(e.target)) {
+              dropdownMenu.classList.add('hidden');
             }
-
-
-
-        // Show reviews when button is clicked
+          });
        
+       document.addEventListener('DOMContentLoaded', function () {
+    const notificationIcon = document.getElementById('notification-icon');
+    const notificationDropdown = document.getElementById('notification-dropdown');
+    const markAsReadButtons = document.querySelectorAll('.mark-as-read');
+    const markAllReadButton = document.getElementById('mark-all-read');
+
+    // Toggle Notification Dropdown
+    notificationIcon.addEventListener('click', function () {
+        notificationDropdown.classList.toggle('hidden');
+    });
+
+    // Mark Individual Notification as Read
+    markAsReadButtons.forEach(button => {
+        button.addEventListener('click', function () {
+            const notificationId = this.getAttribute('data-id');
+            fetch(`/notifications/mark-as-read/${notificationId}`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                },
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const notificationItem = this.closest('li');
+                        notificationItem.classList.add('bg-gray-100');
+                        notificationItem.querySelector('p').classList.replace('text-gray-600', 'text-gray-500');
+                        this.remove(); // Remove the "Mark as Read" button
+                        updateNotificationCount();
+                    }
+                });
+        });
+    });
+
+    // Mark All Notifications as Read
+    if (markAllReadButton) {
+        markAllReadButton.addEventListener('click', function () {
+            fetch(`/notifications/mark-all-as-read`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                },
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const notificationItems = document.querySelectorAll('#notification-list li');
+                        notificationItems.forEach(item => {
+                            item.classList.add('bg-gray-100');
+                            const message = item.querySelector('p');
+                            if (message) {
+                                message.classList.replace('text-gray-600', 'text-gray-500');
+                            }
+                            const markAsReadButton = item.querySelector('.mark-as-read');
+                            if (markAsReadButton) {
+                                markAsReadButton.remove();
+                            }
+                        });
+                        updateNotificationCount();
+                    }
+                });
+        });
+    }
+
+    // Update Notification Count
+    function updateNotificationCount() {
+        const countElement = notificationIcon.querySelector('span');
+        const currentCount = parseInt(countElement.textContent) || 0;
+        if (currentCount > 1) {
+            countElement.textContent = currentCount - 1;
+        } else {
+            countElement.remove();
+        }
+    }
+});
+
+  // succes message time duration
+  document.addEventListener('DOMContentLoaded', function () {
+        const alert = document.querySelector('.alert-success');
+        if (alert) {
+            setTimeout(() => {
+                alert.remove();
+            }, 3000); // 3 seconds
+        }
+    });
+
+
+
+document.addEventListener("DOMContentLoaded", function () {
+    const bookButton = document.getElementById("bookButton");
+    const bookingModal = document.getElementById("bookingModal");
+    const closeModal = document.getElementById("closeModal");
+    const calendarGrid = document.getElementById("calendarGrid");
+    const monthTitle = document.getElementById("monthTitle");
+    const nextMonthButton = document.getElementById("nextMonthButton");
+    const prevMonthButton = document.getElementById("prevMonthButton");
+    const selectedDateInput = document.getElementById("selectedDate");
+    const selectedTimeInput = document.getElementById("selectedTime");
+    const timeButtons = document.querySelectorAll(".time-btn");
+
+    const months = [
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December",
+    ];
+
+    let currentDate = new Date();
+
+    // Function to update the calendar
+    function updateCalendar() {
+        const year = currentDate.getFullYear();
+        const month = currentDate.getMonth();
+        const firstDay = new Date(year, month, 1).getDay();
+        const lastDate = new Date(year, month + 1, 0).getDate();
+
+        monthTitle.textContent = `${months[month]} ${year}`;
+        calendarGrid.innerHTML = "";
+
+        // Add empty cells for days before the first day of the month
+        for (let i = 0; i < firstDay; i++) {
+            calendarGrid.innerHTML += `<div class="text-sm text-gray-300"></div>`;
+        }
+
+        // Add cells for each day of the month
+        for (let day = 1; day <= lastDate; day++) {
+            const isToday =
+                day === new Date().getDate() &&
+                month === new Date().getMonth() &&
+                year === new Date().getFullYear();
+
+            calendarGrid.innerHTML += `
+                <div class="text-sm py-2 ${
+                    isToday
+                        ? "bg-green-600 text-white rounded-full"
+                        : "hover:bg-gray-100 cursor-pointer"
+                }" data-date="${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}">
+                    ${day}
+                </div>`;
+        }
+
+        // Add click event to each day
+        document.querySelectorAll("#calendarGrid div[data-date]").forEach((day) => {
+            day.addEventListener("click", function () {
+                document
+                    .querySelectorAll("#calendarGrid div")
+                    .forEach((d) => d.classList.remove("bg-green-600", "text-white"));
+                this.classList.add("bg-green-600", "text-white");
+                selectedDateInput.value = this.getAttribute("data-date");
+            });
+        });
+    }
+
+    // Event listeners for navigation buttons
+    nextMonthButton.addEventListener("click", () => {
+        currentDate.setMonth(currentDate.getMonth() + 1);
+        updateCalendar();
+    });
+
+    prevMonthButton.addEventListener("click", () => {
+        currentDate.setMonth(currentDate.getMonth() - 1);
+        updateCalendar();
+    });
+
+    // Open and close modal
+    bookButton.addEventListener("click", () => {
+        bookingModal.classList.remove("hidden");
+        updateCalendar(); // Initialize calendar when modal opens
+    });
+
+    closeModal.addEventListener("click", () => {
+        bookingModal.classList.add("hidden");
+    });
+
+    bookingModal.addEventListener("click", (e) => {
+        if (e.target === bookingModal) {
+            bookingModal.classList.add("hidden");
+        }
+    });
+
+    // Handle time slot selection
+    timeButtons.forEach((button) => {
+        button.addEventListener("click", function () {
+            timeButtons.forEach((btn) => btn.classList.remove("bg-green-600", "text-white"));
+            this.classList.add("bg-green-600", "text-white");
+            selectedTimeInput.value = this.getAttribute("data-time");
+        });
+    });
 });
 
 
+document.addEventListener("DOMContentLoaded", function () {
+    const timeButtons = document.querySelectorAll(".time-btn");
 
-  </script>
-</body>
+    timeButtons.forEach((button) => {
+        button.addEventListener("click", function () {
+            // Remove active class from all buttons
+            timeButtons.forEach((btn) => btn.classList.remove("bg-green-600", "text-white"));
 
+            // Add active class to the selected button
+            this.classList.add("bg-green-600", "text-white");
+        });
+    });
+});
+
+
+        tailwind.config = {
+          theme: {
+            extend: {
+              colors: {
+                primary: "#118f39",
+                secondary: "#64748B",
+              },
+              borderRadius: {
+                none: "0px",
+                sm: "4px",
+                DEFAULT: "8px",
+                md: "12px",
+                lg: "16px",
+                xl: "20px",
+                "2xl": "24px",
+                "3xl": "32px",
+                full: "9999px",
+                button: "8px",
+              },
+            },
+          },
+        };
+
+
+
+      
+
+      </script>
+  </body>
 </html>

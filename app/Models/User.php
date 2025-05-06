@@ -32,8 +32,11 @@ class User extends Authenticatable
          'google_map_link', 
          'id_front', 
          'id_back', 
+         'experience_level',
          'profile_completed',
-         'profile_picture'
+         'profile_picture',
+         'email_verification_token',
+         'email_verified_at',
     ];
 
     /**
@@ -81,6 +84,11 @@ public function appointments()
 public function reviews()
 {
     return $this->hasMany(Appointment::class, 'freelancer_id');
+}
+
+public function freelancer()
+{
+    return $this->belongsTo(User::class, 'freelancer_id');
 }
      
 }

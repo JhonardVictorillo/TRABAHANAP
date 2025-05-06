@@ -50,12 +50,14 @@ class AppointmentRequest extends Notification
     public function toArray(object $notifiable): array
     {
         return [
-           'appointment_id' => $this->appointment->id,
-            'customer_name' => $this->appointment->name,
-            'date' => $this->appointment->date,
-            'time' => $this->appointment->time,
-            'address'=>$this->appointment->address,
-            'contact'=>$this->appointment->contact,
+            'appointment_id' => $this->appointment->id,
+        'customer_name' => $this->appointment->name,
+        'date' => $this->appointment->date,
+        'time' => $this->appointment->time,
+        'address' => $this->appointment->address,
+        'contact' => $this->appointment->contact,
+        'message' => 'You have a new appointment request from ' . $this->appointment->name . 
+                     ' on ' . $this->appointment->date . ' at ' . $this->appointment->time . '.',
             
         ];
     }

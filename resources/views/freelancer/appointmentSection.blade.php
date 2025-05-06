@@ -5,13 +5,13 @@
       <div class="text-center text-3xl font-bold mb-5">Appointment Calendar</div>
       
       <!-- Filter Bar -->
-      <div class="flex justify-center gap-3 mb-5">
+      <!-- <div class="flex justify-center gap-3 mb-5">
           <button class="filter-btn bg-green-500 text-white">Completed</button>
           <button class="filter-btn bg-blue-500 text-white">Scheduled</button>
           <button class="filter-btn bg-yellow-500 text-white">Waiting</button>
           <button class="filter-btn bg-red-500 text-white">Canceled</button>
           <button class="filter-btn bg-gray-500 text-white">Show All</button>
-      </div>
+      </div> -->
 
       <!-- Calendar Container -->
       <div id="calendar-container">

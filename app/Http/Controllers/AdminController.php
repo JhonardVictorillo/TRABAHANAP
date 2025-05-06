@@ -13,7 +13,12 @@ class AdminController extends Controller
    public function dashboard(){
         $totalFreelancers = User::where('role', 'freelancer')->count();
         $totalCustomers = User::where('role', 'customer')->count();
+        
+        // Fetch pending accounts (freelancers with is_verified = 0)
+        $totalPendingAccounts = User::where('role', 'freelancer')->where('is_verified', 0)->count();
 
+        // Fetch pending posts (posts with status = 'pending')
+        $totalPendingPosts = Post::where('status', 'pending')->count();
         $freelancers = User::with('categories')->where('role', 'freelancer')->get(); 
         $customer = User::where('role', 'customer')->get();
         $users = User::all();
@@ -30,6 +35,8 @@ class AdminController extends Controller
             'users' => $users,
            'categories' => $categories,
            'posts' => $posts,
+           'totalPendingAccounts' => $totalPendingAccounts, 
+           'totalPendingPosts' => $totalPendingPosts,   
           
         ]);
     

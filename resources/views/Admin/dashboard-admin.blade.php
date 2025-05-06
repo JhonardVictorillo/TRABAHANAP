@@ -1,28 +1,4 @@
-<!-- <main class="main-content">
-    <div id="dashboard" class="content-section"> 
-        <div class="content-header">
-           <h2>Dashboard</h2>
-        </div>
-        <div class="cards">
-            <div class="card">
-                <span class="material-symbols-outlined">people</span> 
-                <h3>Total Freelancers</h3>
-                <p>{{ $totalFreelancers }}</p>
-            </div>
-            <div class="card">
-                <span class="material-symbols-outlined">groups</span> 
-                <h3>Total Clients</h3>
-                <p>{{ $totalCustomers }}</p>
-            </div>
-            <div class="card">
-                <span class="material-symbols-outlined">pending</span> 
-                <h3>Pending Accounts</h3>
-                <p>{{ $pendingAccounts ?? 0 }}</p>
-            </div>
-        </div>
-        </div>
-        </div>
-         -->
+
 
          <!-- Dashboard Section -->
     
@@ -53,14 +29,14 @@
               <span class="material-symbols-outlined">pending</span>
               <div class="stats-details">
               <h3>Pending Accounts</h3>
-              <p>30</p>
+              <p>{{ $totalPendingAccounts }}</p>
               </div>
           </div>
           <div class="card4" id="pendingPostsCard">
               <span class="material-symbols-outlined">post_add</span>
               <div class="stats-details">
               <h3>Pending Posts</h3>
-              <p>5</p>
+              <p>{{ $totalPendingPosts }}</p>
               </div>     
       </div>     
    
@@ -97,7 +73,11 @@
                 N/A
             @endforelse
            </td>
-            <td> {{ ucfirst($freelancer->status) ?? 'Inactive' }}</td>
+            <td> @if($freelancer->is_verified)
+                    <span style="color:green;">Verified</span>
+                @else
+                    <span style="color:red;">Not Verified</span>
+                @endif</td>
           </tr>
           @empty
                 <tr>
@@ -120,7 +100,7 @@
             <th>Profile</th>
             <th>Name</th>
             <th>Email</th>
-            <th>Status</th>
+            <th>Role</th>
           </tr>
         </thead>
         <tbody>
@@ -133,13 +113,7 @@
         @endif</td>
             <td>{{ $client->firstname }} {{ $client->lastname }}</td>
             <td>{{ $client->email }}</td>
-            <td> 
-               @if($client->status === 'active')
-              <span style="color:green;">Active</span>
-            @else
-              <span style="color:red;">Inactive</span>
-            @endif
-         </td>
+            <td>{{ $client->role }} </td>
           </tr>
           @endforeach
         </tbody>
@@ -157,6 +131,7 @@
             <th>Profile</th>
             <th>Name</th>
             <th>Email</th>
+            <th>Role</th>
             <th>Status</th>
             <th>Actions</th>
           </tr>
@@ -168,6 +143,7 @@
                 <td><img src="{{ asset('storage/' . $freelancer->profile_picture) }}" alt="Profile Picture" class="profile-pic"></td>
                 <td>{{ $freelancer->firstname }} {{ $freelancer->lastname }}</td>
                 <td>{{ $freelancer->email }}</td>
+                <td>{{ $freelancer->role ?? 'N/A' }}</td> 
                 <td>
                   @if($freelancer->is_verified)
                 ✅ Verified

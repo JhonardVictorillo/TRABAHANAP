@@ -33,7 +33,7 @@ class FreelancerController extends Controller
 
 
      $notifications = auth()->user()->notifications;
-        
+     $unreadCount = auth()->user()->unreadNotifications->count();  
       // Fetch appointments related to the freelancer
       $appointments = Appointment::where('freelancer_id', $user->id)
       ->with('customer') // Load related customer data
@@ -90,7 +90,8 @@ class FreelancerController extends Controller
             'postNotifications' => $postNotifications,
              'reviews' => $reviews,
             'clients' => $clients, // pass filtered clients
-            'totalClients' => $totalClients // pass total count
+            'totalClients' => $totalClients,// pass total count
+            'unreadCount' => $unreadCount
         ]);
 
 }   
@@ -128,6 +129,11 @@ public function acceptAppointment($id)
 
 public function declineAppointment(Request $request, $id)
 {
+
+    $request->validate([
+        'reason' => 'required|string|max:255',
+    ]);
+    // Find the appointment by ID
     $appointment = Appointment::findOrFail($id);
     $appointment->status = 'declined';
     $appointment->decline_reason = $request->input('reason');
@@ -138,6 +144,13 @@ public function declineAppointment(Request $request, $id)
      if ($customer) {
          $customer->notify(new AppointmentStatusUpdated($appointment, 'declined'));
      }
+
+     \Log::info('Decline request input:', $request->all());
+     \Log::info('Updated Appointment:', [
+         'id' => $appointment->id,
+         'status' => $appointment->status,
+         'decline_reason' => $appointment->decline_reason,
+     ]);
 
      return response()->json([
         'success' => true,
@@ -171,7 +184,7 @@ private function getStatusColor($status)
         'pending'   => '#fbbf24', // yellow
         'scheduled' => '#3b82f6', // blue
         'completed' => '#10b981', // green
-        'decline'  => '#ef4444', // red
+        'declined'  => '#ef4444', // red
         default     => '#6b7280', // gray
     };
 }
@@ -181,14 +194,22 @@ public function show($id)
 {
     $appointment = Appointment::findOrFail($id);
 
+    \Log::info('Show Appointment:', [
+        'id' => $appointment->id,
+        'status' => $appointment->status,
+        'decline_reason' => $appointment->decline_reason, // Log the decline reason
+    ]);
+
     return response()->json([
-        'name' => $appointment->name ?? 'N/A',
+        'id' => $appointment->id,
+        'freelancer_name' => $appointment->freelancer->firstname . ' ' . $appointment->freelancer->lastname,
         'date' => $appointment->date,
         'time' => $appointment->time,
         'address' => $appointment->address,
         'contact' => $appointment->contact ?? 'N/A',
         'notes' => $appointment->notes,
         'status' => ucfirst($appointment->status),
+        'decline_reason' => $appointment->decline_reason, // Include the decline reason
     ]);
 }
 
@@ -270,17 +291,17 @@ public function markNotificationsAsRead()
                 {
                     $user = Auth::user();
                     $notification = $user->notifications()->where('id', $id)->first();
-
+                
                     if ($notification && is_null($notification->read_at)) {
-                        $notification->markAsRead(); // Use markAsRead() instead of update()
-
+                        $notification->markAsRead();
+                
                         return response()->json([
                             'success' => true,
                             'message' => 'Notification marked as read.',
-                            'unread_count' => $user->unreadNotifications()->count()
+                            'unread_count' => $user->unreadNotifications->count(),
                         ]);
                     }
-
+                
                     return response()->json(['success' => false, 'message' => 'Notification not found.'], 404);
                 }
 public function getNotifications() {
@@ -298,6 +319,7 @@ public function update(Request $request)
         'contact_number' => 'nullable|string',
         'province' => 'nullable|string',
         'city' => 'nullable|string',
+        'experience_level' => 'required|string|in:Beginner,Intermediate,Expert',
         'profile_picture' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
     ]);
 
@@ -307,6 +329,7 @@ public function update(Request $request)
     $user->contact_number = $request->contact_number;
     $user->province = $request->province;
     $user->city = $request->city;
+    $user->experience_level = $request->experience_level;
 
     // Profile picture upload
     if ($request->hasFile('profile_picture')) {
