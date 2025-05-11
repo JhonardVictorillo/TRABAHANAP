@@ -48,7 +48,7 @@
       };
     </script>
     <style>
-      :where([class^="ri-"])::before { content: "\f3c2"; }
+      /* :where([class^="ri-"])::before { content: "\f3c2"; } */
       .search-input:focus {
       outline: none;
       box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
@@ -62,7 +62,10 @@
   <body class="bg-[#F8F9FA] font-inter">
     <header class="sticky top-0 z-50 bg-white shadow-sm">
       <div class="flex items-center justify-between px-8 h-16">
-        <a href="/" class="font-['Pacifico'] text-2xl text-primary">MinglaGawa</a>
+      <a href="/" class="font-poppins text-2xl font-semibold">
+          <span class="text-[#118f39]">Mingla</span> 
+          <span class="text-[#4CAF50]">Gawa</span> 
+        </a>
         <div class="flex items-center flex-1 max-w-xl mx-8">
           <div class="relative w-full">
           <form action="{{ route('search') }}" method="GET" style="display: flex; align-items: center; width: 100%;">
@@ -224,12 +227,13 @@
 
     <main class="max-w-7xl mx-auto px-8 py-8">
     <div class="mb-4">
-        <a href="{{ route('customer.dashboard') }}">
-            <button class="px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary/90 rounded-lg shadow-md">
-                Back to Dashboard
-            </button>
-        </a>
-    </div>
+    <a href="{{ route('customer.dashboard') }}">
+        <button class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-primary bg-white border border-primary hover:bg-primary hover:text-white transition rounded-lg shadow-sm">
+            <i class="ri-arrow-left-line text-lg"></i>
+            
+        </button>
+    </a>
+</div>
     <div class="grid grid-cols-3 gap-8">
         <!-- Left Section -->
         <div class="col-span-2">
@@ -315,7 +319,7 @@
             </p>
                 <!-- Portfolio Section -->
                 <div class="border-t pt-8">
-                    <h3 class="text-lg font-semibold mb-6">Portfolio</h3>
+                    <h3 class="text-lg font-semibold mb-6">Recent works</h3>
                     <div class="grid grid-cols-2 gap-6">
                         @forelse ($freelancer->posts as $post)
                             @forelse ($post->pictures as $picture)
@@ -371,7 +375,7 @@
         </div>
         <!-- Right Section -->
         <div class="col-span-1">
-            <div class="bg-white rounded-lg p-6">
+                <div class="bg-white rounded-lg p-6 shadow-lg sticky top-20">
                 <h3 class="text-lg font-semibold mb-6">Book Appointment Here</h3>
                 <p class="text-sm text-gray-600 mb-6">
                     Book a consultation to discuss your digital marketing needs and goals.
@@ -386,10 +390,7 @@
         </div>
     </div>
     
-    <div
-    id="bookingModal"
-    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50"
->
+    <div id="bookingModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
     <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
         <div class="flex justify-between items-center mb-6">
             <h3 class="text-xl font-semibold">Book an Appointment</h3>
@@ -402,28 +403,20 @@
         <form id="bookingForm" method="POST" action="{{ route('book.appointment') }}">
             @csrf
             <input type="hidden" name="freelancer_id" value="{{ $freelancer->id }}">
-            <input type="hidden" name="post_id" value="{{ $post->id ?? '' }}">
+            <input type="hidden" name="post_id" value="{{ $post->id }}">
             <input type="hidden" id="selectedDate" name="date" required>
             <input type="hidden" id="selectedTime" name="time" required>
 
             <!-- Calendar Section -->
             <div class="mb-6">
                 <div class="flex items-center justify-between mb-4">
-                    <button
-                        type="button"
-                        id="prevMonthButton"
-                        class="text-gray-400 hover:text-gray-600"
-                    >
+                    <button type="button" id="prevMonthButton" class="text-gray-400 hover:text-gray-600">
                         <div class="w-6 h-6 flex items-center justify-center">
                             <i class="ri-arrow-left-s-line"></i>
                         </div>
                     </button>
                     <h4 id="monthTitle" class="text-base font-medium"></h4>
-                    <button
-                        type="button"
-                        id="nextMonthButton"
-                        class="text-gray-400 hover:text-gray-600"
-                    >
+                    <button type="button" id="nextMonthButton" class="text-gray-400 hover:text-gray-600">
                         <div class="w-6 h-6 flex items-center justify-center">
                             <i class="ri-arrow-right-s-line"></i>
                         </div>
@@ -438,100 +431,31 @@
                     <div class="text-sm text-gray-600">Fri</div>
                     <div class="text-sm text-gray-600">Sat</div>
                 </div>
-                <div
-                    id="calendarGrid"
-                    class="grid grid-cols-7 gap-1 text-center"
-                ></div>
+                <div id="calendarGrid" class="grid grid-cols-7 gap-1 text-center"></div>
             </div>
 
             <!-- Time Slots Section -->
             <div class="mb-6">
                 <h5 class="text-sm font-medium mb-4">Available Time Slots</h5>
-                <div class="grid grid-cols-3 gap-3">
-                    <button
-                        type="button"
-                        class="time-btn text-sm py-2 border border-gray-200 rounded hover:border-gray-300"
-                        data-time="8:00 AM"
-                    >
-                        8:00 AM
-                    </button>
-                    <button
-                        type="button"
-                        class="time-btn text-sm py-2 border border-gray-200 rounded hover:border-gray-300"
-                        data-time="9:00 AM"
-                    >
-                        9:00 AM
-                    </button>
-                    <button
-                        type="button"
-                        class="time-btn text-sm py-2 border border-gray-200 rounded hover:border-gray-300"
-                        data-time="10:00 AM"
-                    >
-                        10:00 AM
-                    </button>
-                    <button
-                        type="button"
-                        class="time-btn text-sm py-2 border border-gray-200 rounded hover:border-gray-300"
-                        data-time="11:00 AM"
-                    >
-                        11:00 AM
-                    </button>
-                    <button
-                        type="button"
-                        class="time-btn text-sm py-2 border border-gray-200 rounded hover:border-gray-300"
-                        data-time="12:00 PM"
-                    >
-                        12:00 PM
-                    </button>
-                    <button
-                        type="button"
-                        class="time-btn text-sm py-2 border border-gray-200 rounded hover:border-gray-300"
-                        data-time="1:00 PM"
-                    >
-                        1:00 PM
-                    </button>
-                    <button
-                        type="button"
-                        class="time-btn text-sm py-2 border border-gray-200 rounded hover:border-gray-300"
-                        data-time="2:00 PM"
-                    >
-                        2:00 PM
-                    </button>
-                    <button
-                        type="button"
-                        class="time-btn text-sm py-2 border border-gray-200 rounded hover:border-gray-300"
-                        data-time="3:00 PM"
-                    >
-                        3:00 PM
-                    </button>
-                    <button
-                        type="button"
-                        class="time-btn text-sm py-2 border border-gray-200 rounded hover:border-gray-300"
-                        data-time="4:00 PM"
-                    >
-                        4:00 PM
-                    </button>
-                </div>
+                <div class="grid grid-cols-3 gap-3"></div>
             </div>
             <!-- Notes Section -->
-              <div class="mb-6">
+            <div class="mb-6">
                   <label for="notes" class="block text-sm font-medium text-gray-700">Notes (Optional)</label>
                   <textarea id="notes" name="notes" rows="3" class="w-full mt-1 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"  placeholder="Add any additional details or instructions for the freelancer..."
                   ></textarea>
               </div>
-            
 
             <!-- Submit Button -->
-            <button
-                type="submit"
-                class="w-full py-3 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded"
-            >
+            <button type="submit" class="w-full py-3 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded">
                 Book Appointment
             </button>
         </form>
     </div>
 </div>
 </main>
+ 
+ 
       <!-- Success message -->
       @if(session('success'))
         <div class="alert alert-success">
@@ -539,13 +463,124 @@
         {{ session('success') }}
         </div>
         @endif
-    <footer class="bg-gray-50 py-8">
+        <footer class="bg-gray-50 pt-16 pb-8">
       <div class="max-w-7xl mx-auto px-8">
-        <div class="text-sm text-center text-gray-600">
-          <!-- <p>&copy; 2024 MinglaGawa. All rights reserved.</p> -->
+        <div class="grid grid-cols-4 gap-8 pb-12 border-b">
+          <div>
+            <a
+              href="/"
+              class="font-['Pacifico'] text-2xl text-primary block mb-4"
+              >MinglaGawa</a
+            >
+            <p class="text-sm text-gray-600 mb-6">
+              Your trusted platform for finding and hiring local freelance
+              talent.
+            </p>
+            <div class="flex gap-4">
+              <a
+                href="#"
+                class="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-primary"
+              >
+                <i class="ri-twitter-x-line"></i>
+              </a>
+              <a
+                href="#"
+                class="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-primary"
+              >
+                <i class="ri-facebook-circle-line"></i>
+              </a>
+              <a
+                href="#"
+                class="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-primary"
+              >
+                <i class="ri-instagram-line"></i>
+              </a>
+              <a
+                href="#"
+                class="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-primary"
+              >
+                <i class="ri-linkedin-box-line"></i>
+              </a>
+            </div>
+          </div>
+          <div>
+            <h4 class="font-medium mb-4">Company</h4>
+            <ul class="space-y-3 text-sm">
+              <li>
+                <a href="#" class="text-gray-600 hover:text-primary"
+                  >About Us</a
+                >
+              </li>
+              <li>
+                <a href="#" class="text-gray-600 hover:text-primary">Careers</a>
+              </li>
+              <li>
+                <a href="#" class="text-gray-600 hover:text-primary"
+                  >Press & News</a
+                >
+              </li>
+              <li>
+                <a href="#" class="text-gray-600 hover:text-primary"
+                  >Partnerships</a
+                >
+              </li>
+            </ul>
+          </div>
+          <div>
+            <h4 class="font-medium mb-4">Support</h4>
+            <ul class="space-y-3 text-sm">
+              <li>
+                <a href="#" class="text-gray-600 hover:text-primary"
+                  >Help & Support</a
+                >
+              </li>
+              <li>
+                <a href="#" class="text-gray-600 hover:text-primary"
+                  >Trust & Safety</a
+                >
+              </li>
+              <li>
+                <a href="#" class="text-gray-600 hover:text-primary"
+                  >Contact Us</a
+                >
+              </li>
+              <li>
+                <a href="#" class="text-gray-600 hover:text-primary">FAQ</a>
+              </li>
+            </ul>
+          </div>
+          <div>
+            <h4 class="font-medium mb-4">Legal</h4>
+            <ul class="space-y-3 text-sm">
+              <li>
+                <a href="#" class="text-gray-600 hover:text-primary"
+                  >Privacy Policy</a
+                >
+              </li>
+              <li>
+                <a href="#" class="text-gray-600 hover:text-primary"
+                  >Terms of Service</a
+                >
+              </li>
+              <li>
+                <a href="#" class="text-gray-600 hover:text-primary"
+                  >Cookie Policy</a
+                >
+              </li>
+              <li>
+                <a href="#" class="text-gray-600 hover:text-primary"
+                  >Accessibility</a
+                >
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div class="pt-8 text-sm text-center text-gray-600">
+       
         </div>
       </div>
     </footer>
+
 
     <script>
 
@@ -650,7 +685,7 @@ const profileBtn = document.getElementById('profileBtn');
 
 
 
-document.addEventListener("DOMContentLoaded", function () {
+    document.addEventListener("DOMContentLoaded", function () {
     const bookButton = document.getElementById("bookButton");
     const bookingModal = document.getElementById("bookingModal");
     const closeModal = document.getElementById("closeModal");
@@ -660,7 +695,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const prevMonthButton = document.getElementById("prevMonthButton");
     const selectedDateInput = document.getElementById("selectedDate");
     const selectedTimeInput = document.getElementById("selectedTime");
-    const timeButtons = document.querySelectorAll(".time-btn");
+    const timeButtonsContainer = document.querySelector(".grid-cols-3");
 
     const months = [
         "January",
@@ -678,51 +713,119 @@ document.addEventListener("DOMContentLoaded", function () {
     ];
 
     let currentDate = new Date();
+    let freelancerId = "{{ $freelancer->id }}";
+
+    // Function to fetch availability
+    function fetchAvailability(year, month) {
+    return fetch(`/freelancer/${freelancerId}/availability?year=${year}&month=${month + 1}`)
+        .then(response => response.json())
+        .then(data => {
+            console.log("Fetched availability:", data); // Debugging
+            return data;
+        })
+        .catch(error => {
+            console.error("Error fetching availability:", error);
+            return [];
+        });
+}
 
     // Function to update the calendar
-    function updateCalendar() {
-        const year = currentDate.getFullYear();
-        const month = currentDate.getMonth();
-        const firstDay = new Date(year, month, 1).getDay();
-        const lastDate = new Date(year, month + 1, 0).getDate();
+    async function updateCalendar() {
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+    const firstDay = new Date(year, month, 1).getDay();
+    const lastDate = new Date(year, month + 1, 0).getDate();
 
-        monthTitle.textContent = `${months[month]} ${year}`;
-        calendarGrid.innerHTML = "";
+    monthTitle.textContent = `${months[month]} ${year}`;
+    calendarGrid.innerHTML = "";
 
-        // Add empty cells for days before the first day of the month
-        for (let i = 0; i < firstDay; i++) {
-            calendarGrid.innerHTML += `<div class="text-sm text-gray-300"></div>`;
-        }
+    // Fetch availability for the current month
+    const availability = await fetchAvailability(year, month);
 
-        // Add cells for each day of the month
-        for (let day = 1; day <= lastDate; day++) {
-            const isToday =
-                day === new Date().getDate() &&
-                month === new Date().getMonth() &&
-                year === new Date().getFullYear();
+    // Add empty cells for days before the first day of the month
+    for (let i = 0; i < firstDay; i++) {
+        calendarGrid.innerHTML += `<div class="text-sm text-gray-300"></div>`;
+    }
 
-            calendarGrid.innerHTML += `
-                <div class="text-sm py-2 ${
-                    isToday
-                        ? "bg-green-600 text-white rounded-full"
-                        : "hover:bg-gray-100 cursor-pointer"
-                }" data-date="${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}">
-                    ${day}
-                </div>`;
-        }
+    // Add cells for each day of the month
+    for (let day = 1; day <= lastDate; day++) {
+        const date = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+        const isAvailable = availability.some(avail => avail.date === date);
 
-        // Add click event to each day
-        document.querySelectorAll("#calendarGrid div[data-date]").forEach((day) => {
+        calendarGrid.innerHTML += `
+            <div class="text-sm py-2 ${
+                isAvailable
+                    ? "bg-green-600 text-white rounded-full cursor-pointer"
+                    : "bg-gray-200 text-gray-400 cursor-not-allowed"
+            }" data-date="${date}" ${isAvailable ? "" : "disabled"}>
+                ${day}
+            </div>`;
+    }
+
+    // Add click event to available days only
+    document.querySelectorAll("#calendarGrid div[data-date]").forEach((day) => {
+        if (!day.classList.contains("cursor-not-allowed")) {
             day.addEventListener("click", function () {
                 document
                     .querySelectorAll("#calendarGrid div")
                     .forEach((d) => d.classList.remove("bg-green-600", "text-white"));
                 this.classList.add("bg-green-600", "text-white");
                 selectedDateInput.value = this.getAttribute("data-date");
+
+                // Update time slots for the selected date
+                updateTimeSlots(this.getAttribute("data-date"), availability);
+            });
+        }
+    });
+}
+
+function updateTimeSlots(selectedDate, availability) {
+    const timeButtonsContainer = document.querySelector("#bookingModal .grid-cols-3"); // Target the modal's time slot container
+    const availableTimes = availability.find(avail => avail.date === selectedDate);
+    timeButtonsContainer.innerHTML = ""; // Clear previous time slots
+
+    if (availableTimes) {
+        const startTime = parseInt(availableTimes.start_time.split(":")[0]);
+        const endTime = parseInt(availableTimes.end_time.split(":")[0]);
+        const bookedTimes = availableTimes.booked_times || []; // Get booked times
+
+        for (let hour = startTime; hour < endTime; hour++) {
+            const time24 = `${hour}:00`;
+            const time12 = convertTo12HourFormat(hour); // Convert to 12-hour format
+            const isBooked = bookedTimes.includes(time24); // Check if the time is booked
+
+            timeButtonsContainer.innerHTML += `
+                <button
+                    type="button"
+                    class="time-btn text-sm py-2 border border-gray-200 rounded hover:border-gray-300 ${
+                        isBooked ? "bg-gray-300 text-gray-500 cursor-not-allowed" : ""
+                    }"
+                    data-time="${time24}"
+                    ${isBooked ? "disabled" : ""}
+                >
+                    ${time12} ${isBooked ? "(Booked)" : ""}
+                </button>`;
+        }
+
+        // Add click event to time buttons
+        document.querySelectorAll(".time-btn:not([disabled])").forEach((button) => {
+            button.addEventListener("click", function () {
+                document.querySelectorAll(".time-btn").forEach((btn) => btn.classList.remove("bg-green-600", "text-white"));
+                this.classList.add("bg-green-600", "text-white");
+                document.getElementById("selectedTime").value = this.getAttribute("data-time");
             });
         });
+    } else {
+        timeButtonsContainer.innerHTML = `<p class="text-sm text-gray-600">No available time slots for this date.</p>`;
     }
+}
 
+// Helper function to convert 24-hour time to 12-hour format
+function convertTo12HourFormat(hour) {
+    const period = hour >= 12 ? "PM" : "AM";
+    const hour12 = hour % 12 || 12; // Convert 0 to 12 for midnight
+    return `${hour12}:00 ${period}`;
+}
     // Event listeners for navigation buttons
     nextMonthButton.addEventListener("click", () => {
         currentDate.setMonth(currentDate.getMonth() + 1);
@@ -748,30 +851,6 @@ document.addEventListener("DOMContentLoaded", function () {
         if (e.target === bookingModal) {
             bookingModal.classList.add("hidden");
         }
-    });
-
-    // Handle time slot selection
-    timeButtons.forEach((button) => {
-        button.addEventListener("click", function () {
-            timeButtons.forEach((btn) => btn.classList.remove("bg-green-600", "text-white"));
-            this.classList.add("bg-green-600", "text-white");
-            selectedTimeInput.value = this.getAttribute("data-time");
-        });
-    });
-});
-
-
-document.addEventListener("DOMContentLoaded", function () {
-    const timeButtons = document.querySelectorAll(".time-btn");
-
-    timeButtons.forEach((button) => {
-        button.addEventListener("click", function () {
-            // Remove active class from all buttons
-            timeButtons.forEach((btn) => btn.classList.remove("bg-green-600", "text-white"));
-
-            // Add active class to the selected button
-            this.classList.add("bg-green-600", "text-white");
-        });
     });
 });
 

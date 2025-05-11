@@ -19,36 +19,48 @@
       </div>
     </section>
     
-    <!-- Appointment Details Modal -->
     <div id="appointmentModal" class="Apptmodal hidden">
-    <div class="Apptmodal-content">
-        <button id="closeAppointmentModal" class="close-button">&times;</button>
-        <h2 class="Apptmodal-title">Appointment Details</h2>
-        <div class="Apptmodal-body">
-            <p><strong>Name:</strong> <span id="appointmentName" class="font-medium"></span></p>
-            <p><strong>Date:</strong> <span id="appointmentDate" class="font-medium"></span></p>
-            <p><strong>Time:</strong> <span id="appointmentTime" class="font-medium"></span></p>
-            <p><strong>Address:</strong> <span id="appointmentAddress" class="font-medium"></span></p>
-            <p><strong>Contact:</strong> <span id="appointmentContact" class="font-medium"></span></p>
-            <p><strong>Status:</strong> <span id="appointmentStatus" class="font-medium"></span></p>
-            <p><strong>Notes:</strong> <span id="appointmentNotes" class="font-medium"></span></p>
-        </div>
-        
-        <!-- Action buttons -->
-        <div class="modal-actions">
-        <button id="acceptAppointmentBtn" class="action-button accept-button" data-id="">Accept</button>
-        <button id="declineAppointmentBtn" class="action-button decline-button" data-id="">Decline</button>
-        <button id="completeAppointmentBtn" class="action-button complete-button" data-id="">Complete</button>
-        <div id="declineReasonContainer" style="display: none; margin-top: 1rem;">
-            <label for="declineReason">Reason for Declining:</label>
-            <textarea id="declineReason" placeholder="Enter reason..." rows="3"></textarea>
-            <button id="confirmDeclineBtn" class="action-button decline-button">Confirm Decline</button>
-            <button id="cancelDeclineBtn" class="action-button cancel-button">Cancel</button>
-        </div>
-        </div>
+  <div class="Apptmodal-content enhanced-modal">
+    <button id="closeAppointmentModal" class="close-button enhanced-close" title="Close">
+      <i class="fas fa-times"></i>
+    </button>
+    <h2 class="Apptmodal-title enhanced-title">
+      <i class="fas fa-calendar-check" style="color:#118f39;"></i> Appointment Details
+    </h2>
+    <div class="Apptmodal-body enhanced-body">
+      <p><i class="fas fa-user"></i> <strong>Name:</strong> <span id="appointmentName" class="font-medium"></span></p>
+      <p><i class="fas fa-calendar-day"></i> <strong>Date:</strong> <span id="appointmentDate" class="font-medium"></span></p>
+      <p><i class="fas fa-clock"></i> <strong>Time:</strong> <span id="appointmentTime" class="font-medium"></span></p>
+      <p><i class="fas fa-map-marker-alt"></i> <strong>Address:</strong> <span id="appointmentAddress" class="font-medium"></span></p>
+      <p><i class="fas fa-phone"></i> <strong>Contact:</strong> <span id="appointmentContact" class="font-medium"></span></p>
+      <p><i class="fas fa-info-circle"></i> <strong>Status:</strong> <span id="appointmentStatus" class="font-medium"></span></p>
+      <p><i class="fas fa-sticky-note"></i> <strong>Notes:</strong> <span id="appointmentNotes" class="font-medium"></span></p>
     </div>
+    <div class="modal-actions enhanced-actions">
+      <button id="acceptAppointmentBtn" class="action-button accept-button enhanced-btn" data-id="">
+        <i class="fas fa-check-circle"></i> Accept
+      </button>
+      <button id="declineAppointmentBtn" class="action-button decline-button enhanced-btn" data-id="">
+        <i class="fas fa-times-circle"></i> Decline
+      </button>
+      <button id="completeAppointmentBtn" class="action-button complete-button enhanced-btn" data-id="">
+        <i class="fas fa-flag-checkered"></i> Complete
+      </button>
+      <div id="declineReasonContainer" style="display: none; margin-top: 1rem;">
+        <label for="declineReason" class="enhanced-label">
+          <i class="fas fa-comment-dots"></i> Reason for Declining:
+        </label>
+        <textarea id="declineReason" placeholder="Enter reason..." rows="3" class="enhanced-textarea"></textarea>
+        <button id="confirmDeclineBtn" class="action-button decline-button enhanced-btn">
+          <i class="fas fa-check"></i> Confirm Decline
+        </button>
+        <button id="cancelDeclineBtn" class="action-button cancel-button enhanced-btn">
+          <i class="fas fa-undo"></i> Cancel
+        </button>
+      </div>
+    </div>
+  </div>
 </div>
-    
     
 <script>
   const appointmentModal = document.getElementById('appointmentModal');
@@ -72,7 +84,7 @@
 
     document.getElementById('appointmentName').textContent = data.name || 'N/A';
     document.getElementById('appointmentDate').textContent = data.date || 'N/A';
-    document.getElementById('appointmentTime').textContent = data.time || 'N/A';
+    document.getElementById('appointmentTime').textContent = convertTo12HourFormat(data.time) || 'N/A';
     document.getElementById('appointmentAddress').textContent = data.address || 'N/A';
     document.getElementById('appointmentContact').textContent = data.contact || 'N/A';
     document.getElementById('appointmentStatus').textContent = data.status || 'N/A';
@@ -103,6 +115,16 @@
 
     appointmentModal.style.display = 'flex';
   }
+
+//12-hour format conversion function
+  function convertTo12HourFormat(time) {
+    if (!time) return 'N/A'; // Handle empty or invalid time
+
+    const [hour, minute] = time.split(':').map(Number);
+    const period = hour >= 12 ? 'PM' : 'AM';
+    const hour12 = hour % 12 || 12; // Convert 0 to 12 for midnight
+    return `${hour12}:${minute.toString().padStart(2, '0')} ${period}`;
+}
 
   // Reset modal buttons and inputs when opened/closed
   function resetModalState() {

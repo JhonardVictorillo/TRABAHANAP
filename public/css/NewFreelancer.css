@@ -606,7 +606,7 @@
   
   #calendar-container {
     max-width: 1200px;
-    margin: auto;
+    margin: 20px auto;
     background: white;
     padding: 20px;
     border-radius: 10px;
@@ -615,9 +615,10 @@
   }
   
   #calendar {
-    width: 100%;
-    max-height: 800px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
     padding: 10px;
+    background-color: #fff;
   }
   
   .filter-btn {
@@ -869,111 +870,150 @@ input:invalid {
     border-color: red;
 }
 /************8 Modal Background(Appointment modal) ************************/
+/* Modal Overlay */
 .Apptmodal {
+  display: none;
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.7);
-  display: flex;
+  z-index: 1050;
+  left: 0; top: 0;
+  width: 100vw; height: 100vh;
+  background: rgba(0,0,0,0.25);
   align-items: center;
   justify-content: center;
-  z-index: 50;
 }
 
 /* Modal Content */
-.Apptmodal-content {
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-  width: 400px;
-  padding: 20px;
+.enhanced-modal {
+  background: #fff;
+  border-radius: 1.2rem;
+  box-shadow: 0 8px 32px rgba(17,143,57,0.13);
+  padding: 2.5rem 2rem 2rem 2rem;
+  max-width: 420px;
+  width: 95vw;
   position: relative;
+  animation: modal-fade-in 0.25s;
 }
 
-/* Close Button */
-.close-button {
-  position: absolute;
-  top: 10px;
-  right: 15px;
-  background: none;
-  border: none;
-  font-size: 24px;
-  color: #333;
-  cursor: pointer;
+@keyframes modal-fade-in {
+  from { transform: translateY(-30px) scale(0.97); opacity: 0; }
+  to   { transform: translateY(0) scale(1); opacity: 1; }
 }
 
-
-.Apptmodal-title {
-  font-size: 20px;
-  font-weight: bold;
-  color: #4CAF50; /* Green color */
+.enhanced-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #118f39;
+  margin-bottom: 1.2rem;
   text-align: center;
-  margin-bottom: 15px;
 }
 
-
-.Apptmodal-body {
-  color: #555;
-  margin-bottom: 20px;
+.enhanced-body p {
+  margin: 0.5rem 0;
+  font-size: 1.08rem;
+  color: #333;
 }
 
-/* Action Buttons */
-.modal-actions {
+.enhanced-body strong {
+  color: #118f39;
+  font-weight: 600;
+}
+
+.enhanced-actions {
   display: flex;
-  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  justify-content: center;
+  margin-top: 1.5rem;
 }
 
-.action-button {
-  padding: 10px 15px;
+.enhanced-btn {
+  padding: 0.6rem 1.4rem;
+  border-radius: 999px;
+  font-size: 1rem;
+  font-weight: 600;
   border: none;
-  border-radius: 5px;
   cursor: pointer;
-  font-weight: bold;
-  transition: background-color 0.3s;
-  width: 48%; /* Make buttons take equal space */
+  transition: background 0.18s, color 0.18s;
+  box-shadow: 0 1px 4px rgba(17,143,57,0.07);
 }
 
 .accept-button {
-  background-color: #4CAF50; /* Green */
-  color: white;
+  background: #118f39;
+  color: #fff;
 }
-
 .accept-button:hover {
-  background-color: #45a049; /* Darker green */
+  background: #0e7e33;
 }
 
 .decline-button {
-  background-color: #f44336; /* Red */
-  color: white;
+  background: #ffeaea;
+  color: #d32f2f;
 }
-
 .decline-button:hover {
-  background-color: #e53935; /* Darker red */
+  background: #ffd6d6;
 }
 
 .complete-button {
-  background-color: #3698f4; /* Red */
-  color: white;
+  background: #e6f4ea;
+  color: #118f39;
 }
-
 .complete-button:hover {
-  background-color: #3555e5; /* Darker red */
+  background: #d2f0db;
 }
 
-#declineReasonContainer {
-  margin-top: 1rem;
+.cancel-button {
+  background: #f3f3f3;
+  color: #888;
+}
+.cancel-button:hover {
+  background: #e0e0e0;
+  color: #222;
 }
 
-#declineReason {
+.enhanced-label {
+  display: block;
+  margin-bottom: 0.4rem;
+  color: #d32f2f;
+  font-weight: 500;
+}
+
+.enhanced-textarea {
   width: 100%;
-  margin-bottom: 0.5rem;
+  border-radius: 0.7rem;
+  border: 1px solid #ddd;
+  padding: 0.7rem;
+  margin-bottom: 0.7rem;
+  font-size: 1rem;
+  resize: vertical;
+  background: #fafafa;
+  transition: border 0.18s;
+}
+.enhanced-textarea:focus {
+  border: 1.5px solid #118f39;
+  outline: none;
 }
 
-.action-button.cancel-button {
-  background-color: #ccc;
-  color: #333;
+/* Close Button */
+.enhanced-close {
+  position: absolute;
+  top: 1.1rem;
+  right: 1.1rem;
+  background: #f3f3f3;
+  color: #888;
+  border: none;
+  border-radius: 50%;
+  width: 2.2rem;
+  height: 2.2rem;
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: background 0.18s, color 0.18s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.enhanced-close:hover {
+  background: #e0e0e0;
+  color: #222;
 }
 
 /******************* editProfile **********************/
@@ -1423,3 +1463,6 @@ label {
 .notification-container .mark-single-read:hover {
   background-color: #0056b3;
 }
+
+
+

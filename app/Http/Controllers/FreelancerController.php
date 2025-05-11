@@ -7,6 +7,9 @@ use App\Models\Appointment;
 use App\Notifications\AppointmentStatusUpdated; 
 use Illuminate\Support\Facades\Auth; 
 use Illuminate\Http\Request;
+use App\Models\FreelancerAvailability;
+use Carbon\Carbon;
+
 
 class FreelancerController extends Controller
 {
@@ -21,6 +24,8 @@ class FreelancerController extends Controller
        $freelancerCategory = $user->categories()->first();
        $unreadNotifications = $user->unreadNotifications; // Get unread notifications
 
+    // Fetch availabilities (no need to format start_time and end_time manually)
+    $availabilities = $user->availabilities;
 
         // Fetch notifications separately
         $appointmentNotifications = $user->notifications()
@@ -91,7 +96,8 @@ class FreelancerController extends Controller
              'reviews' => $reviews,
             'clients' => $clients, // pass filtered clients
             'totalClients' => $totalClients,// pass total count
-            'unreadCount' => $unreadCount
+            'unreadCount' => $unreadCount,
+            'availabilities' => $availabilities
         ]);
 
 }   
@@ -162,13 +168,15 @@ public function declineAppointment(Request $request, $id)
 public function getAppointments(Request $request)
 {
     // Get the current freelancer's appointments (adjust this as needed)
-    $appointments = Appointment::where('freelancer_id', auth()->id())->get();
+    $appointments = Appointment::where('freelancer_id', auth()->id())
+        ->with('customer') // Load the related customer data
+        ->get();
 
     // Format appointments for FullCalendar
     $events = $appointments->map(function ($appointment) {
         return [
             'id' => $appointment->id,
-            'title' => $appointment->name . ' (' . ucfirst($appointment->status) . ')', 
+            'title' => $appointment->customer->firstname . ' ' . $appointment->customer->lastname . ' (' . ucfirst($appointment->status) . ')',
             'start' => $appointment->date,
             'color' => $this->getStatusColor($appointment->status), 
         ];
@@ -194,22 +202,16 @@ public function show($id)
 {
     $appointment = Appointment::findOrFail($id);
 
-    \Log::info('Show Appointment:', [
-        'id' => $appointment->id,
-        'status' => $appointment->status,
-        'decline_reason' => $appointment->decline_reason, // Log the decline reason
-    ]);
 
     return response()->json([
         'id' => $appointment->id,
-        'freelancer_name' => $appointment->freelancer->firstname . ' ' . $appointment->freelancer->lastname,
+        'name' => $appointment->customer->firstname.' '.$appointment->customer->lastname, // Ensure the customer's name is included
         'date' => $appointment->date,
         'time' => $appointment->time,
         'address' => $appointment->address,
-        'contact' => $appointment->contact ?? 'N/A',
-        'notes' => $appointment->notes,
-        'status' => ucfirst($appointment->status),
-        'decline_reason' => $appointment->decline_reason, // Include the decline reason
+        'contact' => $appointment->customer->contact_number, // Assuming contact is part of the customer model
+        'status' => $appointment->status,
+        'notes' => $appointment->notes, // Include the decline reason
     ]);
 }
 
@@ -340,6 +342,72 @@ public function update(Request $request)
     $user->save();
 
     return redirect()->back()->with('success', 'Profile updated successfully!');
+}
+
+public function setAvailability(Request $request)
+{
+   
+
+    $request->validate([
+        'date' => 'required|date',
+        'start_time' => 'required|date_format:H:i',
+        'end_time' => 'required|date_format:H:i|after:start_time',
+    ]);
+
+    // Calculate the day of the week
+    $dayOfWeek = Carbon::parse($request->date)->format('l'); // e.g., "Monday"
+
+    FreelancerAvailability::create([
+        'freelancer_id' => Auth::id(),
+        'date' => $request->date,
+        'day_of_week' => $dayOfWeek, // Automatically populate day_of_week
+        'start_time' => $request->start_time,
+        'end_time' => $request->end_time,
+    ]);
+
+    return redirect()->back()->with('success', 'Availability added successfully!');
+}
+
+public function editAvailability($id)
+{
+    $availability = FreelancerAvailability::findOrFail($id);
+    return response()->json($availability);
+}
+
+
+
+public function updateAvailability(Request $request, $id)
+{
+    $request->validate([
+        'date' => 'required|date',
+        'start_time' => 'required|date_format:H:i',
+        'end_time' => 'required|date_format:H:i|after:start_time',
+    ]);
+
+    $availability = FreelancerAvailability::findOrFail($id);
+
+    // Calculate the day of the week
+    $dayOfWeek = Carbon::parse($request->date)->format('l'); // e.g., "Monday"
+
+    $availability->update([
+        'date' => $request->date,
+        'day_of_week' => $dayOfWeek,
+        'start_time' => $request->start_time,
+        'end_time' => $request->end_time,
+    ]);
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Schedule updated successfully!',
+        'availability' => $availability,
+    ]);
+}
+public function destroyAvailability($id)
+{
+    $availability = FreelancerAvailability::findOrFail($id);
+    $availability->delete();
+
+    return response()->json(['success' => true]);
 }
 
 }

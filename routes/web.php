@@ -2,6 +2,7 @@
 
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\HomepageController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RoleController;
@@ -18,10 +19,7 @@ use App\Http\Controllers\Auth\ResetPasswordController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 // Home Route
-Route::get('/', function () {
-    return view('homepage'); // Ensure you have 'home.blade.php'
-})->name('homepage');
-
+Route::get('/', [HomepageController::class, 'index'])->name('homepage');
 // Registration Routes
 Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register.form');
 Route::post('/register', [RegisterController::class, 'register'])->name('register');
@@ -119,6 +117,12 @@ Route::post('/book-appointment', [CustomerController::class, 'bookAppointment'])
 Route::post('/appointments/accept/{id}', [FreelancerController::class, 'acceptAppointment'])->name('appointments.accept');
 Route::post('/appointments/decline/{id}', [FreelancerController::class, 'declineAppointment'])->name('appointments.decline');
 
+//freelancer schedule
+
+Route::post('/freelancer/set-availability', [FreelancerController::class, 'setAvailability'])->name('freelancer.setAvailability');
+Route::get('/freelancer/availabilities/{id}/edit', [FreelancerController::class, 'editAvailability'])->name('freelancer.availabilities.edit');
+Route::put('/freelancer/availabilities/{id}', [FreelancerController::class, 'updateAvailability'])->name('freelancer.availabilities.update');
+Route::delete('/freelancer/availabilities/{id}', [FreelancerController::class, 'destroyAvailability'])->name('freelancer.availabilities.destroy');
 //Appointment done status
 Route::post('/appointments/{appointment}/complete', [FreelancerController::class, 'markAsCompleted'])->name('appointments.complete');
 
@@ -164,3 +168,5 @@ Route::post('/validate-email', [ForgotPasswordController::class, 'validateEmail'
 
 // customer edit profile
 Route::put('/customer/profile/update', [CustomerController::class, 'updateProfile'])->name('customer.profile.update');
+//customer view freelancer schedule
+Route::get('/freelancer/{freelancerId}/availability', [CustomerController::class, 'getAvailability'])->name('freelancer.availability');

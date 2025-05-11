@@ -90,5 +90,9 @@ public function freelancer()
 {
     return $this->belongsTo(User::class, 'freelancer_id');
 }
-     
+   
+public function availabilities()
+{
+    return $this->hasMany(FreelancerAvailability::class, 'freelancer_id');
+}
 }

@@ -1,21 +1,4 @@
-<div class="px-8 py-6 bg-white border-b">
-<div id="categories-container" class="flex items-center gap-4 overflow-x-auto">
-        <button class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-primary bg-blue-50 !rounded-button whitespace-nowrap {{ request('category') == null ? 'active' : '' }}">
-            <div class="w-4 h-4 flex items-center justify-center">
-                <i class="bx bx-category"></i>
-            </div>
-            All Categories
-        </button>
-        @foreach($categories as $category)
-            <button class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-600 hover:bg-blue-50 hover:text-primary !rounded-button whitespace-nowrap {{ request('category') == $category->id ? 'active' : '' }}">
-                <div class="w-4 h-4 flex items-center justify-center">
-                    <i class="bx bx-category"></i> <!-- General category icon -->
-                </div>
-                {{ $category->name }}
-            </button>
-        @endforeach
-    </div>
-    </div>
+
     <main class="max-w-7xl mx-auto px-8 py-8">
       <div class="flex items-center justify-between mb-8">
         <h1 class="text-2xl font-semibold font-poppins">

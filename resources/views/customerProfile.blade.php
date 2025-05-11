@@ -54,7 +54,10 @@
 
 <header class="sticky top-0 z-50 bg-white shadow-sm">
       <div class="flex items-center justify-between px-8 h-16">
-        <a href="/" class="font-['Pacifico'] text-2xl text-primary">MinglaGawa</a>
+      <a href="/" class="font-poppins text-2xl font-extrabold">
+          <span class="text-[#118f39]">Mingla</span> 
+          <span class="text-[#4CAF50]">Gawa</span> 
+        </a>
         <div class="flex items-center flex-1 max-w-xl mx-8">
           <div class="relative w-full">
           <form action="{{ route('search') }}" method="GET" style="display: flex; align-items: center; width: 100%;">
@@ -382,6 +385,124 @@
     </div>
 </div>
     </main>
+
+    <footer class="bg-gray-50 pt-16 pb-8">
+      <div class="max-w-7xl mx-auto px-8">
+        <div class="grid grid-cols-4 gap-8 pb-12 border-b">
+          <div>
+            <a
+              href="/"
+              class="font-['Pacifico'] text-2xl text-primary block mb-4"
+              >MinglaGawa</a
+            >
+            <p class="text-sm text-gray-600 mb-6">
+              Your trusted platform for finding and hiring local freelance
+              talent.
+            </p>
+            <div class="flex gap-4">
+              <a
+                href="#"
+                class="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-primary"
+              >
+                <i class="ri-twitter-x-line"></i>
+              </a>
+              <a
+                href="#"
+                class="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-primary"
+              >
+                <i class="ri-facebook-circle-line"></i>
+              </a>
+              <a
+                href="#"
+                class="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-primary"
+              >
+                <i class="ri-instagram-line"></i>
+              </a>
+              <a
+                href="#"
+                class="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-primary"
+              >
+                <i class="ri-linkedin-box-line"></i>
+              </a>
+            </div>
+          </div>
+          <div>
+            <h4 class="font-medium mb-4">Company</h4>
+            <ul class="space-y-3 text-sm">
+              <li>
+                <a href="#" class="text-gray-600 hover:text-primary"
+                  >About Us</a
+                >
+              </li>
+              <li>
+                <a href="#" class="text-gray-600 hover:text-primary">Careers</a>
+              </li>
+              <li>
+                <a href="#" class="text-gray-600 hover:text-primary"
+                  >Press & News</a
+                >
+              </li>
+              <li>
+                <a href="#" class="text-gray-600 hover:text-primary"
+                  >Partnerships</a
+                >
+              </li>
+            </ul>
+          </div>
+          <div>
+            <h4 class="font-medium mb-4">Support</h4>
+            <ul class="space-y-3 text-sm">
+              <li>
+                <a href="#" class="text-gray-600 hover:text-primary"
+                  >Help & Support</a
+                >
+              </li>
+              <li>
+                <a href="#" class="text-gray-600 hover:text-primary"
+                  >Trust & Safety</a
+                >
+              </li>
+              <li>
+                <a href="#" class="text-gray-600 hover:text-primary"
+                  >Contact Us</a
+                >
+              </li>
+              <li>
+                <a href="#" class="text-gray-600 hover:text-primary">FAQ</a>
+              </li>
+            </ul>
+          </div>
+          <div>
+            <h4 class="font-medium mb-4">Legal</h4>
+            <ul class="space-y-3 text-sm">
+              <li>
+                <a href="#" class="text-gray-600 hover:text-primary"
+                  >Privacy Policy</a
+                >
+              </li>
+              <li>
+                <a href="#" class="text-gray-600 hover:text-primary"
+                  >Terms of Service</a
+                >
+              </li>
+              <li>
+                <a href="#" class="text-gray-600 hover:text-primary"
+                  >Cookie Policy</a
+                >
+              </li>
+              <li>
+                <a href="#" class="text-gray-600 hover:text-primary"
+                  >Accessibility</a
+                >
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div class="pt-8 text-sm text-center text-gray-600">
+       
+        </div>
+      </div>
+    </footer>
 
     <script>
           const profileBtn = document.getElementById('profileBtn');

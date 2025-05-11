@@ -5,6 +5,7 @@ use App\Models\Category;
 use App\Models\Post;
 use App\Models\User;
 use App\Models\Appointment;
+use App\Models\FreelancerAvailability;
 use App\Notifications\AppointmentRequest;
 
 use Illuminate\Support\Facades\Auth; 
@@ -345,5 +346,41 @@ public function updateProfile(Request $request)
     $user->save();
 
     return redirect()->route('customer.profile')->with('success', 'Profile updated successfully!');
+}
+
+public function getAvailability(Request $request, $freelancerId)
+{ 
+    try {
+        // Fetch availability for the given freelancer
+        $availabilities = FreelancerAvailability::where('freelancer_id', $freelancerId)->get();
+
+        // Fetch booked appointments for the freelancer
+        $appointments = Appointment::where('freelancer_id', $freelancerId)
+            ->whereIn('date', $availabilities->pluck('date')) // Match dates with availability
+            ->get();
+
+        // Format the response
+        $response = $availabilities->map(function ($availability) use ($appointments) {
+            $bookedTimes = $appointments
+                ->where('date', $availability->date)
+                ->pluck('time') // Get booked times for the date
+                ->toArray();
+
+            return [
+                'date' => $availability->date,
+                'start_time' => $availability->start_time,
+                'end_time' => $availability->end_time,
+                'booked_times' => $bookedTimes, // Include booked times
+            ];
+        });
+
+        return response()->json($response);
+    } catch (\Exception $e) {
+        // Log the error for debugging
+        \Log::error('Error fetching availability: ' . $e->getMessage());
+
+        // Return a 500 error response
+        return response()->json(['error' => 'Failed to fetch availability'], 500);
+    }
 }
 }

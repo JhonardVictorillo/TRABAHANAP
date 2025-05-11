@@ -106,7 +106,89 @@
     </div>
   </section>
 
- 
+  <!-- Post Services Section -->
+  <section class="post-services-section" id="post-services">
+  <h2>Explore Services</h2>
+  <div class="post-services-carousel">
+    @foreach ($posts as $post)
+      <div class="post-card">
+        <div>
+          <div class="post-card-header">
+            <img
+              src="{{ $post->freelancer && $post->freelancer->profile_picture ? asset('storage/' . $post->freelancer->profile_picture) : asset('images/defaultprofile.png') }}"
+              alt="{{ $post->freelancer->firstname ?? 'Freelancer' }}"
+              class="post-card-profile"
+            />
+            <div class="post-card-info">
+              <div class="post-card-name">
+                {{ $post->freelancer->firstname ?? 'N/A' }} {{ $post->freelancer->lastname ?? '' }}
+              </div>
+              <div class="post-card-category">
+                {{ $post->freelancer->categories->pluck('name')->first() ?? 'No Category' }}
+              </div>
+              <div class="post-card-rating">
+              <span class="star-yellow">&#9733;</span>
+                <span class="rating-value">
+                {{ $post->average_rating }} 
+                </span>
+                <span class="rating-count">
+                ({{ $post->review_count }})
+                </span>
+              </div>
+            </div>
+          </div>
+          <div class="post-card-tags">
+            @if($post->subServices && $post->subServices->isNotEmpty())
+              @foreach ($post->subServices as $subService)
+                <span class="post-card-tag">{{ $subService->sub_service }}</span>
+              @endforeach
+            @else
+              <span class="post-card-tag" style="background:#f3f3f3; color:#888;">No sub-services</span>
+            @endif
+          </div>
+          <div class="post-card-desc">
+            {{ $post->description ?? 'No description available' }}
+          </div>
+          <div class="post-card-images">
+            @php
+              $postPictures = $post->pictures->take(3);
+            @endphp
+            @if ($postPictures->isNotEmpty())
+              @foreach ($postPictures as $picture)
+                <img
+                  src="{{ asset('storage/' . $picture->image_path) }}"
+                  alt="Recent work"
+                />
+              @endforeach
+            @endif
+          </div>
+        </div>
+        <button onclick="showLoginPopup()" class="post-card-btn">
+          See Profile
+        </button>
+      </div>
+    @endforeach
+  </div>
+</section>
+
+<!-- Login/Register Popup -->
+<div id="login-popup" class="login-popup-overlay">
+  <div class="login-popup-modal">
+    <div class="login-popup-header">
+      <span class="login-popup-icon"><i class="fas fa-lock"></i></span>
+      <h3>Please Login or Register</h3>
+    </div>
+    <p class="login-popup-text">You need to login or register to view freelancer profiles.</p>
+    <div class="login-popup-actions">
+      <a href="{{ route('login') }}" class="logbtn login-popup-btn">Login</a>
+      <a href="{{ route('register.form') }}" class="regisbtn login-popup-btn">Register</a>
+    </div>
+    <button onclick="document.getElementById('login-popup').style.display='none'" class="login-popup-close">
+      <i class="fas fa-times"></i> Close
+    </button>
+  </div>
+</div>
+
   <section class="how-it-works" id="how-it-works">
     <h2 data-aos="fade-up">How It Works</h2>
     <div class="steps">
@@ -227,6 +309,10 @@
         }
       });
     });
+
+    function showLoginPopup() {
+    document.getElementById('login-popup').style.display = 'flex';
+  }
   </script>
 </body>
 </html>

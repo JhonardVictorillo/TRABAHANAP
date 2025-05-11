@@ -13,11 +13,6 @@ body {
   z-index: 50;
 }
 
-#main-header a {
-  color: #118f39;
-  text-decoration: none;
-  font-family: 'Pacifico', cursive;
-}
 
 #main-header .search-bar {
   border-radius: 8px;
@@ -517,3 +512,18 @@ textarea::placeholder {
 .time-btn:hover {
   border-color: #d1d5db; /* Light gray border on hover */
 }
+
+/* Disabled Button Styles for the calendar dates */
+.bg-gray-200 {
+  background-color: #e5e7eb; /* Light gray */
+}
+
+.text-gray-400 {
+  color: #9ca3af; /* Medium gray */
+}
+
+.cursor-not-allowed {
+  cursor: not-allowed;
+}
+
+

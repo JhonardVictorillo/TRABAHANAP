@@ -55,7 +55,9 @@
 
 <header class="sticky top-0 z-50 bg-white shadow-sm">
       <div class="flex items-center justify-between px-8 h-16">
-        <a href="/" class="font-['Pacifico'] text-2xl text-primary">MinglaGawa</a>
+      <a href="/" class="font-poppins text-2xl font-extrabold">
+          <span class="text-[#118f39]">Mingla</span>&nbsp;<span class="text-[#4CAF50]">Gawa</span> 
+        </a>
         <div class="flex items-center flex-1 max-w-xl mx-8">
           <div class="relative w-full">
           <form action="{{ route('search') }}" method="GET" style="display: flex; align-items: center; width: 100%;">

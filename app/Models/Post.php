@@ -60,4 +60,15 @@ class Post extends Model
         {
             return $this->hasMany(PostSubService::class, 'post_id');
         }
+
+         // --- Accessors for ratings ---
+    public function getAverageRatingAttribute()
+    {
+        return round($this->appointments()->whereNotNull('rating')->avg('rating') ?? 0, 1);
+    }
+
+    public function getReviewCountAttribute()
+    {
+        return $this->appointments()->whereNotNull('rating')->count();
+    }
 }
