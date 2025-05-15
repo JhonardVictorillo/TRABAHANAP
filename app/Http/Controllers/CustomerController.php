@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\Appointment;
 use App\Models\FreelancerAvailability;
 use App\Notifications\AppointmentRequest;
+use App\Notifications\AppointmentCanceled;
 
 use Illuminate\Support\Facades\Auth; 
 use Illuminate\Http\Request;
@@ -80,53 +81,18 @@ public function showFreelancerProfile($id)
     return view('PostSeeProfile', compact('freelancer', 'user','reviews', 'notifications','totalStars', 'totalReviews' ));
 }
 
-public function bookAppointment(Request $request)
-{
-   
-    // Validate the input fields from the request
-    $validated = $request->validate([
-        'freelancer_id' => 'required|exists:users,id',  
-        'post_id' => 'required|exists:posts,id',
-        'date' => 'required|date',
-        'time' => 'required|string',
-        'notes' => 'nullable|string',
-    ], [
-        'time.required' => 'The appointment time is required.',
-    ]);
 
-    // Fetch the authenticated user's details
-    $user = auth()->user();
-
-    // Automatically use the authenticated user's details for name, address, and contact
-    $appointment = Appointment::create([
-        'freelancer_id' => $validated['freelancer_id'],
-        'customer_id' => $user->id,
-        'post_id' => $validated['post_id'],
-        'date' => $validated['date'],
-        'time' => $validated['time'],
-        'name' => $user->firstname . ' ' . $user->lastname, // Combine first and last name
-        'address' => $user->province.' '.$user->city ?? 'N/A', // Use the user's address or a default value
-        'contact' => $user->contact_number ?? 'N/A', // Use the user's contact number or a default value
-        'notes' => $validated['notes'],
-        'status' => 'pending', // Default status for new appointments
-    ]);
-
-   
-    // Notify the freelancer
-    $freelancer = User::find($validated['freelancer_id']);
-    $freelancer->notify(new AppointmentRequest($appointment));
-
-    // Flash success message and redirect back
-    session()->flash('success', 'Appointment booked successfully!');
-    return redirect()->back()->with('success', 'Appointment request sent successfully!');
-}
 private function getStatusColor($status)
 {
     return match ($status) {
-        'pending'   => '#fbbf24', // Yellow
-        'completed' => '#10b981', // Green
-        'canceled'  => '#ef4444', // Red
-        default     => '#6b7280', // Gray
+        'pending'            => '#fbbf24', // Yellow
+        'accepted'           => '#2563eb', // Blue
+        'completed'          => '#10b981', // Green
+        'Canceled'           => '#ef4444', // Red
+        'declined'           => '#6b7280', // Gray
+        'no_show_freelancer' => '#eab308', // Amber/Orange
+        'no_show_customer'   => '#a21caf', // Purple
+        default              => '#6b7280', // Default Gray
     };
 }
 
@@ -177,6 +143,7 @@ public function getAppointments(Request $request)
             'contact' => $appointment->contact ?? 'N/A',
             'notes' => $appointment->notes,
             'status' => ucfirst($appointment->status),
+            'fee_status' => $appointment->fee_status,
             'decline_reason' => $appointment->decline_reason,
         ]);
     }
@@ -186,6 +153,23 @@ public function getAppointments(Request $request)
         $appointment = Appointment::where('id', $id)
             ->where('customer_id', auth()->id())
             ->firstOrFail();
+
+        
+    // Only allow refund if appointment is pending and fee is paid
+    if ($appointment->status === 'pending' && $appointment->fee_status === 'paid' && $appointment->stripe_session_id) {
+        try {
+            \Stripe\Stripe::setApiKey(env('STRIPE_SECRET'));
+            $session = \Stripe\Checkout\Session::retrieve($appointment->stripe_session_id);
+            $paymentIntentId = $session->payment_intent;
+            $refund = \Stripe\Refund::create(['payment_intent' => $paymentIntentId]);
+
+            $appointment->fee_status = 'refunded';
+        } catch (\Exception $e) {
+            // Optionally log the error and inform the user
+            \Log::error('Stripe refund failed: ' . $e->getMessage());
+            return response()->json(['error' => 'Failed to refund commitment fee. Please contact support.'], 500);
+        }
+    }
     
         $appointment->status = 'Canceled';
         $appointment->save();

@@ -18,7 +18,7 @@
           </div>
           <div class="hero-illustration">
             
-            <img src="admin.png" alt="" />
+            <img src="" alt="" />
           </div>
         </div>
       </div>

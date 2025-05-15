@@ -44,6 +44,16 @@ class LoginController extends Controller
       // Get the authenticated user
       $user = Auth::user();  // This will get the currently authenticated user
 
+          // Check if the user is banned
+        if ($user->is_banned) {
+          Auth::logout();
+          return redirect()->back()->withErrors([
+              'email' => 'Your account has been banned. Please contact support for more information.',
+          ])->withInput();
+        }
+
+
+
       // Check if the user's email is verified
       if (is_null($user->email_verified_at)) {
           Auth::logout(); // Log the user out

@@ -10,7 +10,11 @@
         
           <div class="status-section">
             <span class="status-label">Status:</span>
-            <span class="status-value" id="status">Verified</span>
+            @if($user->is_verified)
+                <span class="status-value verified">Verified</span>
+            @else
+                <span class="status-value not-verified">Not Verified</span>
+            @endif
           </div>
           <p class="member-since">Member since: January 21, 2023</p>
 

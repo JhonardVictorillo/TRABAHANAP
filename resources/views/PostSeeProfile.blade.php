@@ -258,10 +258,14 @@
                                 @endif
                             </div>
                             <div class="flex items-center gap-1">
+                            @if($freelancer->is_verified)
                                 <div class="w-5 h-5 flex items-center justify-center text-blue-500">
                                     <i class="ri-verified-badge-fill"></i>
                                 </div>
                                 <span class="text-sm font-medium text-blue-500">Verified</span>
+                            @else
+                                <span class="text-sm font-medium text-gray-400">Not Verified</span>
+                            @endif
                             </div>
                         </div>
                         <div class="flex items-center gap-6 mb-4">
@@ -390,68 +394,88 @@
         </div>
     </div>
     
-    <div id="bookingModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
-    <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-        <div class="flex justify-between items-center mb-6">
-            <h3 class="text-xl font-semibold">Book an Appointment</h3>
-            <button id="closeModal" class="text-gray-400 hover:text-gray-600">
-                <div class="w-6 h-6 flex items-center justify-center">
-                    <i class="ri-close-line"></i>
-                </div>
-            </button>
+   <!-- Booking Modal -->
+<div id="bookingModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+  <div class="bg-white rounded-lg p-6 max-w-lg w-full mx-4 relative" style="max-height:100vh;">
+    <div class="flex justify-between items-center mb-6">
+      <h3 class="text-xl font-semibold">Book an Appointment</h3>
+      <button id="closeModal" class="text-gray-400 hover:text-gray-600">
+        <div class="w-6 h-6 flex items-center justify-center">
+          <i class="ri-close-line"></i>
         </div>
-        <form id="bookingForm" method="POST" action="{{ route('book.appointment') }}">
-            @csrf
-            <input type="hidden" name="freelancer_id" value="{{ $freelancer->id }}">
-            <input type="hidden" name="post_id" value="{{ $post->id }}">
-            <input type="hidden" id="selectedDate" name="date" required>
-            <input type="hidden" id="selectedTime" name="time" required>
-
-            <!-- Calendar Section -->
-            <div class="mb-6">
-                <div class="flex items-center justify-between mb-4">
-                    <button type="button" id="prevMonthButton" class="text-gray-400 hover:text-gray-600">
-                        <div class="w-6 h-6 flex items-center justify-center">
-                            <i class="ri-arrow-left-s-line"></i>
-                        </div>
-                    </button>
-                    <h4 id="monthTitle" class="text-base font-medium"></h4>
-                    <button type="button" id="nextMonthButton" class="text-gray-400 hover:text-gray-600">
-                        <div class="w-6 h-6 flex items-center justify-center">
-                            <i class="ri-arrow-right-s-line"></i>
-                        </div>
-                    </button>
-                </div>
-                <div class="grid grid-cols-7 gap-1 text-center mb-2">
-                    <div class="text-sm text-gray-600">Sun</div>
-                    <div class="text-sm text-gray-600">Mon</div>
-                    <div class="text-sm text-gray-600">Tue</div>
-                    <div class="text-sm text-gray-600">Wed</div>
-                    <div class="text-sm text-gray-600">Thu</div>
-                    <div class="text-sm text-gray-600">Fri</div>
-                    <div class="text-sm text-gray-600">Sat</div>
-                </div>
-                <div id="calendarGrid" class="grid grid-cols-7 gap-1 text-center"></div>
-            </div>
-
-            <!-- Time Slots Section -->
-            <div class="mb-6">
-                <h5 class="text-sm font-medium mb-4">Available Time Slots</h5>
-                <div class="grid grid-cols-3 gap-3"></div>
-            </div>
-            <!-- Notes Section -->
-            <div class="mb-6">
-                  <label for="notes" class="block text-sm font-medium text-gray-700">Notes (Optional)</label>
-                  <textarea id="notes" name="notes" rows="3" class="w-full mt-1 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"  placeholder="Add any additional details or instructions for the freelancer..."
-                  ></textarea>
-              </div>
-
-            <!-- Submit Button -->
-            <button type="submit" class="w-full py-3 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded">
-                Book Appointment
-            </button>
-        </form>
+      </button>
     </div>
+    <form id="bookingForm" method="POST" action="{{ route('pay.commitment') }}" class="flex flex-col h-full">
+      @csrf
+      <input type="hidden" name="freelancer_id" value="{{ $freelancer->id }}">
+      <input type="hidden" name="post_id" value="{{ $post->id }}">
+      <input type="hidden" id="selectedDate" name="date" required>
+      <input type="hidden" id="selectedTime" name="time" required>
+      <input type="hidden" name="notes" id="notesInput">
+      <input type="hidden" name="commitment_fee" value="{{ $commitment_fee ?? 100 }}">
+      <!-- Scrollable Content -->
+      <div class="flex-1 overflow-y-auto pr-2" style="max-height:60vh;">
+        <!-- Calendar Section -->
+        <div class="mb-4">
+          <div class="flex items-center justify-between mb-4">
+            <button type="button" id="prevMonthButton" class="text-gray-400 hover:text-gray-600">
+              <div class="w-6 h-6 flex items-center justify-center">
+                <i class="ri-arrow-left-s-line"></i>
+              </div>
+            </button>
+            <h4 id="monthTitle" class="text-base font-medium"></h4>
+            <button type="button" id="nextMonthButton" class="text-gray-400 hover:text-gray-600">
+              <div class="w-6 h-6 flex items-center justify-center">
+                <i class="ri-arrow-right-s-line"></i>
+              </div>
+            </button>
+          </div>
+          <div class="grid grid-cols-7 gap-1 text-center mb-2">
+            <div class="text-sm text-gray-600">Sun</div>
+            <div class="text-sm text-gray-600">Mon</div>
+            <div class="text-sm text-gray-600">Tue</div>
+            <div class="text-sm text-gray-600">Wed</div>
+            <div class="text-sm text-gray-600">Thu</div>
+            <div class="text-sm text-gray-600">Fri</div>
+            <div class="text-sm text-gray-600">Sat</div>
+          </div>
+          <div id="calendarGrid" class="grid grid-cols-7 gap-1 text-center"></div>
+        </div>
+
+        <!-- Time Slots Section -->
+        <div class="mb-6">
+          <h5 class="text-sm font-medium mb-4">Available Time Slots</h5>
+          <div class="grid grid-cols-3 gap-3"></div>
+        </div>
+
+        <!-- Notes Section -->
+        <div class="mb-6">
+          <label for="notes" class="block text-sm font-medium text-gray-700">Notes (Optional)</label>
+          <textarea id="notes" name="notes" rows="3" class="w-full mt-1 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" placeholder="Add any additional details or instructions for the freelancer..."></textarea>
+        </div>
+
+        <!-- Commitment Fee Section -->
+        <div class="mb-4 p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded">
+          <div class="flex items-center gap-2 mb-1">
+            <i class="ri-information-line text-yellow-400 text-lg"></i>
+            <span class="font-semibold text-yellow-700">Commitment Fee Required</span>
+          </div>
+          <p class="text-sm text-yellow-700">
+            To book this appointment, a non-refundable commitment fee of 
+            <span class="font-bold text-yellow-900">₱{{ number_format($commitment_fee ?? 100, 2) }}</span>
+            is required. This fee will not be refunded if you cancel after the freelancer accepts your booking.
+          </p>
+        </div>
+      </div>
+
+      <!-- Sticky Submit Button -->
+      <div class="pt-4 bg-white sticky bottom-0 left-0 right-0">
+        <button type="submit" class="w-full py-3 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded">
+        Proceed to Payment
+        </button>
+      </div>
+    </form>
+  </div>
 </div>
 </main>
  
@@ -879,7 +903,18 @@ function convertTo12HourFormat(hour) {
         };
 
 
-
+        document.getElementById('bookingForm').addEventListener('submit', function(e) {
+    document.getElementById('notesInput').value = document.getElementById('notes').value;
+   // Validation for date and time
+   const date = document.getElementById('selectedDate').value;
+    const time = document.getElementById('selectedTime').value;
+    if (!date || !time) {
+        e.preventDefault();
+        alert('Please select both a date and a time before proceeding to payment.');
+        return false;
+    }
+  
+  });
       
 
       </script>

@@ -21,6 +21,12 @@ class Appointment extends Model
         'post_id',
         'rating',
         'decline_reason',
+        'commitment_fee',
+        'fee_status',
+        'cancelled_by',
+        'cancelled_at',
+        'status',
+        'stripe_session_id',
     ];
 
     public function customer()
@@ -47,6 +53,18 @@ class Appointment extends Model
      }
 
     
+    // Helper methods for commitment fee
+    public function forfeitCommitmentFee()
+    {
+        $this->commitment_fee_status = 'forfeited';
+        $this->save();
+    }
+
+    public function refundCommitmentFee()
+    {
+        $this->commitment_fee_status = 'refunded';
+        $this->save();
+    }
 }
 
 

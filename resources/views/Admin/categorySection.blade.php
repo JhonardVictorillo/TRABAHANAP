@@ -1,86 +1,11 @@
-<!-- <div id="category" class="section" style="display: none;"> 
-        <h2>All Category</h2>
-        <button id="createCategoryBtn" class="create-btn">+ Create Category</button>
-        <hr>
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>CATEGORY NAME</th>
-                    <th>CREATED</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-           
-            @if($categories->count() > 0)
-        @foreach($categories as $category)
-            <tr>
-                <td>{{ $category->id }}</td>
-                <td>{{ $category->name }}</td>
-                <td>{{ $category->created_at->format('Y-m-d H:i') }}</td> 
-                <td>
-                <button class="verify-btn edit-category-btn" data-id="{{ $category->id }}">Edit</button>
-                    <form action="{{ route('categories.destroy', $category->id) }}" method="POST" style="display:inline;">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="delete-btn">Delete</button>
-                </form>
-                </td>
-            </tr>
-        @endforeach
-    @else
-        <tr>
-            <td colspan="4">No categories found.</td>
-        </tr>
-    @endif
-            
-            </tbody>
-        </table>
-    </div>
 
-    <div id="editCategoryModal" class="modal">
-    <div class="modal-content">
-        <span class="close-btn">&times;</span>
-        <h3>Edit Category</h3>
-        <form id="editCategoryForm" method="POST">
-            @csrf
-            <input type="hidden" name="id" id="editCategoryId">
-            <div class="form-group">
-                <label for="name">Category Name:</label>
-                <input type="text" name="name" id="editCategoryName" required>
-            </div>
-            <div class="modal-actions">
-                <button type="button" class="cancel-btn">Cancel</button>
-                <button type="submit" class="save-btn">Update</button>
-            </div>
-        </form>
-    </div>
-</div> -->
-
- <!-- Modal -->
- <!-- <div id="categoryModal" class="modal" style="display: none;">
-        <div class="modal-content">
-            <span class="close-modal">&times;</span>
-            <h3>Create New Category</h3>
-            <form action="{{ route('categories.store') }}" method="POST">
-                @csrf
-                <div class="form-group">
-                    <label for="categoryName">Category Name:</label>
-                    <input type="text" id="categoryName"  name="name" value="{{ old('name') }}"  class="{{ $errors->has('name') ? 'input-error' : '' }}" required>
-                    @error('name')
-                     <div class="error-message" style="color: red; margin-top: 5px;">{{ $message }}</div>
-                  @enderror
-                </div>
-                <button type="submit" class="verify-btn">Create</button>
-            </form>
-        </div>
-    </div>
-</div> -->
 
 <!-- Categories Section -->
 <div class="details-section" id="categoriesSection" style="display: none;">
-      <h2>Categories</h2>
+<h2>
+    <span class="material-symbols-outlined align-middle">category</span>
+    Categories
+  </h2>
       <button id="addCategoryBtn">Add Category</button>
       <table>
 
@@ -299,6 +224,12 @@ function removeCategoryRow(categoryId) {
     }
 }
 
+});
+
+document.querySelectorAll('.close').forEach(btn => {
+    btn.addEventListener('click', function() {
+        this.closest('.modal').style.display = 'none';
+    });
 });
 
 </script>

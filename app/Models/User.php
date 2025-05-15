@@ -37,6 +37,10 @@ class User extends Authenticatable
          'profile_picture',
          'email_verification_token',
          'email_verified_at',
+         'no_show_count',
+        'late_cancel_count',
+        'violation_count',
+        'last_violation_at',
     ];
 
     /**
@@ -95,4 +99,22 @@ public function availabilities()
 {
     return $this->hasMany(FreelancerAvailability::class, 'freelancer_id');
 }
+
+
+    // Helper methods for violations
+    public function incrementNoShow()
+    {
+        $this->increment('no_show_count');
+        $this->increment('violation_count');
+        $this->last_violation_at = now();
+        $this->save();
+    }
+
+    public function incrementLateCancel()
+    {
+        $this->increment('late_cancel_count');
+        $this->increment('violation_count');
+        $this->last_violation_at = now();
+        $this->save();
+    }
 }

@@ -98,16 +98,19 @@
       <li>
         <a href="#" id="categoriesLink"><span class="material-symbols-outlined">category</span>Categories</a>
       </li>
+   
       <li>
-        <a href="#"><span class="material-symbols-outlined">flag</span>All Reports</a>
-      </li>
-    
-      <li>
+      <a href="#bookingsSection" id="bookingsLink"><span class="material-symbols-outlined">event_note</span>Bookings</a>
+    </li>
+    <li>
+      <a href="#violationsSection" id="violationsLink"><span class="material-symbols-outlined">report_problem</span>Violations</a>
+    </li>
+    <li>
+      <a href="#userStatsSection" id="userStatsLink"><span class="material-symbols-outlined">bar_chart</span>User Stats</a>
+    </li>
+    <li>
         <a href="#"><span class="material-symbols-outlined">account_circle</span>Profile</a>
       </li>
-      <!-- <li>
-        <a href="#"><span class="material-symbols-outlined">settings</span>Settings</a>
-      </li> -->
       <li>
       <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
                 @csrf

@@ -1,9 +1,25 @@
+@php
+function getStatusColor($status) {
+    return match (strtolower($status)) {
+        'pending'            => '#fbbf24', // Yellow
+        'accepted'           => '#2563eb', // Blue
+        'completed'          => '#10b981', // Green
+        'canceled'           => '#ef4444', // Red
+        'declined'           => '#6b7280', // Gray
+        'no_show_freelancer' => '#eab308', // Amber/Orange
+        'no_show_customer'   => '#a21caf', // Purple
+        default              => '#6b7280', // Default Gray
+    };
+}
+@endphp
 
 @include("admin.header")
 @include("admin.homeSection")
 @include('admin.sidebar&Header')
-@include('admin.dashboard-admin')  
-
+@include('admin.dashboard-admin')
+@include('admin.booking')  
+@include('admin.violations')
+@include('admin.userstats')
 @include('admin.categorySection') 
 
         
@@ -188,8 +204,14 @@ window.addEventListener('click', (e) => {
   }
 });
 
-
-
+//search functionality
+document.querySelectorAll('input[name="search"]').forEach(function(input) {
+    input.addEventListener('input', function() {
+        if (this.value === '') {
+            this.form.submit();
+        }
+    });
+});
    
        
     </script>

@@ -6,14 +6,15 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Category; // Import the Category model
 use App\Models\Post; // Import the Post model
+use App\Models\Appointment;
 use App\Notifications\PostApprovedNotification;
 
 class AdminController extends Controller
 {
-   public function dashboard(){
+   public function dashboard(Request $request){
         $totalFreelancers = User::where('role', 'freelancer')->count();
         $totalCustomers = User::where('role', 'customer')->count();
-        
+     
         // Fetch pending accounts (freelancers with is_verified = 0)
         $totalPendingAccounts = User::where('role', 'freelancer')->where('is_verified', 0)->count();
 
@@ -24,7 +25,44 @@ class AdminController extends Controller
         $users = User::all();
       $categories = Category::all();
       $posts = Post::with('freelancer')->where('status', 'pending')->get();
-  
+    
+      // Get search input
+    $search = $request->input('search');
+    $section = $request->input('section', 'bookings');
+    // Filter appointments by customer name if search is present
+    $appointments = Appointment::with(['customer', 'freelancer'])
+        ->when($section === 'bookings' && $search, function ($query) use ($search) {
+            $query->whereHas('customer', function ($q) use ($search) {
+                $q->where('firstname', 'like', "%$search%")
+                  ->orWhere('lastname', 'like', "%$search%");
+            });
+        })
+        ->simplePaginate(10);
+
+    // Violations Search (example: search by customer or freelancer name)
+    $violations = Appointment::with(['customer', 'freelancer'])
+        ->where(function ($query) use ($section, $search) {
+            if ($section === 'violations' && $search) {
+                $query->whereHas('customer', function ($q) use ($search) {
+                    $q->where('firstname', 'like', "%$search%")
+                      ->orWhere('lastname', 'like', "%$search%");
+                })
+                ->orWhereHas('freelancer', function ($q) use ($search) {
+                    $q->where('firstname', 'like', "%$search%")
+                      ->orWhere('lastname', 'like', "%$search%");
+                });
+            }
+        })
+        ->where('status', 'like', 'no_show%')
+        ->simplePaginate(10);
+
+    // User Stats Search (example: search by user name)
+    $userStats = User::when($section === 'userstats' && $search, function ($query) use ($search) {
+            $query->where('firstname', 'like', "%$search%")
+                  ->orWhere('lastname', 'like', "%$search%");
+        })
+        ->simplePaginate(10);
+
   
         
     return View('dashboard.admin-dashboard', [
@@ -36,7 +74,12 @@ class AdminController extends Controller
            'categories' => $categories,
            'posts' => $posts,
            'totalPendingAccounts' => $totalPendingAccounts, 
-           'totalPendingPosts' => $totalPendingPosts,   
+           'totalPendingPosts' => $totalPendingPosts, 
+           'appointments' => $appointments,  
+           'search' => $search,
+           'violations' => $violations,        // <-- Add this line
+           'userStats' => $userStats,  
+           'section' => $section,
           
         ]);
     
@@ -122,4 +165,23 @@ class AdminController extends Controller
 
         return redirect()->route('admin.dashboard')->with('error', 'This freelancer account is invalid.');
     }
+
+
+    public function banUser($id)
+{
+    $user = User::findOrFail($id);
+    $user->is_banned = true;
+    $user->save();
+    return back()->with('success', 'User has been banned.');
+}
+
+public function unbanUser($id)
+{
+    $user = User::findOrFail($id);
+    $user->is_banned = false;
+    $user->save();
+    return back()->with('success', 'User has been unbanned.');
+}
+
+// 
 }

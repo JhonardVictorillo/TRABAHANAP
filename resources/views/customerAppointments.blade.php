@@ -252,14 +252,19 @@
                     <p><strong>Reason for Decline:</strong> <span id="declineReason"></span></p>
                 </div>
                 <p><strong>Notes:</strong> <span id="appointmentNotes"></span></p>
+                <p><strong>Commitment Fee Status:</strong> <span id="feeStatus"></span></p>
             </div>
 
              
             <div class="modal-footer">
                 <button id="rescheduleButton" class="btn btn-primary">Re-schedule</button>
-                <button id="cancelButton" class="btn btn-danger">Cancel Appointment</button>
+                <button id="cancelButton" class="btn btn-danger">Cancel</button>
                 <button id="rateButton" class="btn btn-success" style="display: none;">Rate and Review</button>
                 <button type="button" class="btn btn-secondary close-modal">Close</button>
+                <form id="noShowForm" method="POST" action="{{ route('appointments.no_show', 0) }}" style="display:none;">
+                    @csrf
+                    <button type="submit" class="btn btn-warning">Mark as No-Show</button>
+                </form>
             </div>
         </div>
     </div>
@@ -483,7 +488,7 @@ function handleButtonVisibility(status) {
         cancelButton.style.display = 'none'; // Hide cancel button
     } else if (status.toLowerCase() === 'accepted') {
         rescheduleButton.style.display = 'none'; // Hide reschedule button
-        cancelButton.style.display = 'none'; // Hide cancel button
+        cancelButton.style.display = 'inline-block'; // Hide cancel button
     } else {
         // Default to showing both reschedule and cancel buttons for other statuses
         rescheduleButton.style.display = 'inline-block';
@@ -500,6 +505,7 @@ function openAppointmentModal(data) {
     document.getElementById('appointmentAddress').textContent = data.address || 'N/A';
     document.getElementById('appointmentStatus').textContent = data.status || 'N/A';
     document.getElementById('appointmentNotes').textContent = data.notes || 'No additional notes';
+    document.getElementById('feeStatus').textContent = data.fee_status || 'N/A';
     
     document.getElementById('appointmentId').value = data.id;
     
@@ -517,10 +523,34 @@ function openAppointmentModal(data) {
     
     // Show or hide buttons based on appointment status
    
-
-   
-
     handleButtonVisibility(data.status);
+
+     // Real-time No-Show Button Logic
+     const noShowForm = document.getElementById('noShowForm');
+    if (noShowForm) {
+        // Set the correct action URL for the appointment
+        noShowForm.action = `/appointments/${data.id}/no-show`;
+
+        // Function to check if button should be shown
+        function updateNoShowButton() {
+            const appointmentStatus = data.status ? data.status.toLowerCase() : '';
+            const appointmentTime24 = to24HourTime(data.time); // Convert to 24-hour
+            const appointmentDateTime = new Date(data.date + 'T' + appointmentTime24);
+            const now = new Date();
+
+            if (appointmentStatus === 'accepted' && now > appointmentDateTime) {
+                noShowForm.style.display = 'inline';
+            } else {
+                noShowForm.style.display = 'none';
+            }
+        }
+
+        updateNoShowButton();
+        // Check every minute for real-time update
+        window.noShowInterval && clearInterval(window.noShowInterval);
+        window.noShowInterval = setInterval(updateNoShowButton, 60000);
+    }
+
     
     
     // Add event listener for the reschedule button
@@ -566,6 +596,19 @@ function openAppointmentModal(data) {
         });
 };
     };
+
+    function to24HourTime(time12h) {
+    // time12h: "09:30 AM" or "04:00 PM"
+    const [time, modifier] = time12h.split(' ');
+    let [hours, minutes] = time.split(':');
+    if (hours === '12') {
+        hours = '00';
+    }
+    if (modifier === 'PM') {
+        hours = parseInt(hours, 10) + 12;
+    }
+    return `${hours.toString().padStart(2, '0')}:${minutes}:00`;
+}
     // Add event listener for the cancel button
     document.getElementById('cancelButton').onclick = function () {
         if (confirm('Are you sure you want to cancel this appointment?')) {
@@ -577,11 +620,12 @@ function openAppointmentModal(data) {
             })
                 .then(response => response.json())
                 .then(result => {
-                    alert(result.message);
+                    alert(result.message || result.error);
                     location.reload(); // Refresh the calendar
                 })
                 .catch(error => {
                     console.error('Error canceling appointment:', error);
+                    alert('Failed to cancel appointment. Please try again.');
                 });
         }
     };

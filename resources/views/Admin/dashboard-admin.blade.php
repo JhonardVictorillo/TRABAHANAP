@@ -54,6 +54,7 @@
             <th>Email</th>
             <th>Service Category</th>
             <th>Status</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -78,6 +79,21 @@
                 @else
                     <span style="color:red;">Not Verified</span>
                 @endif</td>
+
+                 <!-- Ban/Unban Button Column -->
+                <td>
+                    @if(!$freelancer->is_banned)
+                        <form action="{{ route('admin.user.ban', $freelancer->id) }}" method="POST" style="display:inline;">
+                            @csrf
+                            <button type="submit" class="decline-btn" onclick="return confirm('Ban this user?')">Ban</button>
+                        </form>
+                    @else
+                        <form action="{{ route('admin.user.unban', $freelancer->id) }}" method="POST" style="display:inline;">
+                            @csrf
+                            <button type="submit" class="accept-btn" onclick="return confirm('Unban this user?')">Unban</button>
+                        </form>
+                    @endif
+                </td>
           </tr>
           @empty
                 <tr>
@@ -101,6 +117,7 @@
             <th>Name</th>
             <th>Email</th>
             <th>Role</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -114,6 +131,20 @@
             <td>{{ $client->firstname }} {{ $client->lastname }}</td>
             <td>{{ $client->email }}</td>
             <td>{{ $client->role }} </td>
+             <!-- Ban/Unban Button Column -->
+             <td>
+                    @if(!$freelancer->is_banned)
+                        <form action="{{ route('admin.user.ban', $freelancer->id) }}" method="POST" style="display:inline;">
+                            @csrf
+                            <button type="submit" class="decline-btn" onclick="return confirm('Ban this user?')">Ban</button>
+                        </form>
+                    @else
+                        <form action="{{ route('admin.user.unban', $freelancer->id) }}" method="POST" style="display:inline;">
+                            @csrf
+                            <button type="submit" class="accept-btn" onclick="return confirm('Unban this user?')">Unban</button>
+                        </form>
+                    @endif
+                </td>
           </tr>
           @endforeach
         </tbody>

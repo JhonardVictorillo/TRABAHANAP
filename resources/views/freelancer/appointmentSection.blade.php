@@ -57,6 +57,12 @@
         <button id="cancelDeclineBtn" class="action-button cancel-button enhanced-btn">
           <i class="fas fa-undo"></i> Cancel
         </button>
+        <form id="noShowForm" method="POST" action="{{ route('appointments.no_show', 0) }}" style="display:none; margin-left: 10px;">
+          @csrf
+          <button type="submit" class="action-button warning-button enhanced-btn">
+              <i class="fas fa-user-slash"></i> Mark Customer as No-Show
+          </button>
+      </form>
       </div>
     </div>
   </div>
@@ -244,4 +250,35 @@
       alert('Error marking appointment as completed.');
     });
   });
+
+
+  const noShowForm = document.getElementById('noShowForm');
+if (noShowForm) {
+    noShowForm.action = `/appointments/${eventId}/no-show`;
+
+    function to24HourTime(time12h) {
+        const [time, modifier] = time12h.split(' ');
+        let [hours, minutes] = time.split(':');
+        if (hours === '12') hours = '00';
+        if (modifier === 'PM') hours = parseInt(hours, 10) + 12;
+        return `${hours.toString().padStart(2, '0')}:${minutes}:00`;
+    }
+
+    function updateNoShowButton() {
+        const appointmentStatus = data.status ? data.status.toLowerCase() : '';
+        const appointmentTime24 = to24HourTime(data.time);
+        const appointmentDateTime = new Date(data.date + 'T' + appointmentTime24);
+        const now = new Date();
+
+        if (appointmentStatus === 'accepted' && now > appointmentDateTime) {
+            noShowForm.style.display = 'inline-block';
+        } else {
+            noShowForm.style.display = 'none';
+        }
+    }
+
+    updateNoShowButton();
+    window.noShowInterval && clearInterval(window.noShowInterval);
+    window.noShowInterval = setInterval(updateNoShowButton, 60000);
+}
 </script>

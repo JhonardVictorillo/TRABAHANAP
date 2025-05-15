@@ -12,6 +12,8 @@ use App\Http\Controllers\adminController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\PostController;
+use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 
@@ -170,3 +172,16 @@ Route::post('/validate-email', [ForgotPasswordController::class, 'validateEmail'
 Route::put('/customer/profile/update', [CustomerController::class, 'updateProfile'])->name('customer.profile.update');
 //customer view freelancer schedule
 Route::get('/freelancer/{freelancerId}/availability', [CustomerController::class, 'getAvailability'])->name('freelancer.availability');
+
+//payment routes
+Route::post('/pay/commitment-fee', [PaymentController::class, 'createCheckoutSession'])->name('pay.commitment');
+Route::get('/payment/success', [PaymentController::class, 'success'])->name('payment.success');
+Route::get('/payment/cancel', [PaymentController::class, 'cancel'])->name('payment.cancel');
+
+//banned & unbanned freelancer
+Route::post('/admin/user/{id}/ban', [AdminController::class, 'banUser'])->name('admin.user.ban');
+Route::post('/admin/user/{id}/unban', [AdminController::class, 'unbanUser'])->name('admin.user.unban');
+
+// no-show appointment
+Route::post('/appointments/{id}/no-show', [AppointmentController::class, 'markNoShow'])->name('appointments.no_show');
+
