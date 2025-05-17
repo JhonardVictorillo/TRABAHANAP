@@ -5,6 +5,7 @@
 @include('freelancer.dashboardSection')
  @include('freelancer.appointmentSection')
  @include('freelancer.rescheduleSection')
+ @include('freelancer.revenueSection')
   @include('freelancer.postSection')
   
  
@@ -31,6 +32,8 @@
         }, 3000); // 3 seconds
     }
     })
+
+  
 
     document.addEventListener('DOMContentLoaded', function () {
     // FullCalendar Initialization
@@ -74,7 +77,7 @@
 
    
     const links = document.querySelectorAll('.sidebar-links li a');
-    const sections = document.querySelectorAll('main > div, .details-section, #appointmentCalendar, #rescheduleSection');
+    const sections = document.querySelectorAll('main > div, .details-section, #appointmentCalendar, #rescheduleSection, #revenueSection');
     const logoutBtn = document.getElementById('logout-button');
 
     // Section Navigation Handler

@@ -1464,5 +1464,287 @@ label {
   background-color: #0056b3;
 }
 
+ /* revenueSection  *****************/
+ /* Wallet Section Styles */
+#revenueSection {
+  font-family: 'Poppins', sans-serif;
+  padding: 20px;
+  color: #333;
+  background-color: #f8f9fa;
+  border-radius: 10px;
+}
 
+#revenueSection .section-header {
+  margin-bottom: 25px;
+}
 
+#revenueSection .section-header h1 {
+  font-size: 24px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 5px;
+}
+
+#revenueSection .section-header p {
+  color: #6c757d;
+  font-size: 14px;
+}
+
+/* Dashboard Cards */
+#revenueSection .dashboard-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+#revenueSection .card {
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+#revenueSection .card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+}
+
+#revenueSection .card .icon {
+  height: 50px;
+  width: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+}
+
+#revenueSection .card:nth-child(1) .icon {
+  background-color: #FFE2E5;
+}
+
+#revenueSection .card:nth-child(1) .icon span {
+  color: #F43F5E;
+}
+
+#revenueSection .card:nth-child(2) .icon {
+  background-color: #E0E7FF;
+}
+
+#revenueSection .card:nth-child(2) .icon span {
+  color: #4F46E5;
+}
+
+#revenueSection .card:nth-child(3) .icon {
+  background-color: #ECFDF5;
+}
+
+#revenueSection .card:nth-child(3) .icon span {
+  color: #10B981;
+}
+
+#revenueSection .card p {
+  margin: 0;
+  color: #6c757d;
+  font-size: 14px;
+}
+
+#revenueSection .card h3 {
+  margin: 5px 0 0 0;
+  font-size: 22px;
+  font-weight: 600;
+  color: #333;
+}
+
+/* Content Section */
+#revenueSection .section-content {
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  padding: 20px;
+  margin-bottom: 30px;
+}
+
+#revenueSection .table-header {
+  margin-bottom: 20px;
+}
+
+#revenueSection .table-header h2 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+/* Table Styles */
+#revenueSection table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+#revenueSection table th {
+  text-align: left;
+  padding: 12px 15px;
+  border-bottom: 1px solid #e9ecef;
+  color: #6c757d;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+#revenueSection table td {
+  padding: 15px;
+  border-bottom: 1px solid #e9ecef;
+  color: #333;
+  font-size: 14px;
+}
+
+#revenueSection table tr:last-child td {
+  border-bottom: none;
+}
+
+#revenueSection table tr:hover {
+  background-color: #f8f9fa;
+}
+
+/* Status Badges */
+#revenueSection .status {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  color: white;
+}
+
+/* Commission Label Styling */
+#revenueSection .commission-label {
+  background-color: #4F46E5;
+  color: white;
+  border-radius: 15px;
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+#revenueSection .commission-label i {
+  font-size: 14px;
+}
+
+/* Pagination Styling */
+#revenueSection .pagination-container {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+}
+
+#revenueSection .pagination {
+  display: flex;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+#revenueSection .pagination li {
+  margin: 0 3px;
+}
+
+#revenueSection .pagination .page-link {
+  display: block;
+  padding: 8px 12px;
+  color: #4F46E5;
+  border-radius: 5px;
+  text-decoration: none;
+  transition: background-color 0.2s;
+}
+
+#revenueSection .pagination .page-link:hover {
+  background-color: #EEF2FF;
+}
+
+#revenueSection .pagination .active .page-link {
+  background-color: #4F46E5;
+  color: white;
+}
+
+/* Fee Distribution Section */
+#revenueSection .fee-distribution {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 30px;
+  margin-top: 10px;
+}
+
+#revenueSection .fee-stat {
+  flex: 1;
+  min-width: 300px;
+}
+
+#revenueSection .fee-stat h3 {
+  font-size: 16px;
+  margin-bottom: 15px;
+  color: #333;
+}
+
+#revenueSection .pie-chart-container {
+  height: 250px;
+  position: relative;
+}
+
+#revenueSection .fee-details {
+  flex: 1;
+  min-width: 300px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+#revenueSection .fee-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 15px 0;
+  border-bottom: 1px solid #e9ecef;
+}
+
+#revenueSection .fee-item:last-child {
+  border-bottom: none;
+  font-weight: 600;
+}
+
+#revenueSection .fee-label {
+  color: #6c757d;
+}
+
+#revenueSection .fee-value {
+  font-weight: 500;
+  color: #333;
+}
+
+/* Empty State */
+#revenueSection td.no-data {
+  text-align: center;
+  padding: 40px 0;
+  color: #6c757d;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  #revenueSection .dashboard-cards {
+    grid-template-columns: 1fr;
+  }
+  
+  #revenueSection .fee-distribution {
+    flex-direction: column;
+  }
+  
+  #revenueSection table {
+    display: block;
+    overflow-x: auto;
+  }
+}

@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Appointment;
+use App\Models\FreelancerAvailability;
 
 class AppointmentController extends Controller
 {
@@ -51,4 +53,7 @@ class AppointmentController extends Controller
     
         return back()->with('success', 'No-show status updated.');
     }
+
+
+    
 }

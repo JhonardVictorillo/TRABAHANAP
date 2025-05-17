@@ -8,7 +8,7 @@ use App\Models\Appointment;
 use App\Models\FreelancerAvailability;
 use App\Notifications\AppointmentRequest;
 use App\Notifications\AppointmentCanceled;
-
+use App\Notifications\AppointmentRescheduled;
 use Illuminate\Support\Facades\Auth; 
 use Illuminate\Http\Request;
 
@@ -136,6 +136,7 @@ public function getAppointments(Request $request)
 
         return response()->json([
             'id' => $appointment->id,
+            'freelancer_id' => $appointment->freelancer_id,
             'freelancer_name' => $appointment->freelancer->firstname . ' ' . $appointment->freelancer->lastname,
             'date' => $appointment->date,
             'time' => $appointment->time,
@@ -183,27 +184,33 @@ public function getAppointments(Request $request)
 
     public function rescheduleAppointment(Request $request, $id)
 {
-    try {
+     try {
         $validated = $request->validate([
             'date' => 'required|date',
             'time' => 'required|string',
         ]);
 
         $appointment = Appointment::where('id', $id)
-            ->where('customer_id', auth()->id()) // Ensure the appointment belongs to the authenticated customer
+            ->where('customer_id', auth()->id())
             ->firstOrFail();
+            
+        // Store old date and time for notification
+        $oldDate = $appointment->date;
+        $oldTime = $appointment->time;
 
         $appointment->date = $validated['date'];
         $appointment->time = $validated['time'];
+        $appointment->status = 'rescheduled'; // Update status to show it's been rescheduled
         $appointment->save();
 
         // Notify the freelancer about the reschedule
-        // $freelancer = $appointment->freelancer;
-        // $freelancer->notify(new AppointmentRescheduled($appointment)); // Create a notification for this
+        $freelancer = $appointment->freelancer;
+        if ($freelancer) {
+            $freelancer->notify(new AppointmentRescheduled($appointment, $oldDate, $oldTime));
+        }
 
         return response()->json(['message' => 'Appointment rescheduled successfully!']);
     } catch (\Exception $e) {
-        // Log the error for debugging
         \Log::error('Error rescheduling appointment: ' . $e->getMessage());
         return response()->json(['error' => 'Failed to reschedule appointment.'], 500);
     }
@@ -335,35 +342,69 @@ public function updateProfile(Request $request)
 public function getAvailability(Request $request, $freelancerId)
 { 
     try {
-        // Fetch availability for the given freelancer
-        $availabilities = FreelancerAvailability::where('freelancer_id', $freelancerId)->get();
-
-        // Fetch booked appointments for the freelancer
-        $appointments = Appointment::where('freelancer_id', $freelancerId)
-            ->whereIn('date', $availabilities->pluck('date')) // Match dates with availability
+        // Get current appointment ID for rescheduling
+        $currentAppointmentId = $request->input('current_appointment_id');
+        
+        // Log parameters for debugging
+        \Log::info("Fetching availability", [
+            'freelancer_id' => $freelancerId,
+            'current_appointment_id' => $currentAppointmentId
+        ]);
+        
+        // Fetch ALL availability for the given freelancer (no date filtering)
+        $availabilities = FreelancerAvailability::where('freelancer_id', $freelancerId)
+            ->orderBy('date')
             ->get();
+            
+        // Log what was found
+        \Log::info("Availability records found", [
+            'count' => $availabilities->count(),
+            'dates' => $availabilities->pluck('date')->toArray()
+        ]);
+        
+        // If no availabilities found, return empty array
+        if ($availabilities->isEmpty()) {
+            return response()->json([]);
+        }
+
+        // Build query for booked appointments
+        $appointmentsQuery = Appointment::where('freelancer_id', $freelancerId)
+            ->whereIn('date', $availabilities->pluck('date'))
+            ->whereNotIn('status', ['canceled', 'declined']);
+        
+        // If rescheduling, exclude the current appointment
+        if ($currentAppointmentId) {
+            $appointmentsQuery->where('id', '!=', $currentAppointmentId);
+        }
+        
+        $appointments = $appointmentsQuery->get();
+        
+        // Log appointments found
+        \Log::info("Booked appointments found", [
+            'count' => $appointments->count()
+        ]);
 
         // Format the response
         $response = $availabilities->map(function ($availability) use ($appointments) {
             $bookedTimes = $appointments
                 ->where('date', $availability->date)
-                ->pluck('time') // Get booked times for the date
+                ->pluck('time')
                 ->toArray();
 
             return [
                 'date' => $availability->date,
                 'start_time' => $availability->start_time,
                 'end_time' => $availability->end_time,
-                'booked_times' => $bookedTimes, // Include booked times
+                'booked_times' => $bookedTimes,
             ];
         });
-
+        
         return response()->json($response);
     } catch (\Exception $e) {
-        // Log the error for debugging
-        \Log::error('Error fetching availability: ' . $e->getMessage());
-
-        // Return a 500 error response
+        \Log::error('Error fetching availability: ' . $e->getMessage(), [
+            'file' => $e->getFile(),
+            'line' => $e->getLine()
+        ]);
         return response()->json(['error' => 'Failed to fetch availability'], 500);
     }
 }

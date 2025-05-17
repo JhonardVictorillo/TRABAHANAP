@@ -48,6 +48,11 @@
             <span class="material-symbols-outlined">schedule</span>Schedule
         </a>
     </li>
+     <li>
+    <a href="#revenueSection" id="revenueLink" class="sidebar-link">
+        <span class="material-symbols-outlined">account_balance_wallet</span>My Wallet
+    </a>
+  </li>
        <li>
       <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
                 @csrf

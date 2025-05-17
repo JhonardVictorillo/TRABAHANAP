@@ -63,8 +63,7 @@
     <header class="sticky top-0 z-50 bg-white shadow-sm">
       <div class="flex items-center justify-between px-8 h-16">
       <a href="/" class="font-poppins text-2xl font-semibold">
-          <span class="text-[#118f39]">Mingla</span> 
-          <span class="text-[#4CAF50]">Gawa</span> 
+          <span class="text-[#118f39]">Mingla</span><span class="text-[#4CAF50]">Gawa</span> 
         </a>
         <div class="flex items-center flex-1 max-w-xl mx-8">
           <div class="relative w-full">
@@ -804,19 +803,29 @@ const profileBtn = document.getElementById('profileBtn');
 }
 
 function updateTimeSlots(selectedDate, availability) {
-    const timeButtonsContainer = document.querySelector("#bookingModal .grid-cols-3"); // Target the modal's time slot container
+    const timeButtonsContainer = document.querySelector("#bookingModal .grid-cols-3");
     const availableTimes = availability.find(avail => avail.date === selectedDate);
     timeButtonsContainer.innerHTML = ""; // Clear previous time slots
 
     if (availableTimes) {
+        console.log("Available times for selected date:", availableTimes); // Debug
+        console.log("Booked times:", availableTimes.booked_times); // Debug
+        
         const startTime = parseInt(availableTimes.start_time.split(":")[0]);
         const endTime = parseInt(availableTimes.end_time.split(":")[0]);
         const bookedTimes = availableTimes.booked_times || []; // Get booked times
 
         for (let hour = startTime; hour < endTime; hour++) {
-            const time24 = `${hour}:00`;
-            const time12 = convertTo12HourFormat(hour); // Convert to 12-hour format
-            const isBooked = bookedTimes.includes(time24); // Check if the time is booked
+            // Format hour with padding to match the format from backend
+            const timeStr = `${String(hour).padStart(2, '0')}:00`;
+            const time12 = convertTo12HourFormat(hour);
+            
+            // Check if this time is in the booked_times array
+            const isBooked = bookedTimes.some(bookedTime => 
+                bookedTime.startsWith(timeStr) || bookedTime === timeStr
+            );
+            
+            console.log(`Time: ${timeStr}, Booked: ${isBooked}`); // Debug
 
             timeButtonsContainer.innerHTML += `
                 <button
@@ -824,7 +833,7 @@ function updateTimeSlots(selectedDate, availability) {
                     class="time-btn text-sm py-2 border border-gray-200 rounded hover:border-gray-300 ${
                         isBooked ? "bg-gray-300 text-gray-500 cursor-not-allowed" : ""
                     }"
-                    data-time="${time24}"
+                    data-time="${timeStr}"
                     ${isBooked ? "disabled" : ""}
                 >
                     ${time12} ${isBooked ? "(Booked)" : ""}
@@ -833,8 +842,9 @@ function updateTimeSlots(selectedDate, availability) {
 
         // Add click event to time buttons
         document.querySelectorAll(".time-btn:not([disabled])").forEach((button) => {
-            button.addEventListener("click", function () {
-                document.querySelectorAll(".time-btn").forEach((btn) => btn.classList.remove("bg-green-600", "text-white"));
+            button.addEventListener("click", function() {
+                document.querySelectorAll(".time-btn").forEach((btn) => 
+                    btn.classList.remove("bg-green-600", "text-white"));
                 this.classList.add("bg-green-600", "text-white");
                 document.getElementById("selectedTime").value = this.getAttribute("data-time");
             });

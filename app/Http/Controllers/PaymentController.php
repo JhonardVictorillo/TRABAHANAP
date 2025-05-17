@@ -10,7 +10,7 @@ class PaymentController extends Controller
 {
     public function createCheckoutSession(Request $request)
     {
-        Stripe::setApiKey(env('STRIPE_SECRET'));
+       Stripe::setApiKey(config('services.stripe.secret'));
 
         $session = Session::create([
             'payment_method_types' => ['card'],
@@ -43,7 +43,7 @@ class PaymentController extends Controller
 
     public function success(Request $request)
 {
-    \Stripe\Stripe::setApiKey(env('STRIPE_SECRET'));
+    \Stripe\Stripe::setApiKey(config('services.stripe.secret'));
     $session = \Stripe\Checkout\Session::retrieve($request->get('session_id'));
     $meta = $session->metadata;
 

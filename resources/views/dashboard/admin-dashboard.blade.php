@@ -20,6 +20,7 @@ function getStatusColor($status) {
 @include('admin.booking')  
 @include('admin.violations')
 @include('admin.userstats')
+@include('admin.revenueSection')
 @include('admin.categorySection') 
 
         
@@ -80,6 +81,10 @@ document.getElementById('homeLink').addEventListener('click', function () {
   setActiveSection('#homeSection');
 });
 
+document.getElementById('revenueLink').addEventListener('click', function () {
+  setActiveSection('#revenueSection');
+});
+
 // Dashboard Link
 document.getElementById('dashboardLink').addEventListener('click', function () {
   setActiveSection('#dashboardSection');
@@ -136,6 +141,8 @@ window.addEventListener('DOMContentLoaded', () => {
   const savedSection = localStorage.getItem('activeSection') || '#homeSection';
   setActiveSection(savedSection);
 });
+
+
 
 // Success message hide after 3 seconds
 document.addEventListener('DOMContentLoaded', function () {

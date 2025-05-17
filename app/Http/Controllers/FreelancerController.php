@@ -8,6 +8,7 @@ use App\Notifications\AppointmentStatusUpdated;
 use Illuminate\Support\Facades\Auth; 
 use Illuminate\Http\Request;
 use App\Models\FreelancerAvailability;
+use App\Models\PlatformRevenue;
 use Carbon\Carbon;
 
 
@@ -76,7 +77,37 @@ class FreelancerController extends Controller
     $totalPosts = $user->posts()->count(); // Assuming you have a posts relationship
     $totalAppointments = $user->appointments()->count(); // Assuming you have an appointments relationship
 
-          
+    
+    
+         // Total revenue from all sources
+    $totalRevenue = PlatformRevenue::sum('amount') ?? 0;
+    
+    // Revenue specifically from late cancellations and no-shows
+    $lateCancellationRevenue = PlatformRevenue::where('source', 'late_cancellation_fee')
+        ->sum('amount') ?? 0;
+        
+    $noShowRevenue = PlatformRevenue::where('source', 'no_show_fee')
+        ->sum('amount') ?? 0;
+        
+    // Combined late cancellation and no-show revenue
+    $cancellationAndNoShowRevenue = $lateCancellationRevenue + $noShowRevenue;
+    
+    // Current month's late cancellation and no-show revenue
+    $currentMonthCancellationRevenue = PlatformRevenue::whereIn('source', ['late_cancellation_fee', 'no_show_fee'])
+        ->whereMonth('date', now()->month)
+        ->whereYear('date', now()->year)
+        ->sum('amount') ?? 0;
+    
+    // Only include late cancellation and no-show transactions
+    $revenueTransactions = PlatformRevenue::whereIn('source', ['late_cancellation_fee', 'no_show_fee'])
+        ->with(['appointment.freelancer', 'user'])
+        ->orderBy('date', 'desc')
+        ->paginate(10);
+    
+
+
+
+
         // If profile is complete, show the dashboard without the modal
         return view('dashboard.freelancer-dashboard', [
             'user' => $user,
@@ -97,7 +128,13 @@ class FreelancerController extends Controller
             'clients' => $clients, // pass filtered clients
             'totalClients' => $totalClients,// pass total count
             'unreadCount' => $unreadCount,
-            'availabilities' => $availabilities
+            'availabilities' => $availabilities,
+            'totalRevenue' => $totalRevenue,
+            'cancellationAndNoShowRevenue' => $cancellationAndNoShowRevenue,
+            'currentMonthCancellationRevenue' => $currentMonthCancellationRevenue,
+            'revenueTransactions' => $revenueTransactions,  
+            'lateCancellationRevenue' => $lateCancellationRevenue,
+            'noShowRevenue' => $noShowRevenue,
         ]);
 
 }   
@@ -217,17 +254,44 @@ public function show($id)
 
 public function markAsCompleted($appointmentId)
 {
-    
-    $appointment = Appointment::find($appointmentId);
+   try {
+        $appointment = Appointment::find($appointmentId);
 
-   
-    if ($appointment && $appointment->freelancer_id == Auth::id()) {
+        if (!$appointment || $appointment->freelancer_id != Auth::id()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unable to mark the appointment as completed.'
+            ], 403);
+        }
+
         // Update the status to "completed"
         $appointment->status = 'completed';
-        $appointment->completed_at = now();  // Optionally, track when it was completed
+        $appointment->completed_at = now();  // Track when it was completed
+        
+        // Handle the commitment fee as platform commission
+        if ($appointment->fee_status === 'paid') {
+            $appointment->fee_status = 'commission_collected';
+            
+            // Record as platform revenue
+            \App\Models\PlatformRevenue::create([
+                'amount' => $appointment->commitment_fee ?? 10.00, // Use actual amount or default
+                'source' => 'commitment_fee',
+                'appointment_id' => $appointment->id,
+                'user_id' => $appointment->customer_id,
+                'date' => now(),
+                'notes' => 'Commitment fee from completed appointment'
+            ]);
+            
+            // Log the transaction
+            \Log::info("Commitment fee collected as platform commission", [
+                'appointment_id' => $appointment->id,
+                'amount' => $appointment->commitment_fee_amount ?? 10.00
+            ]);
+        }
+        
         $appointment->save();
 
-       
+        // Notify the customer
         $customer = $appointment->customer;
         if ($customer) {
             $customer->notify(new AppointmentStatusUpdated($appointment, 'completed'));
@@ -238,9 +302,14 @@ public function markAsCompleted($appointmentId)
             'message' => 'The appointment has been marked as completed.',
             'status' => 'completed'
         ]);
+    } catch (\Exception $e) {
+        \Log::error('Error completing appointment: ' . $e->getMessage());
+        
+        return response()->json([
+            'success' => false,
+            'message' => 'An error occurred: ' . $e->getMessage()
+        ], 500);
     }
-
-    return redirect()->back()->with('error', 'Unable to mark the appointment as completed.');
 }
 
     

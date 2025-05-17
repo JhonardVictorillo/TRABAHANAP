@@ -7,6 +7,9 @@ use App\Models\User;
 use App\Models\Category; // Import the Category model
 use App\Models\Post; // Import the Post model
 use App\Models\Appointment;
+use App\Models\PlatformRevenue;
+use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 use App\Notifications\PostApprovedNotification;
 
 class AdminController extends Controller
@@ -63,7 +66,21 @@ class AdminController extends Controller
         })
         ->simplePaginate(10);
 
-  
+
+
+      $totalRevenue = \App\Models\PlatformRevenue::sum('amount') ?? 0;
+    
+    $currentMonthRevenue = \App\Models\PlatformRevenue::whereMonth('date', now()->month)
+        ->whereYear('date', now()->year)
+        ->sum('amount') ?? 0;
+        
+    $revenueFromCompletions = \App\Models\PlatformRevenue::where('source', 'commitment_fee')
+        ->sum('amount') ?? 0;
+        
+    // Get recent transactions
+    $revenueTransactions = \App\Models\PlatformRevenue::with(['appointment.freelancer', 'user'])
+        ->orderBy('date', 'desc')
+        ->paginate(10);
         
     return View('dashboard.admin-dashboard', [
             'totalFreelancers' => $totalFreelancers,
@@ -80,6 +97,12 @@ class AdminController extends Controller
            'violations' => $violations,        // <-- Add this line
            'userStats' => $userStats,  
            'section' => $section,
+
+           // Revenue data
+            'totalRevenue' => $totalRevenue,
+            'currentMonthRevenue' => $currentMonthRevenue,
+            'revenueFromCompletions' => $revenueFromCompletions,
+            'revenueTransactions' => $revenueTransactions
           
         ]);
     

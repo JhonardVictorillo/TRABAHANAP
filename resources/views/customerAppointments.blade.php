@@ -56,7 +56,7 @@
 <header class="sticky top-0 z-50 bg-white shadow-sm">
       <div class="flex items-center justify-between px-8 h-16">
       <a href="/" class="font-poppins text-2xl font-extrabold">
-          <span class="text-[#118f39]">Mingla</span>&nbsp;<span class="text-[#4CAF50]">Gawa</span> 
+          <span class="text-[#118f39]">Mingla</span><span class="text-[#4CAF50]">Gawa</span> 
         </a>
         <div class="flex items-center flex-1 max-w-xl mx-8">
           <div class="relative w-full">
@@ -234,89 +234,141 @@
           <div id="calendar"></div>
       </div>
 
-      <!-- Appointment Details Modal -->
-<div id="appointmentModal" class="modal" tabindex="-1" style="display: none;">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Appointment Details</h5>
-                <button type="button" class="btn-close close-modal" aria-label="Close"></button>
+     <!-- Appointment Details Modal -->
+<div id="appointmentModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" style="display: none;">
+    <div class="bg-white rounded-xl shadow-lg w-full max-w-lg">
+        <div class="flex items-center justify-between px-6 py-4 border-b">
+            <div class="flex items-center gap-2">
+                <i class="ri-calendar-check-line text-2xl text-primary"></i>
+                <h5 class="text-lg font-semibold text-gray-800">Appointment Details</h5>
             </div>
-            <div class="modal-body">
-                <p><strong>Freelancer Name:</strong> <span id="freelancerName"></span></p>
-                <p><strong>Date:</strong> <span id="appointmentDate"></span></p>
-                <p><strong>Time:</strong> <span id="appointmentTime"></span></p>
-                <p><strong>Address:</strong> <span id="appointmentAddress"></span></p>
-                <p><strong>Status:</strong> <span id="appointmentStatus"></span></p>
-                <div id="declineReasonContainer" style="display: none;">
-                    <p><strong>Reason for Decline:</strong> <span id="declineReason"></span></p>
-                </div>
-                <p><strong>Notes:</strong> <span id="appointmentNotes"></span></p>
-                <p><strong>Commitment Fee Status:</strong> <span id="feeStatus"></span></p>
+            <button type="button" class="text-gray-400 hover:text-gray-600 close-modal">
+                <i class="ri-close-line text-2xl"></i>
+            </button>
+        </div>
+        <div class="px-6 py-4 space-y-3">
+            <div class="flex items-center gap-2">
+                <i class="ri-user-line text-primary"></i>
+                <span class="font-medium">Freelancer Name:</span>
+                <span id="freelancerName"></span>
             </div>
-
-             
-            <div class="modal-footer">
-                <button id="rescheduleButton" class="btn btn-primary">Re-schedule</button>
-                <button id="cancelButton" class="btn btn-danger">Cancel</button>
-                <button id="rateButton" class="btn btn-success" style="display: none;">Rate and Review</button>
-                <button type="button" class="btn btn-secondary close-modal">Close</button>
-                <form id="noShowForm" method="POST" action="{{ route('appointments.no_show', 0) }}" style="display:none;">
-                    @csrf
-                    <button type="submit" class="btn btn-warning">Mark as No-Show</button>
-                </form>
+            <div class="flex items-center gap-2">
+                <i class="ri-calendar-line text-primary"></i>
+                <span class="font-medium">Date:</span>
+                <span id="appointmentDate"></span>
             </div>
+            <div class="flex items-center gap-2">
+                <i class="ri-time-line text-primary"></i>
+                <span class="font-medium">Time:</span>
+                <span id="appointmentTime"></span>
+            </div>
+            <div class="flex items-center gap-2">
+                <i class="ri-map-pin-line text-primary"></i>
+                <span class="font-medium">Address:</span>
+                <span id="appointmentAddress"></span>
+            </div>
+            <div class="flex items-center gap-2">
+                <i class="ri-information-line text-primary"></i>
+                <span class="font-medium">Status:</span>
+                <span id="appointmentStatus"></span>
+            </div>
+            <div id="declineReasonContainer" class="flex items-center gap-2" style="display: none;">
+                <i class="ri-error-warning-line text-red-500"></i>
+                <span class="font-medium">Reason for Decline:</span>
+                <span id="declineReason"></span>
+            </div>
+            <div class="flex items-center gap-2">
+                <i class="ri-sticky-note-line text-primary"></i>
+                <span class="font-medium">Notes:</span>
+                <span id="appointmentNotes"></span>
+            </div>
+            <div class="flex items-center gap-2">
+                <i class="ri-money-dollar-circle-line text-primary"></i>
+                <span class="font-medium">Commitment Fee Status:</span>
+                <span id="feeStatus"></span>
+            </div>
+        </div>
+        <div class="flex justify-end gap-2 px-6 py-4 border-t">
+            <button id="rescheduleButton" class="btn btn-primary flex items-center gap-1">
+                <i class="ri-calendar-event-line"></i> Re-schedule
+            </button>
+            <button id="cancelButton" class="btn btn-danger flex items-center gap-1">
+                <i class="ri-close-circle-line"></i> Cancel
+            </button>
+            <button id="rateButton" class="btn btn-success flex items-center gap-1" style="display: none;">
+                <i class="ri-star-line"></i> Rate & Review
+            </button>
+            <button type="button" class="btn btn-secondary close-modal flex items-center gap-1">
+                <i class="ri-arrow-go-back-line"></i> Close
+            </button>
+            <form id="noShowForm" method="POST" action="{{ route('appointments.no_show', 0) }}" style="display:none;">
+                @csrf
+                <button type="submit" class="btn btn-warning flex items-center gap-1">
+                    <i class="ri-error-warning-line"></i> Mark as No-Show
+                </button>
+            </form>
         </div>
     </div>
 </div>
             
-
-<!-- Reschedule Appointment Modal -->
-<div id="rescheduleModal" class="modal" tabindex="-1" style="display: none;">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Reschedule Appointment</h5>
-                <button type="button" class="btn-close close-modal" aria-label="Close"></button>
+<div id="rescheduleModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" style="display: none;">
+    <div class="bg-white rounded-xl shadow-lg w-full max-w-md">
+        <div class="flex items-center justify-between px-6 py-4 border-b">
+            <div class="flex items-center gap-2">
+                <i class="ri-calendar-event-line text-xl text-primary"></i>
+                <h5 class="text-lg font-semibold text-gray-800">Reschedule Appointment</h5>
             </div>
-            <div class="modal-body">
-                <form id="rescheduleForm">
-                    <div class="form-group">
-                        <label for="newDate">New Date:</label>
-                        <input type="date" id="newDate" name="date" class="form-control" required>
+        </div>
+        <div class="px-6 py-4">
+            <form id="rescheduleForm">
+                <!-- Date selection -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Select a new date:</label>
+                    <div id="availableDates" class="grid grid-cols-3 gap-2">
+                        <!-- Date buttons will be inserted here -->
                     </div>
-                    <div class="form-group">
-                        <label for="newTime">New Time:</label>
-                        <input type="time" id="newTime" name="time" class="form-control" required>
+                </div>
+                
+                <!-- Time selection -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Select a new time:</label>
+                    <div id="availableTimes" class="grid grid-cols-3 gap-2">
+                        <!-- Time buttons will be inserted here -->
                     </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary close-modal">Cancel</button>
-                <button type="submit" class="btn btn-primary" id="saveReschedule">Save Changes</button>
-            </div>
+                </div>
+                
+                <input type="hidden" id="selectedDate" name="date">
+                <input type="hidden" id="selectedTime" name="time">
+            </form>
+        </div>
+        <div class="flex justify-end gap-2 px-6 py-4 border-t">
+            <button type="button" class="btn btn-secondary flex items-center gap-1 close-modal">
+                <i class="ri-arrow-go-back-line"></i> Cancel
+            </button>
+            <button type="submit" class="btn btn-primary flex items-center gap-1" id="saveReschedule">
+                <i class="ri-save-line"></i> Save Changes
+            </button>
         </div>
     </div>
 </div>
 
-
-  <!-- Review Modal -->
-  <div id="reviewModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" style="display: none;">
-    <div class="bg-white rounded-lg shadow-lg w-full max-w-md">
-        <div class="px-6 py-4 border-b">
-            <h5 class="text-lg font-semibold text-gray-800">Rate and Review</h5>
-            <button type="button" class="text-gray-400 hover:text-gray-600 float-right close-modal">
-                <i class="ri-close-line text-xl"></i>
+ <!-- Review Modal -->
+<div id="reviewModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" style="display: none;">
+    <div class="bg-white rounded-xl shadow-lg w-full max-w-md">
+        <div class="flex items-center justify-between px-6 py-4 border-b">
+            <div class="flex items-center gap-2">
+                <i class="ri-star-line text-xl text-yellow-400"></i>
+                <h5 class="text-lg font-semibold text-gray-800">Rate and Review</h5>
+            </div>
+            <button type="button" class="text-gray-400 hover:text-gray-600 close-modal">
+                <i class="ri-close-line text-2xl"></i>
             </button>
         </div>
         <div class="px-6 py-4">
             <form id="reviewForm">
-                <!-- Hidden input for appointment ID -->
                 <input type="hidden" id="appointmentId" value="">
-
-                <!-- Star Rating -->
                 <div class="mb-4">
-                    <label for="rating" class="block text-sm font-medium text-gray-700">Rating:</label>
+                    <label for="rating" class="block text-sm font-medium text-gray-700">Rating</label>
                     <div id="starRating" class="flex space-x-2 mt-2">
                         <span class="star text-gray-400 text-3xl cursor-pointer" data-value="1">&#9733;</span>
                         <span class="star text-gray-400 text-3xl cursor-pointer" data-value="2">&#9733;</span>
@@ -326,16 +378,12 @@
                     </div>
                     <input type="hidden" id="rating" name="rating" value="0">
                 </div>
-
-                <!-- Review Textarea -->
                 <div class="mb-4">
-                    <label for="review" class="block text-sm font-medium text-gray-700">Review:</label>
+                    <label for="review" class="block text-sm font-medium text-gray-700">Review</label>
                     <textarea id="review" name="review" class="w-full mt-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary" rows="4" placeholder="Write your review here..."></textarea>
                 </div>
-
-                <!-- Submit Button -->
-                <button type="button" id="submitReview" class="w-full py-2 text-white bg-primary hover:bg-primary/90 rounded-lg">
-                    Submit Review
+                <button type="button" id="submitReview" class="w-full py-2 text-white bg-primary hover:bg-primary/90 rounded-lg flex items-center justify-center gap-2">
+                    <i class="ri-send-plane-line"></i> Submit Review
                 </button>
             </form>
         </div>
@@ -489,6 +537,10 @@ function handleButtonVisibility(status) {
     } else if (status.toLowerCase() === 'accepted') {
         rescheduleButton.style.display = 'none'; // Hide reschedule button
         cancelButton.style.display = 'inline-block'; // Hide cancel button
+     } else if (status.toLowerCase() === 'canceled') {
+        // Hide both buttons if status is canceled
+        rescheduleButton.style.display = 'none';
+        cancelButton.style.display = 'none';
     } else {
         // Default to showing both reschedule and cancel buttons for other statuses
         rescheduleButton.style.display = 'inline-block';
@@ -553,49 +605,169 @@ function openAppointmentModal(data) {
 
     
     
-    // Add event listener for the reschedule button
-    document.getElementById('rescheduleButton').onclick = function () {
-        // Show the reschedule modal
-        document.getElementById('rescheduleModal').style.display = 'block';
+  // ...inside openAppointmentModal(data)...
+document.getElementById('rescheduleButton').onclick = function () {
+    document.getElementById('appointmentModal').style.display = 'none';
+    document.getElementById('rescheduleModal').style.display = 'flex';
 
-        // Pre-fill the current date and time
-        document.getElementById('newDate').value = data.date;
-        document.getElementById('newTime').value = data.time;
-
-        // Handle form submission
-        document.getElementById('saveReschedule').onclick = function () {
-    const newDate = document.getElementById('newDate').value;
-    const newTime = document.getElementById('newTime').value;
-
-    fetch(`/customer/appointments/reschedule/${data.id}`, {
-        method: 'POST',
-        headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ date: newDate, time: newTime }),
-    })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+     const datesContainer = document.getElementById('availableDates');
+    const timesContainer = document.getElementById('availableTimes');
+    const selectedDateInput = document.getElementById('selectedDate');
+    const selectedTimeInput = document.getElementById('selectedTime');
+    
+    // Clear previous selections
+    datesContainer.innerHTML = '<div class="col-span-3 text-center py-2">Loading available dates...</div>';
+    timesContainer.innerHTML = '<div class="col-span-3 text-center py-2">Select a date first</div>';
+    
+    console.log('Fetching availability for freelancer:', data.freelancer_id, 'with appointment ID:', data.id);
+    
+    fetch(`/freelancer/${data.freelancer_id}/availability?current_appointment_id=${data.id}`)
+        .then(response => response.json())  
+        .then(availabilities => {
+            console.log('Received availabilities:', availabilities);
+            
+            // Get unique dates
+            const uniqueDates = [...new Set(availabilities.map(a => a.date))];
+            datesContainer.innerHTML = '';
+            
+            if (uniqueDates.length === 0) {
+                datesContainer.innerHTML = '<div class="col-span-3 text-center py-2">No available dates</div>';
+                return;
             }
-            return response.json();
+            
+            // Create date buttons
+            uniqueDates.forEach(date => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'date-btn px-2 py-3 border rounded text-sm';
+                
+                // Format date for display
+                const d = new Date(date);
+                btn.innerHTML = `${d.getDate()}<br><span class="text-xs">${d.toLocaleString('default', { month: 'short' })}</span>`;
+                btn.dataset.date = date;
+                
+                btn.addEventListener('click', function() {
+                    // Update selection styling
+                    document.querySelectorAll('.date-btn').forEach(b => 
+                        b.classList.remove('bg-primary', 'text-white'));
+                    this.classList.add('bg-primary', 'text-white');
+                    
+                    // Store selected date
+                    selectedDateInput.value = this.dataset.date;
+                    
+                    // Update available times
+                    updateAvailableTimes(this.dataset.date, availabilities);
+                });
+                
+                datesContainer.appendChild(btn);
+            });
+            
+            // Select first date by default
+            if (uniqueDates.length > 0) {
+                const firstDateBtn = datesContainer.querySelector('.date-btn');
+                firstDateBtn.click();
+            }
         })
+        .catch(error => {
+            console.error('Error loading availabilities:', error);
+            datesContainer.innerHTML = '<div class="col-span-3 text-center py-2">Error loading dates: ' + error.message + '</div>';
+        });
+        
+  function updateAvailableTimes(selectedDate, availabilities) {
+    timesContainer.innerHTML = '<div class="col-span-3 text-center py-2">Loading times...</div>';
+    
+    const dateAvailability = availabilities.find(a => a.date === selectedDate);
+    
+    if (!dateAvailability) {
+        timesContainer.innerHTML = '<div class="col-span-3 text-center py-2">No times available</div>';
+        return;
+    }
+    
+    // Get times
+    const start = dateAvailability.start_time.split(':').map(Number);
+    const end = dateAvailability.end_time.split(':').map(Number);
+    const bookedTimes = dateAvailability.booked_times || [];
+    
+    timesContainer.innerHTML = '';
+    let hasAvailableTimes = false;
+    
+    // Generate 1-hour time slots (instead of 30-minute slots)
+    for (let h = start[0]; h < end[0]; h++) {
+        const timeStr = `${h.toString().padStart(2, '0')}:00`;
+        const isBooked = bookedTimes.includes(timeStr);
+        
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = isBooked 
+            ? 'time-btn px-3 py-2 border rounded bg-gray-200 text-gray-500 cursor-not-allowed'
+            : 'time-btn px-3 py-2 border rounded';
+        
+        // Format time for display
+        const timeDisplay = new Date(`2000-01-01T${timeStr}`).toLocaleTimeString('en-US', {
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: true
+        });
+        
+        btn.textContent = timeDisplay;
+        btn.dataset.time = timeStr;
+        
+        // Disable button if time is booked
+        btn.disabled = isBooked;
+        
+        if (!isBooked) {
+            hasAvailableTimes = true;
+            btn.addEventListener('click', function() {
+                // Update selection styling
+                document.querySelectorAll('.time-btn').forEach(b => 
+                    b.classList.remove('bg-primary', 'text-white'));
+                this.classList.add('bg-primary', 'text-white');
+                
+                // Store selected time
+                selectedTimeInput.value = this.dataset.time;
+            });
+        }
+        
+        timesContainer.appendChild(btn);
+    }
+    
+    if (!hasAvailableTimes) {
+        timesContainer.innerHTML = '<div class="col-span-3 text-center py-2">No available times for this date</div>';
+    }
+}
+// Handle form submission
+    document.getElementById('saveReschedule').onclick = function(e) {
+        e.preventDefault();
+        
+        const newDate = selectedDateInput.value;
+        const newTime = selectedTimeInput.value;
+        
+        if (!newDate || !newTime) {
+            alert('Please select both a date and time');
+            return;
+        }
+        
+        fetch(`/customer/appointments/reschedule/${data.id}`, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ date: newDate, time: newTime }),
+        })
+        .then(response => response.json())
         .then(result => {
-            alert(result.message); // Show success message
-
-            // Close the reschedule modal
+            alert(result.message);
             document.getElementById('rescheduleModal').style.display = 'none';
-
-            // Refresh the calendar dynamically
             location.reload();
         })
         .catch(error => {
             console.error('Error rescheduling appointment:', error);
             alert('Failed to reschedule appointment. Please try again.');
         });
-};
     };
+};
+    
 
     function to24HourTime(time12h) {
     // time12h: "09:30 AM" or "04:00 PM"
@@ -630,8 +802,10 @@ function openAppointmentModal(data) {
         }
     };
 
+   
+
     // Show the appointment modal
-    document.getElementById('appointmentModal').style.display = 'block';
+    document.getElementById('appointmentModal').style.display = 'flex';
 }
 
 function closeAllModals() {
@@ -640,10 +814,13 @@ function closeAllModals() {
     document.getElementById('reviewModal').style.display = 'none';
 }
 
-document.querySelectorAll('.close-modal').forEach(button => {
-    button.onclick = closeAllModals;
-});
-
+// Attach close modal listeners
+    document.querySelectorAll('.close-modal').forEach(button => {
+        button.addEventListener('click', function (e) {
+            e.preventDefault(); // Prevent form submission if inside a form
+            closeAllModals();
+        });
+    }); 
 
 document.addEventListener('DOMContentLoaded', function () {
     const stars = document.querySelectorAll('#starRating .star');

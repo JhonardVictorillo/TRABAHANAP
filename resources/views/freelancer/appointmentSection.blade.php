@@ -119,6 +119,37 @@
       completeBtn.style.display = 'none';
     }
 
+
+     const noShowForm = document.getElementById('noShowForm');
+if (noShowForm) {
+    noShowForm.action = `/appointments/${data.id}/no-show`;
+
+    function to24HourTime(time12h) {
+        const [time, modifier] = time12h.split(' ');
+        let [hours, minutes] = time.split(':');
+        if (hours === '12') hours = '00';
+        if (modifier === 'PM') hours = parseInt(hours, 10) + 12;
+        return `${hours.toString().padStart(2, '0')}:${minutes}:00`;
+    }
+
+    function updateNoShowButton() {
+        const appointmentStatus = data.status ? data.status.toLowerCase() : '';
+        const appointmentTime24 = to24HourTime(data.time);
+        const appointmentDateTime = new Date(data.date + 'T' + appointmentTime24);
+        const now = new Date();
+
+        if (appointmentStatus === 'accepted' && now > appointmentDateTime) {
+            noShowForm.style.display = 'inline-block';
+        } else {
+            noShowForm.style.display = 'none';
+        }
+    }
+
+    updateNoShowButton();
+    window.noShowInterval && clearInterval(window.noShowInterval);
+    window.noShowInterval = setInterval(updateNoShowButton, 60000);
+}
+
     appointmentModal.style.display = 'flex';
   }
 
@@ -223,62 +254,37 @@
   }
 
   // Complete Appointment
-  completeBtn.addEventListener('click', function () {
+completeBtn.addEventListener('click', function () {
     const appointmentId = this.dataset.id;
     if (!appointmentId) return alert('No appointment selected.');
 
     if (!confirm('Are you sure you want to mark this appointment as completed?')) return;
 
     fetch(`/appointments/${appointmentId}/complete`, {
-      method: 'POST',
-      headers: {
-        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-        'Content-Type': 'application/json'
-      }
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            'Content-Type': 'application/json',
+            'Accept': 'application/json' // Add this line to request JSON response
+        }
     })
     .then(response => {
-      if (!response.ok) throw new Error('Failed to mark appointment as completed.');
-      return response.json();
+        if (!response.ok) {
+            return response.json().then(err => { throw new Error(err.message || 'Failed to mark as completed'); });
+        }
+        return response.json();
     })
     .then(data => {
-      alert('Appointment marked as completed!');
-      appointmentModal.style.display = 'none';
-      calendar.refetchEvents(); // Refresh your events if using fullCalendar
+        alert(data.message || 'Appointment marked as completed!');
+        appointmentModal.style.display = 'none';
+       window.location.reload(); // Refresh your events if using fullCalendar
     })
     .catch(error => {
-      console.error(error);
-      alert('Error marking appointment as completed.');
+        console.error('Error details:', error);
+        alert('Error marking appointment as completed: ' + error.message);
     });
-  });
+});
 
 
-  const noShowForm = document.getElementById('noShowForm');
-if (noShowForm) {
-    noShowForm.action = `/appointments/${eventId}/no-show`;
-
-    function to24HourTime(time12h) {
-        const [time, modifier] = time12h.split(' ');
-        let [hours, minutes] = time.split(':');
-        if (hours === '12') hours = '00';
-        if (modifier === 'PM') hours = parseInt(hours, 10) + 12;
-        return `${hours.toString().padStart(2, '0')}:${minutes}:00`;
-    }
-
-    function updateNoShowButton() {
-        const appointmentStatus = data.status ? data.status.toLowerCase() : '';
-        const appointmentTime24 = to24HourTime(data.time);
-        const appointmentDateTime = new Date(data.date + 'T' + appointmentTime24);
-        const now = new Date();
-
-        if (appointmentStatus === 'accepted' && now > appointmentDateTime) {
-            noShowForm.style.display = 'inline-block';
-        } else {
-            noShowForm.style.display = 'none';
-        }
-    }
-
-    updateNoShowButton();
-    window.noShowInterval && clearInterval(window.noShowInterval);
-    window.noShowInterval = setInterval(updateNoShowButton, 60000);
-}
+ 
 </script>

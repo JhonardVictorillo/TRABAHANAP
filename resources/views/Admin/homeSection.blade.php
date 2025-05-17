@@ -24,7 +24,7 @@
       </div>
 
       
-      <div class="calendar-section">
+      <!-- <div class="calendar-section">
         <h3>Calendar <span>August</span></h3>
         <div class="calendar-grid">
           
@@ -35,5 +35,5 @@
           <div>12</div><div>13</div><div>14</div><div>15</div><div>16</div><div>17</div><div>18</div>
           
         </div>
-      </div>
+      </div> -->
     </div>

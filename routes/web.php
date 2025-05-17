@@ -89,8 +89,7 @@ Route::post('/admin/freelancer/{id}/reject', [AdminController::class, 'rejectFre
 //complete profile route
 Route::post('/profile/complete', [ProfileController::class, 'submitCompleteProfileForm'])->name('profile.complete');
 
-//category routes
-Route::post('/categories/store', [CategoryController::class, 'store'])->name('categories.store');
+
 
 //    customer profile
 Route::get('/profile', [CustomerController::class, 'showProfile'])->name('customer.profile');
@@ -126,7 +125,7 @@ Route::get('/freelancer/availabilities/{id}/edit', [FreelancerController::class,
 Route::put('/freelancer/availabilities/{id}', [FreelancerController::class, 'updateAvailability'])->name('freelancer.availabilities.update');
 Route::delete('/freelancer/availabilities/{id}', [FreelancerController::class, 'destroyAvailability'])->name('freelancer.availabilities.destroy');
 //Appointment done status
-Route::post('/appointments/{appointment}/complete', [FreelancerController::class, 'markAsCompleted'])->name('appointments.complete');
+Route::post('/appointments/{appointmentId}/complete', [FreelancerController::class, 'markAsCompleted'])->name('appointments.complete');
 
 //rating appointment
 Route::post('/customer/appointments/review/{id}', [CustomerController::class, 'rateAppointment'])->name('customer.appointments.review');
@@ -184,4 +183,4 @@ Route::post('/admin/user/{id}/unban', [AdminController::class, 'unbanUser'])->na
 
 // no-show appointment
 Route::post('/appointments/{id}/no-show', [AppointmentController::class, 'markNoShow'])->name('appointments.no_show');
-
+Route::get('/freelancer/{id}/available-schedules', [AppointmentController::class, 'getAvailableSchedules']);
