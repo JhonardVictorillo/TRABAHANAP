@@ -55,7 +55,7 @@
                         <div class="form-group">
                             <div class="input-field">
                                 <i class='bx bx-user'></i>
-                                <input type="text" name="firstname" placeholder="First Name" required>
+                                <input type="text" name="firstname" placeholder="First Name" value="{{ old('firstname') }}" required>
                                 @error('firstname')
                                     <div class="error">{{ $message }}</div>
                                 @enderror
@@ -64,7 +64,7 @@
                         <div class="form-group">
                             <div class="input-field">
                                 <i class='bx bx-user'></i>
-                                <input type="text" name="lastname" placeholder="Last Name" required>
+                                <input type="text" name="lastname" placeholder="Last Name" value="{{ old('lastname') }}" required>
                                 @error('lastname')
                                     <div class="error">{{ $message }}</div>
                                 @enderror
@@ -75,7 +75,7 @@
                     <div class="form-group">
                         <div class="input-field">
                             <i class='bx bx-envelope'></i>
-                            <input type="email" name="email" placeholder="Email Address" required>
+                            <input type="email" name="email" placeholder="Email Address" value="{{ old('email') }}" required>
                             @error('email')
                             <div class="error">{{ $message }}</div>
                             @enderror
@@ -85,7 +85,7 @@
                     <div class="form-group">
                         <div class="input-field">
                             <i class='bx bx-id-card'></i>
-                            <input type="text" name="contact_number" placeholder="Contact Number" required>
+                            <input type="text" name="contact_number" placeholder="Contact Number" value="{{ old('contact_number') }}" required>
                             @error('contact_number')
                             <div class="error">{{ $message }}</div>
                             @enderror

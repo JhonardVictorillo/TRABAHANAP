@@ -352,7 +352,7 @@
                                 <div class="flex items-start justify-between mb-4">
                                     <div class="flex items-center gap-4">
                                         <img
-                                            src="{{ $review->customer->profile_picture ?? asset('images/defaultprofile.jpg') }}"
+                                            src="{{ $review->customer && $review->customer->profile_picture ? asset('storage/' . $review->customer->profile_picture) : asset('images/defaultprofile.jpg') }}"
                                             alt="Client"
                                             class="w-10 h-10 rounded-full object-cover"
                                         />

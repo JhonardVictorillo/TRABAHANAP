@@ -71,7 +71,7 @@ public function showFreelancerProfile($id)
          // Fetch only reviews where a rating and review exist
     $reviews = Appointment::where('freelancer_id', $id)
     ->whereNotNull('rating') // Ensure there's a rating
-    ->with('customer:id,firstname,lastname') // Load only customer name details
+    ->with('customer:id,firstname,lastname,profile_picture') // Load only customer name details
     ->get();
     $totalStars = $reviews->sum('rating'); // Sum of all ratings
     $totalReviews = $reviews->count();
