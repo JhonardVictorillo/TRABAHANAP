@@ -674,6 +674,7 @@ document.getElementById('rescheduleButton').onclick = function () {
         });
         
   function updateAvailableTimes(selectedDate, availabilities) {
+    const timesContainer = document.getElementById('availableTimes');
     timesContainer.innerHTML = '<div class="col-span-3 text-center py-2">Loading times...</div>';
     
     const dateAvailability = availabilities.find(a => a.date === selectedDate);
@@ -683,48 +684,91 @@ document.getElementById('rescheduleButton').onclick = function () {
         return;
     }
     
-    // Get times
-    const start = dateAvailability.start_time.split(':').map(Number);
-    const end = dateAvailability.end_time.split(':').map(Number);
+    console.log("Date availability found:", dateAvailability); // Debug
+    
+    // Parse start and end times from 12-hour format
+    let startHour, endHour;
+    
+    try {
+        // Parse start time from 12-hour format
+        const startMatch = dateAvailability.start_time.match(/(\d+):(\d+)\s*(AM|PM)/i);
+        if (startMatch) {
+            startHour = parseInt(startMatch[1]);
+            if (startMatch[3].toUpperCase() === 'PM' && startHour !== 12) {
+                startHour += 12;
+            } else if (startMatch[3].toUpperCase() === 'AM' && startHour === 12) {
+                startHour = 0;
+            }
+        } else {
+            startHour = 9; // Default
+        }
+        
+        // Parse end time from 12-hour format
+        const endMatch = dateAvailability.end_time.match(/(\d+):(\d+)\s*(AM|PM)/i);
+        if (endMatch) {
+            endHour = parseInt(endMatch[1]);
+            if (endMatch[3].toUpperCase() === 'PM' && endHour !== 12) {
+                endHour += 12;
+            } else if (endMatch[3].toUpperCase() === 'AM' && endHour === 12) {
+                endHour = 0;
+            }
+        } else {
+            endHour = 17; // Default
+        }
+    } catch (error) {
+        console.error("Error parsing time format:", error);
+        timesContainer.innerHTML = '<div class="col-span-3 text-center py-2">Error loading time slots</div>';
+        return;
+    }
+    
     const bookedTimes = dateAvailability.booked_times || [];
+    console.log(`Rendering time slots from ${startHour}:00 to ${endHour}:00`);
+    console.log("Booked times:", bookedTimes);
     
     timesContainer.innerHTML = '';
     let hasAvailableTimes = false;
     
-    // Generate 1-hour time slots (instead of 30-minute slots)
-    for (let h = start[0]; h < end[0]; h++) {
+    // Generate 1-hour time slots
+    for (let h = startHour; h < endHour; h++) {
         const timeStr = `${h.toString().padStart(2, '0')}:00`;
-        const isBooked = bookedTimes.includes(timeStr);
         
+        // Check if this time is booked
+        const isBooked = bookedTimes.some(bookedTime => {
+            // Handle different possible formats
+            if (typeof bookedTime === 'string') {
+                return bookedTime === timeStr || 
+                       bookedTime.startsWith(timeStr + ':') ||
+                       bookedTime.includes(convertTo12HourFormat(h));
+            }
+            return false;
+        });
+        
+        // Create button for this time slot
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.className = isBooked 
             ? 'time-btn px-3 py-2 border rounded bg-gray-200 text-gray-500 cursor-not-allowed'
             : 'time-btn px-3 py-2 border rounded';
         
-        // Format time for display
-        const timeDisplay = new Date(`2000-01-01T${timeStr}`).toLocaleTimeString('en-US', {
-            hour: 'numeric',
-            minute: '2-digit',
-            hour12: true
-        });
-        
-        btn.textContent = timeDisplay;
+        // Format time for display (12-hour format)
+        const timeDisplay = convertTo12HourFormat(h);
+        btn.textContent = timeDisplay + (isBooked ? ' (Booked)' : '');
         btn.dataset.time = timeStr;
-        
-        // Disable button if time is booked
         btn.disabled = isBooked;
         
         if (!isBooked) {
             hasAvailableTimes = true;
             btn.addEventListener('click', function() {
-                // Update selection styling
-                document.querySelectorAll('.time-btn').forEach(b => 
-                    b.classList.remove('bg-primary', 'text-white'));
+                // Clear previous selections
+                document.querySelectorAll('#availableTimes .time-btn').forEach(b => {
+                    b.classList.remove('bg-primary', 'text-white');
+                });
+                
+                // Mark this time as selected
                 this.classList.add('bg-primary', 'text-white');
                 
                 // Store selected time
-                selectedTimeInput.value = this.dataset.time;
+                document.getElementById('selectedTime').value = this.dataset.time;
             });
         }
         
@@ -734,6 +778,13 @@ document.getElementById('rescheduleButton').onclick = function () {
     if (!hasAvailableTimes) {
         timesContainer.innerHTML = '<div class="col-span-3 text-center py-2">No available times for this date</div>';
     }
+}
+
+// Helper function to convert hour to 12-hour format string
+function convertTo12HourFormat(hour) {
+    const period = hour >= 12 ? 'PM' : 'AM';
+    const hour12 = hour % 12 || 12; // Convert 0 to 12 for midnight
+    return `${hour12}:00 ${period}`;
 }
 // Handle form submission
     document.getElementById('saveReschedule').onclick = function(e) {

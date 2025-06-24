@@ -16,16 +16,18 @@ class CheckRole
      * @param  string  $role
      * @return mixed
      */
-    public function handle(Request $request, Closure $next, string $role)
+    public function handle($request, Closure $next)
     {
-        if (!Auth::check()) {
-            return redirect()->route('login')->with('error', 'You must be logged in.');
+        // Only check for authenticated users
+        if (Auth::check()) {
+            $user = Auth::user();
+            
+            // Only redirect if the user has no role AND has already verified their email
+            if (!$user->role && $user->email_verified_at) {
+                return redirect()->route('select.role');
+            }
         }
-
-        if (Auth::user()->role !== $role && Auth::user()->role !== 'admin') {
-            return redirect()->route('login')->with('error', 'You do not have access to this page.');
-        }
-
+        
         return $next($request);
     }
 }

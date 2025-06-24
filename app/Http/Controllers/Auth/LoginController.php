@@ -62,11 +62,7 @@ class LoginController extends Controller
           ])->withInput();
       }
 
-            // Check if the user has a role assigned
-            if (Auth::user()->role === null) {
-              session()->flash('success', 'Welcome! Please select your role to continue.');
-                return redirect()->route('select.role');
-        }
+          
       // Redirect to the dashboard based on the user's role
         if (Auth::user()->role === 'freelancer') {
           session()->flash('success', 'Welcome back, Freelancer ' . Auth::user()->firstname . '!');

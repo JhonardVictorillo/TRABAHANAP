@@ -46,7 +46,7 @@
     <div class="details-section" id="totalFreelancersSection" style="display: none;">
       <h2>Total Freelancers</h2>
       <div class="table-container">
-      <table>
+      <table class="admin-table">
         <thead>
           <tr>
             <th>Profile</th>
@@ -110,7 +110,7 @@
     <div class="details-section" id="totalClientsSection" style="display: none;">
       <h2>Total Clients</h2>
       <div class="table-container">
-      <table>
+      <table class="admin-table">
         <thead>
           <tr>
             <th>Profile</th>
@@ -156,7 +156,7 @@
     <div class="details-section" id="pendingAccountsSection" style="display: none;">
       <h2>Pending Accounts</h2>
       <div class="table-container">
-      <table>
+      <table class="admin-table">
         <thead>
           <tr>
             <th>Profile</th>
@@ -212,7 +212,7 @@
     <div class="details-section" id="pendingPostsSection" style="display: none;">
     <h2>Pending Posts</h2>
     <div class="table-container">
-        <table>
+        <table class="admin-table">
           <thead>
             <tr>
            

@@ -451,20 +451,47 @@
 
   
   /* Animation for the success message */
-  @keyframes slideDown {
-    from {
-      opacity: 0;
-      transform: translateY(-10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
   
-  .alert-success {
-    animation: slideDown 0.3s ease-in-out;
+.alert-success {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #d4edda; /* Light green background */
+  color: #155724; /* Dark green text */
+  border: 1px solid #c3e6cb; /* Green border */
+  padding: 15px 20px;
+  border-radius: 5px;
+  font-size: 1rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  width: 90%; /* Adjust width as needed */
+  max-width: 600px;
+  animation: slideDown 0.5s ease-in-out;
+}
+
+/* Icon inside the success message */
+.alert-success i {
+  font-size: 1.2rem;
+  color: #155724;
+}
+
+/* Slide Down Animation */
+@keyframes slideDown {
+  from {
+      transform: translateX(-50%) translateY(-100%);
+      opacity: 0;
   }
+  to {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+  }
+}
 
 
   /* Password Toggle Icon */

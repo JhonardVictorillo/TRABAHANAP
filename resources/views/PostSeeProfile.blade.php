@@ -741,13 +741,19 @@ const profileBtn = document.getElementById('profileBtn');
     // Function to fetch availability
     function fetchAvailability(year, month) {
     return fetch(`/freelancer/${freelancerId}/availability?year=${year}&month=${month + 1}`)
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
         .then(data => {
-            console.log("Fetched availability:", data); // Debugging
+            console.log("Fetched availability data:", data); // Debugging
             return data;
         })
         .catch(error => {
             console.error("Error fetching availability:", error);
+            alert("Could not load freelancer's availability. Please try again later.");
             return [];
         });
 }
@@ -804,29 +810,60 @@ const profileBtn = document.getElementById('profileBtn');
 
 function updateTimeSlots(selectedDate, availability) {
     const timeButtonsContainer = document.querySelector("#bookingModal .grid-cols-3");
-    const availableTimes = availability.find(avail => avail.date === selectedDate);
     timeButtonsContainer.innerHTML = ""; // Clear previous time slots
-
-    if (availableTimes) {
-        console.log("Available times for selected date:", availableTimes); // Debug
-        console.log("Booked times:", availableTimes.booked_times); // Debug
+    
+    // Find the availability for the selected date
+    const availableDay = availability.find(avail => avail.date === selectedDate);
+    
+    if (availableDay) {
+        console.log("Available day data:", availableDay); // Debug
         
-        const startTime = parseInt(availableTimes.start_time.split(":")[0]);
-        const endTime = parseInt(availableTimes.end_time.split(":")[0]);
-        const bookedTimes = availableTimes.booked_times || []; // Get booked times
-
-        for (let hour = startTime; hour < endTime; hour++) {
-            // Format hour with padding to match the format from backend
+        // Parse start and end times from 12-hour format
+        let startHour, endHour;
+        
+        // Parse start time
+        const startMatch = availableDay.start_time.match(/(\d+):(\d+)\s*(AM|PM)/i);
+        if (startMatch) {
+            startHour = parseInt(startMatch[1]);
+            if (startMatch[3].toUpperCase() === 'PM' && startHour !== 12) {
+                startHour += 12;
+            } else if (startMatch[3].toUpperCase() === 'AM' && startHour === 12) {
+                startHour = 0;
+            }
+        } else {
+            startHour = 9; // Default
+        }
+        
+        // Parse end time
+        const endMatch = availableDay.end_time.match(/(\d+):(\d+)\s*(AM|PM)/i);
+        if (endMatch) {
+            endHour = parseInt(endMatch[1]);
+            if (endMatch[3].toUpperCase() === 'PM' && endHour !== 12) {
+                endHour += 12;
+            } else if (endMatch[3].toUpperCase() === 'AM' && endHour === 12) {
+                endHour = 0;
+            }
+        } else {
+            endHour = 17; // Default
+        }
+        
+        const bookedTimes = availableDay.booked_times || []; // Get booked times
+        
+        console.log(`Rendering time slots from ${startHour}:00 to ${endHour}:00`);
+        console.log("Booked times:", bookedTimes);
+        
+        // Generate time slots
+        for (let hour = startHour; hour < endHour; hour++) {
+            // Format hour with padding
             const timeStr = `${String(hour).padStart(2, '0')}:00`;
             const time12 = convertTo12HourFormat(hour);
             
-            // Check if this time is in the booked_times array
+            // Check if this time is booked
             const isBooked = bookedTimes.some(bookedTime => 
-                bookedTime.startsWith(timeStr) || bookedTime === timeStr
+                bookedTime === timeStr || bookedTime.startsWith(timeStr + ':')
             );
             
-            console.log(`Time: ${timeStr}, Booked: ${isBooked}`); // Debug
-
+            // Create the time slot button
             timeButtonsContainer.innerHTML += `
                 <button
                     type="button"
@@ -839,7 +876,7 @@ function updateTimeSlots(selectedDate, availability) {
                     ${time12} ${isBooked ? "(Booked)" : ""}
                 </button>`;
         }
-
+        
         // Add click event to time buttons
         document.querySelectorAll(".time-btn:not([disabled])").forEach((button) => {
             button.addEventListener("click", function() {
@@ -850,7 +887,10 @@ function updateTimeSlots(selectedDate, availability) {
             });
         });
     } else {
-        timeButtonsContainer.innerHTML = `<p class="text-sm text-gray-600">No available time slots for this date.</p>`;
+        timeButtonsContainer.innerHTML = `
+            <p class="col-span-3 text-sm text-gray-600 py-4 text-center">
+                No available time slots for this date.
+            </p>`;
     }
 }
 

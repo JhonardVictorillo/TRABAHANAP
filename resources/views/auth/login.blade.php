@@ -119,14 +119,15 @@
 </div>
   <script>
 
-document.addEventListener('DOMContentLoaded', function () {
+ document.addEventListener('DOMContentLoaded', function () {
+    // Success message duration
     const alert = document.querySelector('.alert-success');
     if (alert) {
         setTimeout(() => {
             alert.remove();
         }, 3000); // 3 seconds
     }
-});
+    })
     // Modal functionality
     const modal = document.getElementById('forgotPasswordModal');
     const forgotPasswordLink = document.getElementById('forgotPasswordLink');

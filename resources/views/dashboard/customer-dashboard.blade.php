@@ -1,4 +1,9 @@
   @include('customer.header')
+
+  @if(!$user->profile_completed)
+    @include('completeProfile.customerCompleteProfile')
+@endif
+
 @include('customer.maincontent')
 @include('customer.footer')
   

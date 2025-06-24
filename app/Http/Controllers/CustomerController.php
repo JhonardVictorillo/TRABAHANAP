@@ -49,12 +49,23 @@ class CustomerController extends Controller
     // Fetch the authenticated user's data
     $user = auth()->user();
     $notifications = $user->notifications; 
-    $recentFreelancers = User::where('role', 'freelancer')
-    ->where('is_verified', true)
-    ->with('categories') // Load categories relationship
-    ->latest() // Order by the most recent
-    ->take(6) // Limit to 6 freelancers
-    ->get();
+     // Get freelancers this customer has booked appointments with
+      // Get freelancers this customer has completed appointments with
+    $completedAppointments = Appointment::where('customer_id', $user->id)
+        ->where('status', 'completed')  // Only consider completed appointments
+        ->orderBy('date', 'desc')       // Most recent first
+        ->get();
+    
+    // Extract unique freelancer IDs from completed appointments
+    $freelancerIds = $completedAppointments->pluck('freelancer_id')->unique()->toArray();
+    
+    // Get the freelancer profiles
+    $recentFreelancers = User::whereIn('id', $freelancerIds)
+        ->where('role', 'freelancer')
+        ->where('is_verified', true)
+        ->with('categories')
+        ->take(6)
+        ->get();
     // Pass the data to the profile view
     return view('customerProfile', compact('user','recentFreelancers', 'notifications'));
 }
@@ -118,7 +129,7 @@ public function getAppointments(Request $request)
     $events = $appointments->map(function ($appointment) {
         return [
             'id' => $appointment->id,
-            'title' => $appointment->name . ' (' . ucfirst($appointment->status) . ')', 
+            'title' => $appointment->freelancer->firstname . ' ' . $appointment->freelancer->lastname . ' (' . ucfirst($appointment->status) . ')', 
             'start' => $appointment->date,
             'color' => $this->getStatusColor($appointment->status), 
         ];

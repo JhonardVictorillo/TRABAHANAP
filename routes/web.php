@@ -16,6 +16,8 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
+use App\Http\Controllers\Admin\CategoryRequestController;
+use App\Http\Controllers\Auth\RoleSwitchController;
 
 
 use Illuminate\Support\Facades\Auth;
@@ -37,8 +39,8 @@ Route::post('/login', [LoginController::class, 'login'])->name('login.submit');
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 // Role Selection Routes (Protected by 'auth' middleware)
-Route::get('/select-role', [RoleController::class, 'showRoleForm'])->name('select.role')->middleware('auth');
-Route::post('/select-role', [RoleController::class, 'saveRole'])->name('save.role')->middleware('auth');
+// Route::get('/select-role', [RoleController::class, 'showRoleForm'])->name('select.role')->middleware('auth');
+// Route::post('/select-role', [RoleController::class, 'saveRole'])->name('save.role')->middleware('auth');
 
 // Freelancer Dashboard Route
 Route::get('/freelancer-dashboard', function () {
@@ -52,11 +54,11 @@ Route::get('/freelancer-dashboard', function () {
 // Route::post('/freelancer-dashboard/update', [FreelancerController::class, 'update'])->name('freelancer.dashboard.update');
 
 Route::prefix('profile')->middleware('auth')->group(function () {
-    Route::get('/freelancer', [ProfileController::class, 'showFreelancerProfileForm'])
-        ->name('profile.freelancer');
+    // Route::get('/freelancer', [ProfileController::class, 'showFreelancerProfileForm'])
+    //     ->name('profile.freelancer');
 
-    Route::get('/customer', [ProfileController::class, 'showCustomerProfileForm'])
-        ->name('profile.customer');
+    // Route::get('/customer', [ProfileController::class, 'showCustomerProfileForm'])
+    //     ->name('profile.customer');
 
     Route::post('/complete', [ProfileController::class, 'submitCompleteProfileForm'])
         ->name('profile.complete');
@@ -85,6 +87,15 @@ Route::put('/admin/posts/{id}/reject', [AdminController::class, 'rejectPost'])->
 Route::post('/admin/freelancer/{id}/verify', [AdminController::class, 'verifyFreelancer'])->name('admin.verifyFreelancer');
 Route::post('/admin/freelancer/{id}/reject', [AdminController::class, 'rejectFreelancer'])->name('admin.rejectFreelancer');
 
+Route::prefix('admin')->group(function () {
+    // Category request routes
+    Route::post('/category-requests/{id}/approve', [CategoryRequestController::class, 'approve'])
+        ->name('admin.category-requests.approve');
+    Route::post('/category-requests/{id}/decline', [CategoryRequestController::class, 'decline'])
+        ->name('admin.category-requests.decline');
+    Route::get('/category-requests/pending-count', [CategoryRequestController::class, 'pendingCount'])
+        ->name('admin.category-requests.pending-count');
+});
 
 //complete profile route
 Route::post('/profile/complete', [ProfileController::class, 'submitCompleteProfileForm'])->name('profile.complete');
@@ -184,3 +195,22 @@ Route::post('/admin/user/{id}/unban', [AdminController::class, 'unbanUser'])->na
 // no-show appointment
 Route::post('/appointments/{id}/no-show', [AppointmentController::class, 'markNoShow'])->name('appointments.no_show');
 Route::get('/freelancer/{id}/available-schedules', [AppointmentController::class, 'getAvailableSchedules']);
+
+
+
+// Role switching routes
+Route::post('/switch-mode', [RoleSwitchController::class, 'switchMode'])->name('switch.mode');
+
+// Become a freelancer/customer
+Route::get('/become-freelancer', [RoleSwitchController::class, 'becomeFreelancer'])->name('become.freelancer');
+Route::post('/become-freelancer', [RoleSwitchController::class, 'processFreelancerApplication']);
+
+Route::get('/become-customer', [RoleSwitchController::class, 'becomeCustomer'])->name('become.customer');
+Route::post('/become-customer', [RoleSwitchController::class, 'processCustomerApplication']);
+
+// Onboarding routes
+Route::get('/freelancer-onboarding', [RoleSwitchController::class, 'freelancerOnboarding'])->name('freelancer.onboarding');
+Route::post('/freelancer-onboarding', [RoleSwitchController::class, 'completeFreelancerOnboarding']);
+
+Route::get('/customer-onboarding', [RoleSwitchController::class, 'customerOnboarding'])->name('customer.onboarding');
+Route::post('/customer-onboarding', [RoleSwitchController::class, 'completeCustomerOnboarding']);

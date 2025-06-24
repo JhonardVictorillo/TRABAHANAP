@@ -43,8 +43,8 @@
     <div class="table-header">
       <h2>Recent Transactions</h2>
     </div>
-    
-    <table>
+     <div class="admin-table-container">
+     <table class="admin-table">
       <thead>
         <tr>
           <th>Date</th>
@@ -96,7 +96,7 @@
         @endforelse
       </tbody>
     </table>
-    
+    </div>
     <!-- Pagination -->
     @if(isset($revenueTransactions) && method_exists($revenueTransactions, 'links'))
       <div class="pagination-container">

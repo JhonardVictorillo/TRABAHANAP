@@ -24,7 +24,8 @@
            
         </form>
         <!-- User Stats Table -->
-        <table class="admin-table">
+         <div class="admin-table-container">
+            <table class="admin-table">
             <thead>
                 <tr>
                     <th>User</th>
@@ -48,6 +49,8 @@
             @endforeach
             </tbody>
         </table>
+        </div>
+        <!-- Pagination -->
         <div class="pagination-container" style="margin-top: 1.5rem;">
         {{ $userStats->appends(['search' => request('search'), 'section' => 'userstats'])->links() }}
         </div>

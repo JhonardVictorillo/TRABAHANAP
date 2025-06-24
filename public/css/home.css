@@ -1,8 +1,8 @@
 
 :root {
-    --primary-color: #118f39;
-    --text-color: #333;
-    --background-color: #f5f5f5;
+  --primary-color: #2563eb;     /* Royal Blue */
+  --text-color: #333333;        /* Dark Gray (keeping your current text color) */
+  --background-color: #f8fafc;
   }
   
 
@@ -80,15 +80,15 @@
   
 .navbar button{
     background: transparent;
-    border: 2px solid #118f39;
-    color: #118f39;
+    border: 2px solid var(--text-color);;
+    color: var(--text-color);;
     border-radius: 20px;
     padding: 5px 15px;
     cursor: pointer;
     transition: 0.3s;
 }
 .navbar button:hover{
-    background: #118f39;
+    background:  var(--primary-color);
     color: #fff;
 }
 
@@ -195,7 +195,7 @@
     transition: background 0.3s ease;
   }
   .btn:hover {
-    background: #0e7e33;
+    background:var(--primary-color);
   }
   
  
@@ -476,7 +476,7 @@
 
 .post-card-category {
   font-size: 0.95rem;
-  color: #888;
+  color: var(--text-color);
   margin-bottom: 0.1rem;
   text-transform: capitalize;
 }
@@ -500,7 +500,7 @@
 }
 
 .post-card-rating .rating-count {
-  color: #888;
+  color: var(--text-color);
   font-size: 0.95rem;
 }
 
@@ -521,7 +521,7 @@
 }
 
 .post-card-desc {
-  color: #444;
+  color: var(--text-color);
   font-size: 0.98rem;
   margin-bottom: 1rem;
   min-height: 32px;
@@ -543,9 +543,9 @@
 
 .post-card-btn {
   width: 100%;
-  background: var(--primary-color);
-  color: #fff;
-  border: none;
+  background: var(--background-color);
+  color: var(--text-color);
+  /* border: 2px solid var(--primary-color); */
   border-radius: 999px;
   padding: 0.7rem 0;
   font-size: 1.08rem;
@@ -556,13 +556,16 @@
 }
 
 .post-card-btn:hover {
-  background: #0e7e33;
+  background:var(--primary-color);
+  color: #fff;
+  border: none;
 }
 
 .star-yellow {
   color: #FFD700;
   font-size: 1.1rem;
 }
+
 
 /* Login Popup */
 .login-popup-overlay {

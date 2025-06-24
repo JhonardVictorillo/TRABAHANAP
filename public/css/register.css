@@ -363,20 +363,47 @@ body {
   
   
   /* Animation for the success message */
-  @keyframes slideDown {
-    from {
-      opacity: 0;
-      transform: translateY(-10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
   
-  .alert-success {
-    animation: slideDown 0.3s ease-in-out;
+.alert-success {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #d4edda; /* Light green background */
+  color: #155724; /* Dark green text */
+  border: 1px solid #c3e6cb; /* Green border */
+  padding: 15px 20px;
+  border-radius: 5px;
+  font-size: 1rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  width: 90%; /* Adjust width as needed */
+  max-width: 600px;
+  animation: slideDown 0.5s ease-in-out;
+}
+
+/* Icon inside the success message */
+.alert-success i {
+  font-size: 1.2rem;
+  color: #155724;
+}
+
+/* Slide Down Animation */
+@keyframes slideDown {
+  from {
+      transform: translateX(-50%) translateY(-100%);
+      opacity: 0;
   }
+  to {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+  }
+}
 
 /* Responsive Design */
 @media (max-width: 968px) {
@@ -417,3 +444,89 @@ body {
 .password-toggle-text:hover {
   color: #0056b3; /* Darker blue on hover */
 }
+
+ /* Role Selection Styles */
+        .role-selection-container {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 25px;
+            gap: 20px; /* Increased gap for 2 options */
+            max-width: 600px; /* Control maximum width */
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .role-option {
+            flex: 1;
+            position: relative;
+            border-radius: 10px;
+            overflow: hidden;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, border-color 0.3s ease;
+        }
+
+        .role-option:hover {
+            transform: translateY(-5px);
+        }
+
+        .role-option input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+        }
+
+        .role-option label {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 25px; /* More padding for larger touch targets */
+            text-align: center;
+            cursor: pointer;
+            height: 100%;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            transition: all 0.3s;
+        }
+
+        .role-option input[type="radio"]:checked + label {
+            border-color: #118f39;
+            background-color: rgba(17, 143, 57, 0.05);
+            box-shadow: 0 0 0 2px #118f39;
+        }
+
+        .role-icon {
+            font-size: 4rem; /* Larger icons */
+            margin-bottom: 15px;
+            color: #118f39;
+        }
+
+        .role-title {
+            font-weight: bold;
+            font-size: 1.3rem; /* Larger title */
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .role-description {
+            font-size: 0.95rem;
+            color: #666;
+            line-height: 1.4;
+        }
+
+        .form-group h3 {
+            margin-bottom: 15px;
+            color: #118f39;
+            font-size: 1.2rem;
+            text-align: center; /* Center the heading */
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .role-selection-container {
+                flex-direction: column;
+            }
+            
+            .role-option {
+                margin-bottom: 15px;
+            }
+          }

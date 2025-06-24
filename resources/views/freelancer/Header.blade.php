@@ -11,11 +11,14 @@
   <link  rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap"/>
   <link rel="stylesheet"href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"/>
   <link rel="stylesheet" href="{{asset ('css/NewFreelancer.css')}}" />
+  
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <!-- FullCalendar CSS -->
   <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet">
    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"rel="stylesheet"/>
- 
+ <link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.css' rel='stylesheet' />
+
+
  
  <!-- Tailwind CSS (Optional for better styling) -->
  <script src="https://cdn.tailwindcss.com"></script>
@@ -104,7 +107,7 @@
         <span class="user-name">{{ Auth::user()->firstname }}</span>
         <p class="freelancer">{{ Auth::user()->role }}</p>
     </div>
-    
+      
     </div>
   </header>
 

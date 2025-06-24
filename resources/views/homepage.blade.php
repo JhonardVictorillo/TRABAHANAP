@@ -171,23 +171,7 @@
   </div>
 </section>
 
-<!-- Login/Register Popup -->
-<div id="login-popup" class="login-popup-overlay">
-  <div class="login-popup-modal">
-    <div class="login-popup-header">
-      <span class="login-popup-icon"><i class="fas fa-lock"></i></span>
-      <h3>Please Login or Register</h3>
-    </div>
-    <p class="login-popup-text">You need to login or register to view freelancer profiles.</p>
-    <div class="login-popup-actions">
-      <a href="{{ route('login') }}" class="logbtn login-popup-btn">Login</a>
-      <a href="{{ route('register.form') }}" class="regisbtn login-popup-btn">Register</a>
-    </div>
-    <button onclick="document.getElementById('login-popup').style.display='none'" class="login-popup-close">
-      <i class="fas fa-times"></i> Close
-    </button>
-  </div>
-</div>
+
 
   <section class="how-it-works" id="how-it-works">
     <h2 data-aos="fade-up">How It Works</h2>

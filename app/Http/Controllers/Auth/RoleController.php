@@ -8,11 +8,20 @@ use Illuminate\Support\Facades\Auth;
 
 class RoleController extends Controller
 {
-    /**
-     * Show the role selection form.
-     */
+  
     public function showRoleForm()
     {
+        // If user already has a role, redirect them to the appropriate dashboard
+        $user = Auth::user();
+        if ($user->role) {
+            if ($user->role === 'freelancer') {
+                return redirect()->route('freelancer.dashboard');
+            } else {
+                return redirect()->route('customer.dashboard');
+            }
+        }
+        
+        // Only show the role selection form to users without a role
         return view('auth.select-role');
     }
 
@@ -21,30 +30,20 @@ class RoleController extends Controller
      */
     public function saveRole(Request $request)
     {
-        $request->validate([
-            'role' => 'required|in:freelancer,customer'
+        $validated = $request->validate([
+            'role' => 'required|in:freelancer,customer',
         ]);
 
         $user = Auth::user();
-        $user->role = $request->input('role');
+        $user->role = $validated['role'];
+        $user->current_mode = $validated['role']; // Also set current_mode
         $user->save();
 
-        // Redirect to profile completion page if the profile is incomplete
-    if (!$user->profile_completed) {
-        if ($user->role === 'freelancer') {
-            return redirect()->route('profile.freelancer');
-        } elseif ($user->role === 'customer') {
-            return redirect()->route('profile.customer');
+        // Redirect to the appropriate dashboard
+        if ($validated['role'] === 'freelancer') {
+            return redirect()->route('freelancer.dashboard');
+        } else {
+            return redirect()->route('customer.dashboard');
         }
-    }
-    
-        if ($user->role === 'freelancer') {
-            return redirect()->route('freelancer.dashboard')->with('success', 'Role selected successfully!');
-        } elseif ($user->role === 'customer') {
-            return redirect()->route('customer.dashboard')->with('success', 'Role selected successfully!');
-        }
-
-        // Fallback if role doesn't match
-        return redirect()->route('select.role')->with('error', 'Please select a valid role.');
     }
 }

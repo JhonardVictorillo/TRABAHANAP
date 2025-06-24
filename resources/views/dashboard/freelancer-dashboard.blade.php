@@ -1,7 +1,13 @@
 
 @include('freelancer.Header')
 
-
+ 
+  @if(!$user->profile_completed)
+     @php
+        $categories = \App\Models\Category::all();
+    @endphp
+        @include('completeProfile.freelancerCompleteProfile')
+    @endif
 @include('freelancer.dashboardSection')
  @include('freelancer.appointmentSection')
  @include('freelancer.rescheduleSection')
@@ -9,7 +15,7 @@
   @include('freelancer.postSection')
   
  
-
+   
            
 
        <!-- Success message -->
@@ -20,6 +26,15 @@
         </div>
         @endif
     
+
+    @if(!$user->profile_completed)
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Show the modal when the page loads for users with incomplete profiles
+        document.getElementById('completeAccountModal').style.display = 'flex';
+    });
+</script>
+@endif
 
 
    <script>

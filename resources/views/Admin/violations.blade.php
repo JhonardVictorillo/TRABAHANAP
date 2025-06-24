@@ -24,7 +24,8 @@
           
         </form>
         <!-- Violations Table -->
-        <table class="admin-table">
+       <div class="admin-table-container">
+            <table class="admin-table">
             <thead>
                 <tr>
                     <th>Appointment ID</th>
@@ -66,6 +67,8 @@
             @endforeach
             </tbody>
         </table>
+        </div>
+        <!-- Pagination -->
         <div class="pagination-container" style="margin-top: 1.5rem;">
         {{ $violations->appends(['search' => request('search'), 'section' => 'violations'])->links() }}
         </div>

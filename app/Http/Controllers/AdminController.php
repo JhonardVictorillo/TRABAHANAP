@@ -11,7 +11,7 @@ use App\Models\PlatformRevenue;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use App\Notifications\PostApprovedNotification;
-
+use App\Models\CategoryRequest; // Import the CategoryRequest model
 class AdminController extends Controller
 {
    public function dashboard(Request $request){
@@ -26,9 +26,40 @@ class AdminController extends Controller
         $freelancers = User::with('categories')->where('role', 'freelancer')->get(); 
         $customer = User::where('role', 'customer')->get();
         $users = User::all();
-      $categories = Category::all();
+    
       $posts = Post::with('freelancer')->where('status', 'pending')->get();
     
+        $categories = Category::orderBy('name')->simplePaginate(10);
+           // Count all types of requests for filter badges
+        $categoryRequestsCount = CategoryRequest::count();
+        $pendingCount = CategoryRequest::where('status', 'pending')->count();
+        $approvedCount = CategoryRequest::where('status', 'approved')->count();
+        $declinedCount = CategoryRequest::where('status', 'declined')->count();
+        // For category requests - initialize as empty
+        $categoryRequests = collect([]); // Use a simple collection for now
+
+        // If tab is set to requests, get category requests with simple pagination
+        if ($request->tab == 'requests') {
+            $requestsQuery = CategoryRequest::with('user');
+            
+            if ($request->has('status')) {
+                $requestsQuery->where('status', $request->status);
+            }
+            
+            $categoryRequests = $requestsQuery->orderBy('created_at', 'desc')->simplePaginate(10);
+        } else {
+            // Create a simple empty paginator
+            $categoryRequests = new \Illuminate\Pagination\Paginator(
+                collect([]), // Empty collection
+                10,          // Per page
+                1,           // Current page
+                [
+                    'path' => request()->url(),
+                    'pageName' => 'page_req' // Use a different page name to avoid conflicts
+                ]
+            );
+        }
+
       // Get search input
     $search = $request->input('search');
     $section = $request->input('section', 'bookings');
@@ -97,12 +128,16 @@ class AdminController extends Controller
            'violations' => $violations,        // <-- Add this line
            'userStats' => $userStats,  
            'section' => $section,
-
+             'categoryRequests' => $categoryRequests, // Pass category requests to the view
            // Revenue data
             'totalRevenue' => $totalRevenue,
             'currentMonthRevenue' => $currentMonthRevenue,
             'revenueFromCompletions' => $revenueFromCompletions,
-            'revenueTransactions' => $revenueTransactions
+            'revenueTransactions' => $revenueTransactions,
+            'categoryRequestsCount' => $categoryRequestsCount,
+            'pendingCount' => $pendingCount,
+            'approvedCount' => $approvedCount,
+            'declinedCount' => $declinedCount,
           
         ]);
     

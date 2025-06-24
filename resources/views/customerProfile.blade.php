@@ -268,7 +268,7 @@
             <div class="freelancer-card bg-white rounded-lg shadow-lg p-8">
                 <!-- Freelancer Profile Picture -->
                 <img 
-                    src="{{ $freelancer->profile_picture ? asset('storage/' . $freelancer->profile_picture) : asset('images/defaultprofile.png') }}" 
+                    src="{{ $freelancer->profile_picture ? asset('storage/' . $freelancer->profile_picture) : asset('images/defaultprofile.jpg') }}" 
                     alt="{{ $freelancer->firstname }} {{ $freelancer->lastname }}" 
                     class="w-24 h-24 rounded-full mx-auto object-cover shadow-md"
                 >

@@ -37,11 +37,13 @@ class ProfileController extends Controller
             'firstname' => 'required|string|max:255',
             'lastname' => 'required|string|max:255',
             'email' => 'required|email',
+             'bio' => 'nullable|string|max:500',
             'contact_number' => 'required|string',
             'province' => 'required|string',
             'city' => 'required|string',
             'zipcode' => 'required|string',
             'google_map_link' => 'nullable|url',
+           
             
             'profile_picture' => 'required|image|mimes:jpg,jpeg,png|max:2048', // New validation for profile picture
         ]);
@@ -54,6 +56,7 @@ class ProfileController extends Controller
         $user->firstname = $validatedData['firstname'];
         $user->lastname = $validatedData['lastname'];
         $user->email = $validatedData['email'];
+        $user->bio = $validatedData['bio'] ?? null; 
         $user->contact_number = $validatedData['contact_number'];
         $user->province = $validatedData['province'];
         $user->city = $validatedData['city'];
@@ -86,12 +89,11 @@ class ProfileController extends Controller
         }
 
         // Add category selection only if the user is a freelancer
-        $validatedData['category'] = $request->validate([
-            'category' => 'required|array|min:1',
-            'category.*' => 'integer',
-        ])['category'];
+        $validatedData = array_merge($validatedData, $request->validate([
+            'category' => 'required|exists:categories,id',
+        ]));
 
-        $user->categories()->sync($validatedData['category']);
+        $user->categories()->sync([$validatedData['category']]);
     }
         
         // Mark the profile as completed

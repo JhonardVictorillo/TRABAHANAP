@@ -10,6 +10,11 @@ use Illuminate\Http\Request;
 use App\Models\FreelancerAvailability;
 use App\Models\PlatformRevenue;
 use Carbon\Carbon;
+use App\Models\CategoryRequest;
+use App\Notifications\NewCategoryRequestNotification;
+use App\Models\User;
+use Illuminate\Support\Facades\Storage;
+
 
 
 class FreelancerController extends Controller
@@ -25,6 +30,7 @@ class FreelancerController extends Controller
        $freelancerCategory = $user->categories()->first();
        $unreadNotifications = $user->unreadNotifications; // Get unread notifications
 
+        $isProfileComplete = $user->profile_completed;
     // Fetch availabilities (no need to format start_time and end_time manually)
     $availabilities = $user->availabilities;
 
@@ -135,6 +141,7 @@ class FreelancerController extends Controller
             'revenueTransactions' => $revenueTransactions,  
             'lateCancellationRevenue' => $lateCancellationRevenue,
             'noShowRevenue' => $noShowRevenue,
+             'isProfileComplete' => $isProfileComplete,
         ]);
 
 }   
@@ -383,36 +390,86 @@ public function update(Request $request)
 {
     $user = Auth::user();
 
-    $request->validate([
+    // Validate the request data with expanded validation rules
+    $validated = $request->validate([
         'firstname' => 'required|string|max:255',
         'lastname' => 'required|string|max:255',
         'email' => 'required|email|unique:users,email,' . $user->id,
-        'contact_number' => 'nullable|string',
-        'province' => 'nullable|string',
-        'city' => 'nullable|string',
+        'bio' => 'nullable|string|max:300',
+        'contact_number' => 'nullable|string|max:20',
+        'province' => 'nullable|string|max:255',
+        'city' => 'nullable|string|max:255',
+        'zipcode' => 'nullable|string|max:20',
+        'google_map_link' => 'nullable|url|max:255',
         'experience_level' => 'required|string|in:Beginner,Intermediate,Expert',
+        'specialization' => 'nullable|string|max:255',
+        'skills' => 'nullable|array',
+        'skills.*' => 'string|max:50',
+        'hourly_rate' => 'nullable|numeric|min:0',
+        'daily_rate' => 'nullable|numeric|min:0',
+        'category_request' => 'nullable|string|max:255',
         'profile_picture' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        'categories' => 'nullable|array',
+        'categories.*' => 'exists:categories,id',
     ]);
 
-    $user->firstname = $request->firstname;
-    $user->lastname = $request->lastname;
-    $user->email = $request->email;
-    $user->contact_number = $request->contact_number;
-    $user->province = $request->province;
-    $user->city = $request->city;
-    $user->experience_level = $request->experience_level;
-
-    // Profile picture upload
+    // Profile picture upload with proper error handling
     if ($request->hasFile('profile_picture')) {
-        $imagePath = $request->file('profile_picture')->store('profile_pictures', 'public');
-        $user->profile_picture = $imagePath;
+        try {
+            // Delete old profile picture if exists
+            if ($user->profile_picture && Storage::disk('public')->exists($user->profile_picture)) {
+                Storage::disk('public')->delete($user->profile_picture);
+            }
+            
+            $imagePath = $request->file('profile_picture')->store('profile_pictures', 'public');
+            $user->profile_picture = $imagePath;
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Failed to upload profile picture: ' . $e->getMessage());
+        }
     }
 
+    // Handle skills array - convert to JSON for storage
+    if (isset($validated['skills']) && is_array($validated['skills'])) {
+        $user->skills = json_encode($validated['skills']);
+    } elseif (!$request->has('skills')) {
+        $user->skills = null;
+    }
+    
+    // Handle category request (only if it's new and user doesn't already have a pending request)
+    if ($request->filled('category_request') && 
+        $request->category_request != $user->category_request && 
+        !$user->category_request) {
+        
+        try {
+            // Create a record in category_requests table
+            $categoryRequest = new CategoryRequest();
+            $categoryRequest->user_id = $user->id;
+            $categoryRequest->category_name = $request->category_request;
+            $categoryRequest->status = 'pending';
+            $categoryRequest->save();
+            
+            // Notify admins about the new request
+            $admins = User::where('role', 'admin')->get();
+            foreach ($admins as $admin) {
+             $admin->notify(new NewCategoryRequestNotification($user, $request->category_request));
+            }
+        } catch (\Exception $e) {
+            // Continue with the update even if notification fails
+            \Log::error('Failed to process category request: ' . $e->getMessage());
+        }
+    }
+    
+    // Handle categories relationship if present
+    if ($request->has('categories')) {
+        $user->categories()->sync($request->categories);
+    }
+
+    // Update user attributes
+    $user->fill(array_diff_key($validated, array_flip(['profile_picture', 'skills', 'categories'])));
     $user->save();
 
     return redirect()->back()->with('success', 'Profile updated successfully!');
 }
-
 public function setAvailability(Request $request)
 {
    

@@ -17,39 +17,37 @@ class RegisterController extends Controller
         return view('auth.register'); // Ensure this view exists
     }
     
-    public function register(Request $request)
+      public function register(Request $request)
     {
-       
-               
-        // Validate the incoming request data
+        // Validate the incoming request data - ADD ROLE TO VALIDATION
         $request->validate([
             'firstname' => 'required|string|max:255',
             'lastname' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
-           'contact_number' => 'required|string|regex:/^[0-9]{10}$/', 
+            'contact_number' => 'required|string|regex:/^[0-9]{10}$/',
+            'role' => 'required|string|in:customer,freelancer', // Add this line
         ],[
             'email.unique' => 'The email address is already in use.',
             'contact_number.regex' => 'The contact number must be 10 digits.',
-
-
+            'role.required' => 'Please select whether you want to join as a customer or freelancer.',
         ]);
         
-          // Create a new user in the database
-          $user = User::create([
+        // Create a new user in the database - SAVE ROLE DURING REGISTRATION
+        $user = User::create([
             'firstname' => $request->firstname,
             'lastname' => $request->lastname,
             'email' => $request->email,
-            'password' => Hash::make($request->password),  // Encrypt the password
-            'contact_number' => $request->contact_number, 
-            'role' => null, // Explicitly set the role to null
+            'password' => Hash::make($request->password),
+            'contact_number' => $request->contact_number,
+            'role' => $request->role, // Save role from the form
+            'current_mode' => $request->role, // Set current_mode to match the role
             'email_verification_token' => Str::random(60),
         ]);
-        // dd($user->email_verification_token); 
 
         Mail::to($user->email)->send(new VerifyEmail($user));
 
-        return redirect()->route('login')->with('success', 'Account created successfully! Please log in.');
+        return redirect()->route('login')->with('success', 'Account created successfully! Please check your email to verify your account.');
     }
 
     public function verifyEmail($token)
