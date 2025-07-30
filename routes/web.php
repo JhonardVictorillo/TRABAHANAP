@@ -87,6 +87,10 @@ Route::put('/admin/posts/{id}/reject', [AdminController::class, 'rejectPost'])->
 Route::post('/admin/freelancer/{id}/verify', [AdminController::class, 'verifyFreelancer'])->name('admin.verifyFreelancer');
 Route::post('/admin/freelancer/{id}/reject', [AdminController::class, 'rejectFreelancer'])->name('admin.rejectFreelancer');
 
+Route::post('/admin/notifications/mark-all-as-read', [AdminController::class, 'markNotificationsAsRead'])->name('admin.notifications.markAllAsRead');
+Route::post('/admin/notifications/{id}/mark-as-read', [AdminController::class, 'markSingleNotificationAsRead'])->name('admin.notifications.markSingleAsRead');
+Route::get('/admin/notifications', [AdminController::class, 'getNotifications'])->name('admin.notifications.get');
+
 Route::prefix('admin')->group(function () {
     // Category request routes
     Route::post('/category-requests/{id}/approve', [CategoryRequestController::class, 'approve'])
@@ -95,6 +99,10 @@ Route::prefix('admin')->group(function () {
         ->name('admin.category-requests.decline');
     Route::get('/category-requests/pending-count', [CategoryRequestController::class, 'pendingCount'])
         ->name('admin.category-requests.pending-count');
+
+         // Platform withdrawal routes
+    Route::post('/admin/platform-withdrawals', [PlatformWithdrawalController::class, 'store'])
+        ->name('admin.withdraw.platform.revenue');
 });
 
 //complete profile route
@@ -148,7 +156,7 @@ Route::post('/categories', [CategoryController::class, 'store'])->name('categori
 Route::get('/categories/{id}/edit', [CategoryController::class, 'edit'])->name('categories.edit');
 Route::put('/categories/{id}', [CategoryController::class, 'update'])->name('categories.update');
 Route::delete('/categories/{id}', [CategoryController::class, 'destroy'])->name('categories.destroy');
-
+Route::get('/categories/{category}/users', [CategoryController::class, 'getUsers'])->name('categories.users');
 // post edit
 Route::get('/posts/{id}/edit', [PostController::class, 'edit'])->name('posts.edit');
 Route::put('/posts/{id}', [PostController::class, 'update'])->name('posts.update');
@@ -187,6 +195,10 @@ Route::get('/freelancer/{freelancerId}/availability', [CustomerController::class
 Route::post('/pay/commitment-fee', [PaymentController::class, 'createCheckoutSession'])->name('pay.commitment');
 Route::get('/payment/success', [PaymentController::class, 'success'])->name('payment.success');
 Route::get('/payment/cancel', [PaymentController::class, 'cancel'])->name('payment.cancel');
+Route::post('/appointment/{id}/complete-payment', [PaymentController::class, 'createFinalPaymentSession'])->name('payment.final');
+Route::get('/payment/final-success', [PaymentController::class, 'finalPaymentSuccess'])->name('payment.final.success');
+Route::get('/payment/final-cancel', [PaymentController::class, 'finalPaymentCancel'])->name('payment.final.cancel');
+
 
 //banned & unbanned freelancer
 Route::post('/admin/user/{id}/ban', [AdminController::class, 'banUser'])->name('admin.user.ban');
@@ -214,3 +226,18 @@ Route::post('/freelancer-onboarding', [RoleSwitchController::class, 'completeFre
 
 Route::get('/customer-onboarding', [RoleSwitchController::class, 'customerOnboarding'])->name('customer.onboarding');
 Route::post('/customer-onboarding', [RoleSwitchController::class, 'completeCustomerOnboarding']);
+
+// Freelancer withdrawal routes
+Route::middleware(['auth', 'role:freelancer'])->prefix('freelancer')->name('freelancer.')->group(function () {
+    Route::post('/withdraw', [FreelancerPayoutController::class, 'store'])->name('withdraw');
+    Route::post('/withdrawals/{id}/cancel', [FreelancerPayoutController::class, 'cancel'])->name('withdraw.cancel');
+    Route::get('/withdrawals/{id}', [FreelancerPayoutController::class, 'show'])->name('withdraw.show');
+});
+
+// Admin withdrawal management routes
+Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/withdrawals', [AdminPayoutController::class, 'index'])->name('withdrawals.index');
+    Route::get('/withdrawals/{id}', [AdminPayoutController::class, 'show'])->name('withdrawals.show');
+    Route::post('/withdrawals/{id}/process', [AdminPayoutController::class, 'process'])->name('withdrawals.process');
+    Route::post('/withdrawals/{id}/reject', [AdminPayoutController::class, 'reject'])->name('withdrawals.reject');
+});

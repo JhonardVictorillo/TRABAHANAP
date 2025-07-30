@@ -1,7 +1,7 @@
 :root {
-    --primary-color: #0ad48b;
-    --secondary-color: #0066cc;
-    --danger-color: #f44336;
+    --primary-color: #2563eb; /* Changed from #0ad48b to royal blue */
+    --secondary-color: #3b82f6; /* Changed from #0066cc to lighter blue */
+    --danger-color: #f44336; /* Kept the same */
     --text-color: #333;
     --text-muted: #666;
     --bg-color: #f9f9f9;
@@ -47,26 +47,14 @@ body {
 }
 
 .sidebar-header .brand-span {
-    color: #00b86e;
+    color: #3b82f6;
 }
 .logo-header {
     display: flex;
     align-items: center;
   }
   
-  .logo-icon {
-    display: inline-block;
-    width: 40px;
-    height: 40px;
-    background: linear-gradient(135deg, #14d189, #42d166);
-    border-radius: 50%;
-    color: #fff;
-    text-align: center;
-    line-height: 40px;
-    font-weight: bold;
-    margin-right: 10px;
-    font-size: 1.2rem;
-  }
+  
   
 .sidebar-links {
     list-style: none;
@@ -94,7 +82,7 @@ body {
 
 .sidebar-links li a:hover,
 .sidebar-links li a.active {
-    background: #00b86e;
+     background: #2563eb;
     color: #fff;
 }
 
@@ -330,19 +318,11 @@ body {
     margin: 0; 
   }
   
-.card1.active {
-    border: 2px solid #08bf75;
-}
-
-.card2.active {
-    border: 2px solid #08bf75;
-}
-
-.card3.active {
-    border: 2px solid #08bf75;
-}
+.card1.active, 
+.card2.active, 
+.card3.active, 
 .card4.active {
-    border: 2px solid #08bf75;
+    border: 2px solid #2563eb; /* Changed from #08bf75 to royal blue */
 }
 
 .pending-accounts {
@@ -405,6 +385,7 @@ body {
 
 .verify-btn:hover {
     opacity: 0.9;
+     background-color: #1d4ed8;
 }
 
 .delete-btn:hover {
@@ -548,7 +529,7 @@ body {
 .home-hero {
     position: relative;
     width: 100%;
-    background: linear-gradient(90deg, #17b571, #2ec36e);
+    background: linear-gradient(90deg, #2563eb, #3b82f6);
     border-radius: 16px;
     padding: 20px;
     margin-bottom: 20px;
@@ -624,7 +605,7 @@ body {
 }
 
 .calendar-grid div.highlight {
-    background: #36d1dc;
+    background: #3b82f6;
     color: #fff;
 }
 
@@ -638,7 +619,7 @@ body {
 
 
 .approve-btn {
-    background: #00b86e;
+    background: #2563eb;
     color: white;
     padding: 8px 12px;
     border-radius: 5px;
@@ -648,7 +629,7 @@ body {
 }
 
 .approve-btn:hover {
-    background: #45a049;
+    background: #1d4ed8;
 }
 
 .decline-btn {
@@ -758,7 +739,7 @@ h2 {
 }
 
 .modal-content button {
-    background: #00b86e;
+    background: #2563eb;
     color: white;
     border: none;
     padding: 10px 15px;
@@ -771,7 +752,9 @@ h2 {
 
 
 .modal-content button:hover {
-opacity: 0.9;}
+opacity: 0.9;
+ background: #1d4ed8;
+}
 button {
     padding: 10px 14px;
     border: none;
@@ -782,7 +765,7 @@ button {
 }
 
 #addCategoryBtn {
-    background: #00b86e;
+    background: #2563eb;
             color: #fff;
     font-weight: bold;
     margin-bottom: 15px;
@@ -917,135 +900,256 @@ button {
     margin-right: 2px;
     vertical-align: middle;
 }
-
+/* Admin Notification Styling */
 .notification {
     position: relative;
-    display: inline-block;
+    margin-right: 20px;
 }
+
 .notification-btn {
     background: none;
     border: none;
-    outline: none;
     cursor: pointer;
-    display: flex;
-    align-items: center;
+    padding: 0;
 }
+
 .notif-bell {
     position: relative;
-    width: 28px;
-    height: 28px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
 }
+
 .notif-count {
     position: absolute;
-    top: -6px;
-    right: -8px;
-    background: #ef4444;
-    color: #fff;
-    font-size: 12px;
+    top: -5px;
+    right: -5px;
+    background-color: #ef4444;
+    color: white;
     border-radius: 50%;
-    width: 18px;
+    min-width: 18px;
     height: 18px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: bold;
+    font-size: 11px;
+    padding: 2px;
 }
-.notif-dropdown {
-    position: absolute;
-    right: 0;
-    top: 38px;
-    width: 320px;
-    background: #fff;
-    border-radius: 10px;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
-    z-index: 1050;
-    padding: 0;
+
+.notif-count.hidden {
     display: none;
 }
-.notif-dropdown:not(.hidden) {
-    display: block;
+
+.notif-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    width: 350px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    z-index: 100;
+    max-height: 80vh;
+    overflow-y: auto;
 }
+
+.notif-dropdown.hidden {
+    display: none;
+}
+
 .notif-header {
-    padding: 16px;
+    padding: 15px;
     border-bottom: 1px solid #eee;
+    margin: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
+
 .notif-header h3 {
-    font-size: 1.1rem;
-    font-weight: bold;
-    color: #333;
+    font-size: 16px;
+    font-weight: 600;
     margin: 0;
 }
+
+#refresh-notifications {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #4b5563;
+    padding: 5px;
+}
+
+#refresh-notifications:hover {
+    color: #1f2937;
+}
+
 .notif-list {
-    max-height: 260px;
-    overflow-y: auto;
+    list-style: none;
     margin: 0;
     padding: 0;
-    list-style: none;
 }
+
 .notif-item {
-    padding: 12px 16px;
-    border-bottom: 1px solid #f3f3f3;
-    font-size: 15px;
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+    position: relative;
+    transition: background-color 0.3s ease;
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    background: #fff;
-    transition: background 0.2s;
 }
-.notif-item.notif-read {
-    background: #f3f4f6;
-}
+
 .notif-item:hover {
-    background: #f1f5f9;
+    background-color: #f9f9f9;
 }
-.notif-msg {
-    margin: 0 0 2px 0;
-    color: #374151;
+
+.notif-item.notif-read {
+    background-color: #f5f5f5;
 }
-.notif-msg.notif-msg-read {
+
+.notif-content {
+    display: flex;
+    align-items: flex-start;
+    flex: 1;
+}
+
+.notif-icon {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 12px;
+}
+
+.notif-icon.success {
+    background-color: #d1fae5;
+    color: #059669;
+}
+
+.notif-icon.danger {
+    background-color: #fee2e2;
+    color: #dc2626;
+}
+
+.notif-icon.info {
+    background-color: #dbeafe;
+    color: #3b82f6;
+}
+
+.notif-icon.primary {
+    background-color: #e0f2fe;
+    color: #0ea5e9;
+}
+
+.notif-icon.default {
+    background-color: #f3f4f6;
     color: #6b7280;
 }
-.notif-time {
-    color: #9ca3af;
-    font-size: 12px;
-    margin: 0;
+
+.notif-details {
+    flex: 1;
 }
-.notif-mark-read {
+
+.notif-text-container {
+    position: relative;
+    width: 100%;
+}
+
+.notif-preview {
+    font-size: 13px;
+    line-height: 1.4;
+    margin: 0 0 4px;
+}
+
+.notif-full-content {
+    margin: 0;
+    width: 100%;
+}
+
+.notif-full-content p {
+    font-size: 13px;
+    line-height: 1.4;
+    margin: 0 0 4px;
+}
+
+.notif-additional-info {
+    margin-top: 5px;
+    font-size: 12px;
+    color: #6b7280;
+    background-color: #f9fafb;
+    padding: 5px;
+    border-radius: 4px;
+}
+
+.notif-time {
+    display: block;
+    font-size: 11px;
+    color: #9ca3af;
+    margin-top: 4px;
+}
+
+.toggle-content-btn {
     background: none;
     border: none;
-    color: #16a34a;
-    cursor: pointer;
-    font-size: 13px;
-    text-decoration: underline;
-    margin-left: 10px;
+    color: #3b82f6;
+    font-size: 12px;
     padding: 0;
+    margin-top: 4px;
+    cursor: pointer;
+    display: inline-block;
+    text-decoration: underline;
 }
+
+.toggle-content-btn:hover {
+    color: #2563eb;
+}
+
+.notif-mark-read {
+    padding: 4px 10px;
+    border: none;
+    background-color: #e5e7eb;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    cursor: pointer;
+    color: #4b5563;
+}
+
+.notif-mark-read:hover {
+    background-color: #d1d5db;
+}
+
+.read-status {
+    font-size: 0.75rem;
+    color: #9ca3af;
+    padding: 4px 10px;
+}
+
 .notif-footer {
-    padding: 16px;
+    padding: 12px;
+    background-color: #f9fafb;
     border-top: 1px solid #eee;
     text-align: center;
 }
+
 .notif-mark-all {
-    width: 100%;
-    padding: 10px 0;
-    font-size: 15px;
-    font-weight: 500;
-    color: #fff;
-    background: #16a34a;
-    border: none;
-    border-radius: 7px;
+    background-color: #f3f4f6;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    padding: 8px 16px;
+    font-size: 14px;
     cursor: pointer;
-    transition: background 0.2s;
+    color: #4b5563;
 }
+
 .notif-mark-all:hover {
-    background: #15803d;
+    background-color: #e5e7eb;
 }
+
 .notif-empty {
-    color: #888;
     text-align: center;
+    padding: 30px 15px;
+    color: #9ca3af;
 }
 
 /* booking,violation,userstats table css */
@@ -1195,25 +1299,17 @@ button {
     justify-content: center;
   }
   
-  #revenueSection .card:nth-child(1) .icon {
-    background: #EBF5FF;
-  }
+  
   
   #revenueSection .card:nth-child(1) .icon span {
     color: #3B82F6;
   }
   
-  #revenueSection .card:nth-child(2) .icon {
-    background: #DCFCE7;
-  }
   
   #revenueSection .card:nth-child(2) .icon span {
     color: #10B981;
   }
   
-  #revenueSection .card:nth-child(3) .icon {
-    background: #FEF3C7;
-  }
   
   #revenueSection .card:nth-child(3) .icon span {
     color: #F59E0B;
@@ -1308,7 +1404,7 @@ button {
     display: inline-flex;
   }
   
-  #revenueSection .pagination .page-link {
+  #revenueSection .page-link {
     padding: 8px 12px;
     border-radius: 6px;
     color: #4b5563;
@@ -1317,11 +1413,11 @@ button {
     font-size: 14px;
   }
   
-  #revenueSection .pagination .page-link:hover {
+  #revenueSection .page-link:hover {
     background-color: #f1f5f9;
   }
   
-  #revenueSection .pagination .active .page-link {
+  #revenueSection .active .page-link {
     background-color: #3B82F6;
     color: white;
   }
@@ -1358,7 +1454,7 @@ button {
 }
 
 .category-card-title {
-    color: #4e73df;
+    color: #2563eb;
     font-weight: 700;
     font-size: 1.2rem;
     margin: 0;
@@ -1370,7 +1466,7 @@ button {
 
 /* Button styles */
 .category-add-btn {
-    background-color: #4e73df;
+    background-color: #2563eb;
     color: white;
     border: none;
     border-radius: 0.25rem;
@@ -1385,7 +1481,7 @@ button {
 }
 
 .category-add-btn:hover {
-    background-color: #2e59d9;
+    background-color: #1d4ed8;
 }
 
 /* Tab navigation */
@@ -1423,7 +1519,7 @@ button {
     bottom: -1px;
     width: 100%;
     height: 3px;
-    background-color: #4e73df;
+    background-color: #2563eb;
     border-radius: 1px;
 }
 
@@ -1648,14 +1744,14 @@ button {
 }
 
 .category-filter-btn.active {
-    background-color: #4e73df;
-    border-color: #4e73df;
+     background-color: #2563eb; /* Changed from #4e73df to royal blue */
+    border-color: #2563eb; /* Changed from #4e73df to royal blue */
     color: white;
 }
 
 .category-filter-btn.active .category-count {
     background-color: white;
-    color: #4e73df;
+    color: #2563eb;
 }
 
 .category-filter-btn.active.warning {
@@ -1698,8 +1794,8 @@ button {
 .category-pagination-btn {
     padding: 0.375rem 0.75rem;
     background-color: white;
-    color: #4e73df;
-    border: 1px solid #4e73df;
+   color: #2563eb; /* Changed from #4e73df to royal blue */
+    border: 1px solid #2563eb;
     border-radius: 0.25rem;
     font-size: 0.85rem;
     text-decoration: none;
@@ -1710,7 +1806,7 @@ button {
 }
 
 .category-pagination-btn:not(.category-btn-disabled):hover {
-    background-color: #4e73df;
+  background-color: #2563eb;
     color: white;
     text-decoration: none;
 }
@@ -1837,7 +1933,7 @@ button {
 }
 
 .category-form-control:focus {
-    border-color: #bac8f3;
+    border-color: #2563eb;
     outline: none;
     box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
 }
@@ -1965,4 +2061,200 @@ button {
 .category-request-details strong {
     min-width: 120px;
     display: inline-block;
+}
+
+/* Tab Navigation for revenue section*/
+.admin-revenue-tabs {
+  display: flex;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #ddd;
+}
+
+.admin-tab-btn {
+  padding: 10px 20px;
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 500;
+  color: #666;
+  margin-right: 15px;
+}
+
+.admin-tab-btn.active {
+   color: #2563eb; /* Changed to royal blue */
+    border-bottom: 2px solid #2563eb; /* Changed to royal blue */
+    font-weight: 600;
+}
+
+.admin-tab-content {
+  display: none;
+}
+
+.admin-tab-content.active {
+  display: block;
+}
+
+/* Search Form Styling */
+.table-search-form {
+  margin-bottom: 1.2rem;
+  flex-shrink: 0;
+}
+
+.search-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-container .material-symbols-outlined {
+  position: absolute;
+  left: 12px;
+  color: #999;
+  pointer-events: none;
+}
+
+.search-input {
+  padding: 8px 14px 8px 38px;
+  border: 1px solid #ccc;
+  border-radius: 20px;
+  font-size: 15px;
+  width: 240px;
+  background: #f2f2f2;
+}
+
+.search-button {
+  margin-left: 8px;
+  padding: 8px 18px;
+  border-radius: 20px;
+  background: #00b86e;
+  color: #fff;
+  border: none;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+/* Table Header Styling */
+.table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+/* Action Card and Button */
+.action-card {
+  background: #f8f8f8;
+}
+
+.admin-withdrawal-btn {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  border: none;
+  background-color: #2563eb;
+  cursor: pointer;
+  text-align: left;
+  padding: 0;
+}
+
+.admin-withdrawal-btn:hover {
+  background-color: #1d4ed8;
+}
+
+/* Admin Withdrawal Modal Specific Styles */
+.admin-withdrawal-modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0,0,0,0.4);
+}
+
+.admin-withdrawal-modal-content {
+  background-color: #fefefe;
+  margin: 10% auto;
+  padding: 25px;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  width: 500px;
+  max-width: 90%;
+}
+
+.admin-withdrawal-modal-close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+  margin-top: -10px;
+  cursor: pointer;
+}
+
+.admin-withdrawal-modal-close:hover {
+  color: black;
+}
+
+/* Admin Withdrawal Form Styles */
+.admin-withdrawal-form-group {
+  margin-bottom: 20px;
+}
+
+.admin-withdrawal-form-control {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 16px;
+}
+
+.admin-withdrawal-form-control:focus {
+   border-color: #2563eb; /* Changed to royal blue */
+    outline: none;
+    box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.25);
+}
+
+.admin-withdrawal-balance-info {
+  color: #666;
+  font-size: 14px;
+}
+
+.admin-withdrawal-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 25px;
+}
+
+.admin-withdrawal-btn-primary {
+  padding: 10px 20px;
+  border-radius: 4px;
+  background-color: #2563eb; 
+  color: white;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+}
+
+.admin-withdrawal-btn-primary:hover {
+ background-color: #1d4ed8;
+}
+
+.admin-withdrawal-btn-secondary {
+  padding: 10px 20px;
+  border-radius: 4px;
+  background-color: #f2f2f2;
+  color: #333;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+}
+
+.admin-withdrawal-btn-secondary:hover {
+  background-color: #e5e5e5;
 }

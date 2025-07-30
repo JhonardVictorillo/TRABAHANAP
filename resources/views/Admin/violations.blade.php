@@ -7,7 +7,7 @@
          <input type="hidden" name="section" value="violations">
          <div style="position: relative; width: 240px;">
                 <span class="material-symbols-outlined"
-                    style="color: #999; position: absolute; left: 12px; top: 50%; transform: translateY(-50%); pointer-events: none;">
+                    style="color: #2563eb; position: absolute; left: 12px; top: 50%; transform: translateY(-50%); pointer-events: none;">
                     search
                 </span>
                 <input
@@ -18,7 +18,7 @@
                     style="padding: 8px 14px 8px 38px; border: 1px solid #ccc; border-radius: 20px; font-size: 15px; width: 100%; background: #f2f2f2;"
                 >
             </div>
-            <button type="submit" style="padding: 8px 18px; border-radius: 20px; background: #00b86e; color: #fff; border: none; font-size: 15px; cursor: pointer;">
+            <button type="submit" style="padding: 8px 18px; border-radius: 20px; background: #2563eb; color: #fff; border: none; font-size: 15px; cursor: pointer;">
                 Search
             </button>
           
@@ -68,9 +68,28 @@
             </tbody>
         </table>
         </div>
-        <!-- Pagination -->
-        <div class="pagination-container" style="margin-top: 1.5rem;">
-        {{ $violations->appends(['search' => request('search'), 'section' => 'violations'])->links() }}
+      
+       <!-- Pagination -->
+        <div class="category-pagination-container">
+            @if($violations->previousPageUrl())
+            <a href="{{ $violations->appends(['search' => request('search'), 'section' => 'violations'])->previousPageUrl() }}" class="category-pagination-btn">
+                <i class="fas fa-arrow-left"></i> Previous
+            </a>
+            @else
+            <button class="category-pagination-btn category-btn-disabled" disabled>
+                <i class="fas fa-arrow-left"></i> Previous
+            </button>
+            @endif
+            
+            @if($violations->hasMorePages())
+            <a href="{{ $violations->appends(['search' => request('search'), 'section' => 'violations'])->nextPageUrl() }}" class="category-pagination-btn">
+                Next <i class="fas fa-arrow-right"></i>
+            </a>
+            @else
+            <button class="category-pagination-btn category-btn-disabled" disabled>
+                Next <i class="fas fa-arrow-right"></i>
+            </button>
+            @endif
         </div>
     </div>
 </div>

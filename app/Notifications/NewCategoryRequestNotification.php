@@ -58,7 +58,16 @@ class NewCategoryRequestNotification extends Notification
      */
     public function toArray(object $notifiable): array
     {
+             // Create a proper message field that will be displayed in the notification
+        $message = $this->user->firstname . ' ' . $this->user->lastname . ' has requested a new category: ' . $this->categoryRequest;
+        
+        // Add additional information that can be shown when expanded
+        $additionalInfo = 'Requested on: ' . now()->format('F j, Y g:i A') . 
+                         '\nUser ID: ' . $this->user->id;
+
         return [
+              'message' => $message, // This is the key field that will be displayed
+            'additional_info' => $additionalInfo,
             'user_id' => $this->user->id,
             'user_name' => $this->user->firstname . ' ' . $this->user->lastname,
             'category_request' => $this->categoryRequest,

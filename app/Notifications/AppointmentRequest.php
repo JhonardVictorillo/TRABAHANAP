@@ -58,7 +58,8 @@ class AppointmentRequest extends Notification
         'contact' => $this->appointment->contact,
         'message' => 'You have a new appointment request from ' . $this->appointment->name . 
                      ' on ' . $this->appointment->date . ' at ' . $this->appointment->time . '.',
-            
+        'additional_info' => 'Customer Address: ' . $this->appointment->address . "\n" .
+                           'Contact: ' . $this->appointment->contact
         ];
     }
 }

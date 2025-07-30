@@ -131,11 +131,8 @@
                         </div>
                         
                         <div class="fc-input-group">
-                            <label for="google_map_link">Google Maps Link (Optional)</label>
-                            <input type="url" name="google_map_link" id="google_map_link" placeholder="Paste your Google Maps link" value="{{ old('google_map_link', auth()->user()->google_map_link ?? '') }}">
-                            @error('google_map_link')
-                                <div class="fc-error-message">{{ $message }}</div>
-                            @enderror
+                            <label for="barangay">Barangay</label>
+                             <input type="text" id="barangay" name="barangay" class="fc-input" value="{{ old('barangay', auth()->user()->barangay ?? '') }}" placeholder="Your barangay">
                         </div>
                     </div>
                     
@@ -231,251 +228,255 @@
 <script>
     // Profile completion modal functionality
     document.addEventListener('DOMContentLoaded', function() {
-        // Show welcome modal for new users
-        @if(!auth()->user()->is_profile_complete)
-            document.getElementById('completeAccountModal').style.display = 'flex';
-            
-            // Show main modal when "Complete Your Profile" is clicked
-            document.getElementById("completeAccountBtn").addEventListener("click", function() {
-                document.getElementById("completeAccountModal").style.display = 'none';
-                document.getElementById("completeProfileModal").style.display = 'flex';
-            });
-            
-            // Step navigation functions
-            let currentStep = 1;
-            const totalSteps = 4;
-            
-            window.updateProgressBar = function() {
-                const progressPercentage = ((currentStep - 1) / (totalSteps - 1)) * 100;
-                document.getElementById('progressBar').style.width = `${progressPercentage}%`;
-            }
-            
-            window.nextStep = function(step) {
-                // Validate current step before proceeding
-                if (!validateStep(step)) return;
+        // First check if elements exist before trying to add event listeners
+        const completeAccountModal = document.getElementById('completeAccountModal');
+        const completeAccountBtn = document.getElementById('completeAccountBtn');
+        
+        if (completeAccountModal && completeAccountBtn) {
+            @if(!auth()->user()->is_profile_complete)
+                completeAccountModal.style.display = 'flex';
                 
-                document.getElementById(`step${step}`).style.display = 'none';
-                document.getElementById(`step${step+1}`).style.display = 'block';
-                currentStep = step + 1;
-                updateProgressBar();
-                window.scrollTo(0, 0);
-            }
-            
-            window.prevStep = function(step) {
-                document.getElementById(`step${step}`).style.display = 'none';
-                document.getElementById(`step${step-1}`).style.display = 'block';
-                currentStep = step - 1;
-                updateProgressBar();
-                window.scrollTo(0, 0);
-            }
-            
-            function validateStep(step) {
-                // Basic validation logic for each step
-                if (step === 1) {
-                    const firstname = document.getElementById('firstname').value;
-                    const lastname = document.getElementById('lastname').value;
-                    const email = document.getElementById('email').value;
-                    const contact = document.getElementById('contact_number').value;
-                    const profilePic = document.getElementById('profilePictureInput').files.length;
-                    
-                    if (!firstname || !lastname || !email || !contact) {
-                        alert('Please fill in all required fields before proceeding.');
-                        return false;
-                    }
-                    
-                    if (!profilePic) {
-                        alert('Please upload a profile picture before proceeding.');
-                        return false;
-                    }
-                    
-                    return true;
+                completeAccountBtn.addEventListener("click", function() {
+                    completeAccountModal.style.display = 'none';
+                    document.getElementById("completeProfileModal").style.display = 'flex';
+                });
+                
+                // Step navigation functions
+                let currentStep = 1;
+                const totalSteps = 4;
+                
+                window.updateProgressBar = function() {
+                    const progressPercentage = ((currentStep - 1) / (totalSteps - 1)) * 100;
+                    document.getElementById('progressBar').style.width = `${progressPercentage}%`;
                 }
                 
-                if (step === 2) {
-                    const province = document.getElementById('province').value;
-                    const city = document.getElementById('city').value;
-                    const zipcode = document.getElementById('zipcode').value;
+                window.nextStep = function(step) {
+                    // Validate current step before proceeding
+                    if (!validateStep(step)) return;
                     
-                    if (!province || !city || !zipcode) {
-                        alert('Please fill in all required address fields before proceeding.');
-                        return false;
-                    }
-                    return true;
+                    document.getElementById(`step${step}`).style.display = 'none';
+                    document.getElementById(`step${step+1}`).style.display = 'block';
+                    currentStep = step + 1;
+                    updateProgressBar();
+                    window.scrollTo(0, 0);
                 }
                 
-                if (step === 3) {
-                    const idFront = document.getElementById('id_front').files.length;
-                    const idBack = document.getElementById('id_back').files.length;
-                    
-                    if (!idFront || !idBack) {
-                        alert('Please upload both front and back sides of your ID before proceeding.');
-                        return false;
-                    }
-                    return true;
+                window.prevStep = function(step) {
+                    document.getElementById(`step${step}`).style.display = 'none';
+                    document.getElementById(`step${step-1}`).style.display = 'block';
+                    currentStep = step - 1;
+                    updateProgressBar();
+                    window.scrollTo(0, 0);
                 }
                 
-                // Add this for step 4
-                if (step === 4) {
-                    const selectedCategory = document.querySelector('input[name="category"]:checked');
-                    if (!selectedCategory) {
-                        alert('Please select a category before completing your profile.');
-                        return false;
-                    }
-                    return true;
-                }
-                
-                return true;
-            }
-            
-            // Initialize previews and event handlers
-            
-            // Profile picture preview
-            const profileInput = document.getElementById('profilePictureInput');
-            const profilePreview = document.getElementById('profileImagePreview');
-            const profileContainer = document.querySelector('.fc-profile-preview');
-            
-            if (profileContainer) {
-                profileContainer.addEventListener('click', function() {
-                    profileInput.click();
-                });
-            }
-            
-            if (profileInput) {
-                profileInput.addEventListener('change', function() {
-                    if (this.files && this.files[0]) {
-                        const reader = new FileReader();
-                        reader.onload = function(e) {
-                            profilePreview.src = e.target.result;
+                function validateStep(step) {
+                    // Basic validation logic for each step
+                    if (step === 1) {
+                        const firstname = document.getElementById('firstname').value;
+                        const lastname = document.getElementById('lastname').value;
+                        const email = document.getElementById('email').value;
+                        const contact = document.getElementById('contact_number').value;
+                        const profilePic = document.getElementById('profilePictureInput').files.length;
+                        
+                        if (!firstname || !lastname || !email || !contact) {
+                            alert('Please fill in all required fields before proceeding.');
+                            return false;
                         }
-                        reader.readAsDataURL(this.files[0]);
-                    }
-                });
-            }
-            
-            // ID Front preview
-            const idFrontInput = document.getElementById('id_front');
-            const idFrontPreview = document.getElementById('idFrontPreview');
-            
-            if (idFrontInput) {
-                idFrontInput.addEventListener('change', function() {
-                    if (this.files && this.files[0]) {
-                        const reader = new FileReader();
-                        reader.onload = function(e) {
-                            idFrontPreview.src = e.target.result;
+                        
+                        if (!profilePic) {
+                            alert('Please upload a profile picture before proceeding.');
+                            return false;
                         }
-                        reader.readAsDataURL(this.files[0]);
-                    }
-                });
-            }
-            
-            // ID Back preview
-            const idBackInput = document.getElementById('id_back');
-            const idBackPreview = document.getElementById('idBackPreview');
-            
-            if (idBackInput) {
-                idBackInput.addEventListener('change', function() {
-                    if (this.files && this.files[0]) {
-                        const reader = new FileReader();
-                        reader.onload = function(e) {
-                            idBackPreview.src = e.target.result;
-                        }
-                        reader.readAsDataURL(this.files[0]);
-                    }
-                });
-            }
-            
-            // Google Maps preview
-            const mapInput = document.querySelector('input[name="google_map_link"]');
-            const mapPreview = document.getElementById('mapPreview');
-            const embeddedMap = document.getElementById('embeddedMap');
-            
-            if (mapInput && mapPreview && embeddedMap) {
-                mapInput.addEventListener('input', function() {
-                    const url = mapInput.value;
-                    
-                    if (url.includes('maps.app.goo.gl') || url.includes("google.com/maps")) {
-                        try {
-                            const embedUrl = convertToEmbedURL(url);
-                            embeddedMap.src = embedUrl;
-                            mapPreview.style.display = 'block';
-                        } catch (e) {
-                            mapPreview.style.display = 'none';
-                            embeddedMap.src = '';
-                        }
-                    } else {
-                        mapPreview.style.display = 'none';
-                        embeddedMap.src = '';
-                    }
-                });
-                
-                function convertToEmbedURL(url) {
-                    // For development, return a static map of the Philippines
-                    return "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3861.802548850901!2d121.04882897485761!3d14.554743382575185!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397c8efd99aad53%3A0xb64b39847a866fde!2sMakati%20City%2C%20Metro%20Manila!5e0!3m2!1sen!2sph!4v1698123909569!5m2!1sen!2sph";
-                    
-                    // Uncomment and use this when you have a valid API key
-                    /*
-                    if (url.includes("maps.app.goo.gl")) {
-                        const shortUrl = new URL(url);
-                        const placeId = shortUrl.pathname.split('/').pop();
-                        return `https://www.google.com/maps/embed/v1/place?key=YOUR_API_KEY&q=place_id:${placeId}`;
+                        
+                        return true;
                     }
                     
-                    if (url.includes("google.com/maps")) {
-                        const match = url.match(/@(.*),(.*),([\d\.]*)z/);
-                        if (match) {
-                            const lat = match[1];
-                            const lng = match[2];
-                            return `https://www.google.com/maps/embed/v1/view?key=YOUR_API_KEY&center=${lat},${lng}&zoom=14&maptype=roadmap`;
-                        } else if (url.includes("place")) {
-                            return url.replace("/maps/place/", "/maps/embed/v1/place?key=YOUR_API_KEY&q=");
-                        } else if (url.includes("embed")) {
-                            return url;
+                    if (step === 2) {
+                        const province = document.getElementById('province').value;
+                        const city = document.getElementById('city').value;
+                        const zipcode = document.getElementById('zipcode').value;
+                        
+                        if (!province || !city || !zipcode) {
+                            alert('Please fill in all required address fields before proceeding.');
+                            return false;
                         }
+                        return true;
                     }
-                    */
                     
-                    // If we reached here, return a default map
-                    return "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3861.802548850901!2d121.04882897485761!3d14.554743382575185!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397c8efd99aad53%3A0xb64b39847a866fde!2sMakati%20City%2C%20Metro%20Manila!5e0!3m2!1sen!2sph!4v1698123909569!5m2!1sen!2sph";
-                }
-            }
-            
-            // Bio character counter
-            const bioTextarea = document.getElementById('bio');
-            const bioCharCount = document.getElementById('bioCharCount');
-            
-            if (bioTextarea && bioCharCount) {
-                // Set initial count
-                bioCharCount.textContent = bioTextarea.value.length;
-                
-                bioTextarea.addEventListener('input', function() {
-                    const charCount = this.value.length;
-                    bioCharCount.textContent = charCount;
-                    
-                    if (charCount > 500) {
-                        bioCharCount.classList.add('fc-text-red');
-                        this.value = this.value.substring(0, 500);
-                        bioCharCount.textContent = 500;
-                    } else {
-                        bioCharCount.classList.remove('fc-text-red');
+                    if (step === 3) {
+                        const idFront = document.getElementById('id_front').files.length;
+                        const idBack = document.getElementById('id_back').files.length;
+                        
+                        if (!idFront || !idBack) {
+                            alert('Please upload both front and back sides of your ID before proceeding.');
+                            return false;
+                        }
+                        return true;
                     }
-                });
-            }
-            
-            // Simple radio button selection
-            const categoryRadios = document.querySelectorAll('.fc-category-radio');
-            categoryRadios.forEach(radio => {
-                radio.addEventListener('change', function() {
-                    // Update validation for step 4
-                    window.validateStep4 = function() {
+                    
+                    // Add this for step 4
+                    if (step === 4) {
                         const selectedCategory = document.querySelector('input[name="category"]:checked');
                         if (!selectedCategory) {
                             alert('Please select a category before completing your profile.');
                             return false;
                         }
                         return true;
-                    };
+                    }
+                    
+                    return true;
+                }
+                
+                // Initialize previews and event handlers
+                
+                // Profile picture preview
+                const profileInput = document.getElementById('profilePictureInput');
+                const profilePreview = document.getElementById('profileImagePreview');
+                const profileContainer = document.querySelector('.fc-profile-preview');
+                
+                if (profileContainer) {
+                    profileContainer.addEventListener('click', function() {
+                        profileInput.click();
+                    });
+                }
+                
+                if (profileInput) {
+                    profileInput.addEventListener('change', function() {
+                        if (this.files && this.files[0]) {
+                            const reader = new FileReader();
+                            reader.onload = function(e) {
+                                profilePreview.src = e.target.result;
+                            }
+                            reader.readAsDataURL(this.files[0]);
+                        }
+                    });
+                }
+                
+                // ID Front preview
+                const idFrontInput = document.getElementById('id_front');
+                const idFrontPreview = document.getElementById('idFrontPreview');
+                
+                if (idFrontInput) {
+                    idFrontInput.addEventListener('change', function() {
+                        if (this.files && this.files[0]) {
+                            const reader = new FileReader();
+                            reader.onload = function(e) {
+                                idFrontPreview.src = e.target.result;
+                            }
+                            reader.readAsDataURL(this.files[0]);
+                        }
+                    });
+                }
+                
+                // ID Back preview
+                const idBackInput = document.getElementById('id_back');
+                const idBackPreview = document.getElementById('idBackPreview');
+                
+                if (idBackInput) {
+                    idBackInput.addEventListener('change', function() {
+                        if (this.files && this.files[0]) {
+                            const reader = new FileReader();
+                            reader.onload = function(e) {
+                                idBackPreview.src = e.target.result;
+                            }
+                            reader.readAsDataURL(this.files[0]);
+                        }
+                    });
+                }
+                
+                // Google Maps preview
+                const mapInput = document.querySelector('input[name="google_map_link"]');
+                const mapPreview = document.getElementById('mapPreview');
+                const embeddedMap = document.getElementById('embeddedMap');
+                
+                if (mapInput && mapPreview && embeddedMap) {
+                    mapInput.addEventListener('input', function() {
+                        const url = mapInput.value;
+                        
+                        if (url.includes('maps.app.goo.gl') || url.includes("google.com/maps")) {
+                            try {
+                                const embedUrl = convertToEmbedURL(url);
+                                embeddedMap.src = embedUrl;
+                                mapPreview.style.display = 'block';
+                            } catch (e) {
+                                mapPreview.style.display = 'none';
+                                embeddedMap.src = '';
+                            }
+                        } else {
+                            mapPreview.style.display = 'none';
+                            embeddedMap.src = '';
+                        }
+                    });
+                    
+                    function convertToEmbedURL(url) {
+                        // For development, return a static map of the Philippines
+                        return "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3861.802548850901!2d121.04882897485761!3d14.554743382575185!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397c8efd99aad53%3A0xb64b39847a866fde!2sMakati%20City%2C%20Metro%20Manila!5e0!3m2!1sen!2sph!4v1698123909569!5m2!1sen!2sph";
+                        
+                        // Uncomment and use this when you have a valid API key
+                        /*
+                        if (url.includes("maps.app.goo.gl")) {
+                            const shortUrl = new URL(url);
+                            const placeId = shortUrl.pathname.split('/').pop();
+                            return `https://www.google.com/maps/embed/v1/place?key=YOUR_API_KEY&q=place_id:${placeId}`;
+                        }
+                        
+                        if (url.includes("google.com/maps")) {
+                            const match = url.match(/@(.*),(.*),([\d\.]*)z/);
+                            if (match) {
+                                const lat = match[1];
+                                const lng = match[2];
+                                return `https://www.google.com/maps/embed/v1/view?key=YOUR_API_KEY&center=${lat},${lng}&zoom=14&maptype=roadmap`;
+                            } else if (url.includes("place")) {
+                                return url.replace("/maps/place/", "/maps/embed/v1/place?key=YOUR_API_KEY&q=");
+                            } else if (url.includes("embed")) {
+                                return url;
+                            }
+                        }
+                        */
+                        
+                        // If we reached here, return a default map
+                        return "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3861.802548850901!2d121.04882897485761!3d14.554743382575185!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397c8efd99aad53%3A0xb64b39847a866fde!2sMakati%20City%2C%20Metro%20Manila!5e0!3m2!1sen!2sph!4v1698123909569!5m2!1sen!2sph";
+                    }
+                }
+                
+                // Bio character counter
+                const bioTextarea = document.getElementById('bio');
+                const bioCharCount = document.getElementById('bioCharCount');
+                
+                if (bioTextarea && bioCharCount) {
+                    // Set initial count
+                    bioCharCount.textContent = bioTextarea.value.length;
+                    
+                    bioTextarea.addEventListener('input', function() {
+                        const charCount = this.value.length;
+                        bioCharCount.textContent = charCount;
+                        
+                        if (charCount > 500) {
+                            bioCharCount.classList.add('fc-text-red');
+                            this.value = this.value.substring(0, 500);
+                            bioCharCount.textContent = 500;
+                        } else {
+                            bioCharCount.classList.remove('fc-text-red');
+                        }
+                    });
+                }
+                
+                // Simple radio button selection
+                const categoryRadios = document.querySelectorAll('.fc-category-radio');
+                categoryRadios.forEach(radio => {
+                    radio.addEventListener('change', function() {
+                        // Update validation for step 4
+                        window.validateStep4 = function() {
+                            const selectedCategory = document.querySelector('input[name="category"]:checked');
+                            if (!selectedCategory) {
+                                alert('Please select a category before completing your profile.');
+                                return false;
+                            }
+                            return true;
+                        };
+                    });
                 });
-            });
-        @endif
+            @endif
+        }
     });
 </script>

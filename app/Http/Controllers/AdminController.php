@@ -11,16 +11,29 @@ use App\Models\PlatformRevenue;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use App\Notifications\PostApprovedNotification;
-use App\Models\CategoryRequest; // Import the CategoryRequest model
+use App\Models\CategoryRequest; 
+use App\Models\Withdrawal;
+use Stripe\Stripe;
+use Stripe\Payout;
+use App\Models\FreelancerEarning;
+use App\Models\PlatformWithdrawal; // Import the PlatformWithdrawal model
+use App\Notifications\WithdrawalProcessedNotification;
+use App\Notifications\WithdrawalRejectedNotification;
+
+
 class AdminController extends Controller
 {
    public function dashboard(Request $request){
         $totalFreelancers = User::where('role', 'freelancer')->count();
         $totalCustomers = User::where('role', 'customer')->count();
-     
+
         // Fetch pending accounts (freelancers with is_verified = 0)
         $totalPendingAccounts = User::where('role', 'freelancer')->where('is_verified', 0)->count();
 
+         // Fetch notifications for admin
+        $notifications = auth()->user()->notifications()->latest()->take(10)->get();
+        $unreadCount = auth()->user()->unreadNotifications->count();
+    
         // Fetch pending posts (posts with status = 'pending')
         $totalPendingPosts = Post::where('status', 'pending')->count();
         $freelancers = User::with('categories')->where('role', 'freelancer')->get(); 
@@ -29,7 +42,7 @@ class AdminController extends Controller
     
       $posts = Post::with('freelancer')->where('status', 'pending')->get();
     
-        $categories = Category::orderBy('name')->simplePaginate(10);
+       $categories = Category::withCount('users')->orderBy('name')->simplePaginate(10);
            // Count all types of requests for filter badges
         $categoryRequestsCount = CategoryRequest::count();
         $pendingCount = CategoryRequest::where('status', 'pending')->count();
@@ -59,6 +72,8 @@ class AdminController extends Controller
                 ]
             );
         }
+
+
 
       // Get search input
     $search = $request->input('search');
@@ -138,6 +153,8 @@ class AdminController extends Controller
             'pendingCount' => $pendingCount,
             'approvedCount' => $approvedCount,
             'declinedCount' => $declinedCount,
+             'notifications' => $notifications,
+            'unreadCount' => $unreadCount,
           
         ]);
     
@@ -241,5 +258,156 @@ public function unbanUser($id)
     return back()->with('success', 'User has been unbanned.');
 }
 
-// 
+// Add these new methods to handle notification actions
+public function getNotifications()
+{
+    try {
+        $notifications = auth()->user()->notifications()->latest()->get();
+        $unreadCount = auth()->user()->unreadNotifications->count();
+        
+        return response()->json([
+            'notifications' => $notifications,
+            'unreadCount' => $unreadCount
+        ]);
+    } catch (\Exception $e) {
+        \Log::error('Error fetching admin notifications: ' . $e->getMessage());
+        return response()->json(['error' => 'Could not fetch notifications'], 500);
+    }
+}
+
+/**
+ * Mark a specific notification as read
+ */
+public function markSingleNotificationAsRead($id)
+{
+    try {
+        $notification = auth()->user()->notifications()->where('id', $id)->first();
+        
+        if (!$notification) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Notification not found'
+            ], 404);
+        }
+        
+        $notification->markAsRead();
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Notification marked as read',
+            'unreadCount' => auth()->user()->unreadNotifications->count()
+        ]);
+    } catch (\Exception $e) {
+        \Log::error('Error marking admin notification as read: ' . $e->getMessage());
+        return response()->json(['error' => 'Could not mark notification as read'], 500);
+    }
+}
+
+/**
+ * Mark all notifications as read
+ */
+public function markNotificationsAsRead()
+{
+    try {
+        auth()->user()->unreadNotifications->markAsRead();
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'All notifications marked as read'
+        ]);
+    } catch (\Exception $e) {
+        \Log::error('Error marking all admin notifications as read: ' . $e->getMessage());
+        return response()->json(['error' => 'Could not mark all notifications as read'], 500);
+    }
+}
+
+
+ public function resolveDispute(Request $request, $id)
+    {
+        $request->validate([
+            'resolution' => 'required|in:refund,complete_payment,partial_payment',
+            'notes' => 'required|string',
+            'partial_amount' => 'required_if:resolution,partial_payment|numeric|min:0'
+        ]);
+        
+        $appointment = Appointment::findOrFail($id);
+        
+        // Handle the dispute resolution
+        switch ($request->resolution) {
+            case 'refund':
+                // Code to issue refund
+                $appointment->final_payment_status = 'refunded';
+                break;
+                
+            case 'complete_payment':
+                // Code to complete the payment
+                $appointment->final_payment_status = 'paid';
+                
+                // Calculate final payment amount (total minus commitment fee)
+                $finalPaymentAmount = $appointment->total_amount - $appointment->commitment_fee;
+                
+                // Record platform revenue (10% commission)
+                PlatformRevenue::create([
+                    'user_id' => $appointment->freelancer_id,
+                    'appointment_id' => $appointment->id,
+                    'amount' => $finalPaymentAmount * 0.1, // 10% platform fee
+                    'source' => 'final_payment_commission',
+                    'date' => Carbon::now()->format('Y-m-d'),
+                    'notes' => 'Platform commission from final payment (dispute resolution)'
+                ]);
+                
+                // Record freelancer earning (90% of final payment)
+                FreelancerEarning::create([
+                    'freelancer_id' => $appointment->freelancer_id,
+                    'appointment_id' => $appointment->id,
+                    'amount' => $finalPaymentAmount * 0.9, // 90% to freelancer
+                    'source' => 'service_payment',
+                    'date' => Carbon::now()->format('Y-m-d'),
+                    'notes' => "Final payment for appointment #{$appointment->id} (dispute resolution)"
+                ]);
+                break;
+                
+            case 'partial_payment':
+                // Code to handle partial payment
+                $appointment->final_payment_status = 'partially_paid';
+                
+                // Calculate partial amount for freelancer
+                $platformFeePercentage = 10;
+                $partialAmount = $request->partial_amount;
+                $freelancerAmount = $partialAmount * (1 - $platformFeePercentage/100);
+                
+                // Record partial payment for freelancer
+                FreelancerEarning::create([
+                    'freelancer_id' => $appointment->freelancer_id,
+                    'appointment_id' => $appointment->id,
+                    'amount' => $freelancerAmount,
+                    'source' => 'partial_payment',
+                    'date' => Carbon::now()->format('Y-m-d'),
+                    'notes' => "Partial payment from dispute resolution"
+                ]);
+                
+                // Record platform commission
+                PlatformRevenue::create([
+                    'user_id' => $appointment->freelancer_id,
+                    'appointment_id' => $appointment->id,
+                    'amount' => $partialAmount * ($platformFeePercentage/100),
+                    'source' => 'partial_payment_commission',
+                    'date' => Carbon::now()->format('Y-m-d'),
+                    'notes' => "Platform commission from partial payment"
+                ]);
+                break;
+        }
+        
+        $appointment->save();
+        
+        // Record resolution notes
+        DB::table('admin_notes')->insert([
+            'appointment_id' => $appointment->id,
+            'note' => "Dispute resolved: {$request->resolution}. Notes: {$request->notes}",
+            'created_at' => now(),
+            'updated_at' => now()
+        ]);
+        
+        return redirect()->back()->with('success', 'Dispute resolved successfully.');
+    }
 }

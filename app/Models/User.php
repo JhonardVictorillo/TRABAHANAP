@@ -31,7 +31,7 @@ class User extends Authenticatable
          'province', 
          'city', 
          'zipcode', 
-         'google_map_link', 
+         'barangay', 
          'id_front', 
          'id_back', 
          'experience_level',

@@ -42,7 +42,7 @@ class ProfileController extends Controller
             'province' => 'required|string',
             'city' => 'required|string',
             'zipcode' => 'required|string',
-            'google_map_link' => 'nullable|url',
+           'barangay' => 'required|string|max:255', // New field for Barangay
            
             
             'profile_picture' => 'required|image|mimes:jpg,jpeg,png|max:2048', // New validation for profile picture
@@ -61,7 +61,7 @@ class ProfileController extends Controller
         $user->province = $validatedData['province'];
         $user->city = $validatedData['city'];
         $user->zipcode = $validatedData['zipcode'];
-        $user->google_map_link = $validatedData['google_map_link'];
+        $user->barangay = $validatedData['barangay']; // Save the Barangay field
 
         
           // Handle profile picture upload

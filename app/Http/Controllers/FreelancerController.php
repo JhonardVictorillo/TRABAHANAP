@@ -12,8 +12,16 @@ use App\Models\PlatformRevenue;
 use Carbon\Carbon;
 use App\Models\CategoryRequest;
 use App\Notifications\NewCategoryRequestNotification;
+use App\Notifications\CategoryRequestProcessedNotification;
 use App\Models\User;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\DB;
+use App\Models\Withdrawal;
+use App\Models\FreelancerEarning;
+
+
+
 
 
 
@@ -34,16 +42,7 @@ class FreelancerController extends Controller
     // Fetch availabilities (no need to format start_time and end_time manually)
     $availabilities = $user->availabilities;
 
-        // Fetch notifications separately
-        $appointmentNotifications = $user->notifications()
-            ->where('type', 'App\Notifications\AppointmentNotification')
-            ->get();
-
-        $postNotifications = $user->notifications()
-            ->where('type', 'App\Notifications\PostApprovalNotification')
-            ->get();
-
-
+    
      $notifications = auth()->user()->notifications;
      $unreadCount = auth()->user()->unreadNotifications->count();  
       // Fetch appointments related to the freelancer
@@ -84,35 +83,61 @@ class FreelancerController extends Controller
     $totalAppointments = $user->appointments()->count(); // Assuming you have an appointments relationship
 
     
-    
-         // Total revenue from all sources
-    $totalRevenue = PlatformRevenue::sum('amount') ?? 0;
-    
-    // Revenue specifically from late cancellations and no-shows
-    $lateCancellationRevenue = PlatformRevenue::where('source', 'late_cancellation_fee')
-        ->sum('amount') ?? 0;
+     // Calculate completed services count
+    $completedServices = $user->appointments()->where('status', 'completed')->count();
+
+    // NEW CODE: Calculate earnings and revenue values
+    // Service earnings (payments to freelancer)
+    $serviceEarnings = FreelancerEarning::where('freelancer_id', $user->id)
+            ->whereIn('source', ['service_payment', 'commitment_fee'])
+            ->sum('amount');
+
+        // Revenue from cancellations and no-shows
+        $lateCancellationRevenue = FreelancerEarning::where('freelancer_id', $user->id)
+            ->where('source', 'late_cancellation_fee')
+            ->sum('amount');
+            
+        $noShowRevenue = FreelancerEarning::where('freelancer_id', $user->id)
+            ->where('source', 'no_show_fee')
+            ->sum('amount');
+
+        // Combined cancellation revenue
+        $cancellationRevenue = $lateCancellationRevenue + $noShowRevenue;
+
+        // Calculate current month's earnings
+        $currentMonth = date('Y-m');
+        $currentMonthEarnings = FreelancerEarning::where('freelancer_id', $user->id)
+            ->whereRaw("DATE_FORMAT(date, '%Y-%m') = ?", [$currentMonth])
+            ->sum('amount');
+
+        // Calculate available balance (total earnings - withdrawals)
+        $totalEarnings = FreelancerEarning::where('freelancer_id', $user->id)
+            ->sum('amount');
+            
+        $processedWithdrawals = Withdrawal::where('user_id', $user->id)
+            ->whereIn('status', ['completed', 'processing'])
+            ->sum('amount');
+            
+        $availableBalance = $totalEarnings - $processedWithdrawals;
+
+        // Get all payments for display
+        $allPayments = FreelancerEarning::where('freelancer_id', $user->id)
+            ->with(['appointment', 'appointment.customer', 'appointment.post'])
+            ->orderBy('date', 'desc')
+            ->paginate(10, ['*'], 'payment_page');
+
+        // Get monthly earnings for chart
+        $monthlyData = FreelancerEarning::select(DB::raw('DATE_FORMAT(date, "%Y-%m") as month'), DB::raw('SUM(amount) as total'))
+            ->where('freelancer_id', $user->id)
+            ->groupBy('month')
+            ->orderBy('month', 'asc')
+            ->get();
+            
+        $monthlyLabels = $monthlyData->pluck('month')->map(function($month) {
+            return date('M Y', strtotime($month . '-01'));
+        })->toArray();
         
-    $noShowRevenue = PlatformRevenue::where('source', 'no_show_fee')
-        ->sum('amount') ?? 0;
-        
-    // Combined late cancellation and no-show revenue
-    $cancellationAndNoShowRevenue = $lateCancellationRevenue + $noShowRevenue;
-    
-    // Current month's late cancellation and no-show revenue
-    $currentMonthCancellationRevenue = PlatformRevenue::whereIn('source', ['late_cancellation_fee', 'no_show_fee'])
-        ->whereMonth('date', now()->month)
-        ->whereYear('date', now()->year)
-        ->sum('amount') ?? 0;
-    
-    // Only include late cancellation and no-show transactions
-    $revenueTransactions = PlatformRevenue::whereIn('source', ['late_cancellation_fee', 'no_show_fee'])
-        ->with(['appointment.freelancer', 'user'])
-        ->orderBy('date', 'desc')
-        ->paginate(10);
-    
-
-
-
+        $monthlyEarnings = $monthlyData->pluck('total')->toArray();
 
         // If profile is complete, show the dashboard without the modal
         return view('dashboard.freelancer-dashboard', [
@@ -128,21 +153,26 @@ class FreelancerController extends Controller
            'notifications' => $notifications,
            'totalPosts' => $totalPosts,
            'totalAppointments' => $totalAppointments,
-           'appointmentNotifications' => $appointmentNotifications,
-            'postNotifications' => $postNotifications,
-             'reviews' => $reviews,
+           'reviews' => $reviews,
             'clients' => $clients, // pass filtered clients
             'totalClients' => $totalClients,// pass total count
             'unreadCount' => $unreadCount,
             'availabilities' => $availabilities,
-            'totalRevenue' => $totalRevenue,
-            'cancellationAndNoShowRevenue' => $cancellationAndNoShowRevenue,
-            'currentMonthCancellationRevenue' => $currentMonthCancellationRevenue,
-            'revenueTransactions' => $revenueTransactions,  
+             'isProfileComplete' => $isProfileComplete,
+              // NEW REVENUE/EARNINGS VARIABLES
+           'serviceEarnings' => $serviceEarnings,
+            'cancellationRevenue' => $cancellationRevenue,
             'lateCancellationRevenue' => $lateCancellationRevenue,
             'noShowRevenue' => $noShowRevenue,
-             'isProfileComplete' => $isProfileComplete,
-        ]);
+            'currentMonthEarnings' => $currentMonthEarnings,
+            'availableBalance' => $availableBalance,
+            'allPayments' => $allPayments,
+            'monthlyLabels' => $monthlyLabels,
+            'monthlyEarnings' => $monthlyEarnings,
+            'completedServices' => $completedServices,
+           
+                
+            ]);
 
 }   
 
@@ -255,13 +285,16 @@ public function show($id)
         'address' => $appointment->address,
         'contact' => $appointment->customer->contact_number, // Assuming contact is part of the customer model
         'status' => $appointment->status,
-        'notes' => $appointment->notes, // Include the decline reason
+         'final_payment_status' => $appointment->final_payment_status,
+        'total_amount' => $appointment->total_amount,
+        'fee_status' => $appointment->fee_status,
+        'notes' => $appointment->notes, 
     ]);
 }
 
 public function markAsCompleted($appointmentId)
 {
-   try {
+    try {
         $appointment = Appointment::find($appointmentId);
 
         if (!$appointment || $appointment->freelancer_id != Auth::id()) {
@@ -273,26 +306,42 @@ public function markAsCompleted($appointmentId)
 
         // Update the status to "completed"
         $appointment->status = 'completed';
-        $appointment->completed_at = now();  // Track when it was completed
+        $appointment->completed_at = now();
         
-        // Handle the commitment fee as platform commission
+        // Handle the commitment fee - split between platform and freelancer
         if ($appointment->fee_status === 'paid') {
             $appointment->fee_status = 'commission_collected';
             
-            // Record as platform revenue
-            \App\Models\PlatformRevenue::create([
-                'amount' => $appointment->commitment_fee ?? 10.00, // Use actual amount or default
-                'source' => 'commitment_fee',
+            // 1. Record platform portion (10%) as platform revenue
+            PlatformRevenue::create([
+                'amount' => $appointment->commitment_fee * 0.1, // 10% platform fee
+                'source' => 'commitment_fee_commission',
                 'appointment_id' => $appointment->id,
-                'user_id' => $appointment->customer_id,
-                'date' => now(),
-                'notes' => 'Commitment fee from completed appointment'
+                'user_id' => $appointment->freelancer_id,
+                'date' => now()->format('Y-m-d'),
+                'notes' => 'Platform commission from commitment fee',
+                'created_at' => now(),
+                'updated_at' => now()
+            ]);
+            
+            // 2. Record freelancer portion (90%) as freelancer earning
+            FreelancerEarning::create([
+                'freelancer_id' => $appointment->freelancer_id,
+                'appointment_id' => $appointment->id,
+                'amount' => $appointment->commitment_fee * 0.9, // 90% to freelancer
+                'source' => 'commitment_fee',
+                'date' => now()->format('Y-m-d'),
+                'notes' => "Commitment fee for appointment #{$appointment->id}",
+                'created_at' => now(),
+                'updated_at' => now()
             ]);
             
             // Log the transaction
-            \Log::info("Commitment fee collected as platform commission", [
+            \Log::info("Commitment fee processed for completed appointment", [
                 'appointment_id' => $appointment->id,
-                'amount' => $appointment->commitment_fee_amount ?? 10.00
+                'amount' => $appointment->commitment_fee,
+                'platform_portion' => $appointment->commitment_fee * 0.1,
+                'freelancer_portion' => $appointment->commitment_fee * 0.9
             ]);
         }
         
@@ -318,9 +367,8 @@ public function markAsCompleted($appointmentId)
         ], 500);
     }
 }
-
     
-     // Method to calculate the average rating
+ // Method to calculate the average rating
         private function calculateAverageRating($freelancerId)
         {
             $appointments = Appointment::where('freelancer_id', $freelancerId)
@@ -351,37 +399,35 @@ public function markNotificationsAsRead()
     $user = Auth::user();
 
     // Mark both types of notifications as read
-    $user->unreadNotifications()
-        ->whereIn('type', [
-            'App\Notifications\AppointmentNotification',
-            'App\Notifications\PostApprovalNotification'
-        ])
-        ->update(['read_at' => now()]);
+    $user->unreadNotifications()->update(['read_at' => now()]);
 
         return response()->json([
             'success' => true,
             'message' => 'Notifications marked as read.',
             'unread_count' => $user->unreadNotifications()->count(), // This should now be 0
-            'notifications' => $user->notifications // Return all notifications (both read and unread)
+            'notifications' => $user->fresh()->notifications // Return all notifications (both read and unread)
         ]);
 }
-                public function markSingleNotificationAsRead($id)
-                {
-                    $user = Auth::user();
-                    $notification = $user->notifications()->where('id', $id)->first();
-                
-                    if ($notification && is_null($notification->read_at)) {
-                        $notification->markAsRead();
-                
-                        return response()->json([
-                            'success' => true,
-                            'message' => 'Notification marked as read.',
-                            'unread_count' => $user->unreadNotifications->count(),
-                        ]);
-                    }
-                
-                    return response()->json(['success' => false, 'message' => 'Notification not found.'], 404);
-                }
+
+public function markSingleNotificationAsRead($id)
+{
+    $user = Auth::user();
+    $notification = $user->notifications()->where('id', $id)->first();
+
+    if ($notification && is_null($notification->read_at)) {
+        $notification->markAsRead();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Notification marked as read.',
+            'unread_count' => $user->unreadNotifications->count(),
+        ]);
+    }
+
+    return response()->json(['success' => false, 'message' => 'Notification not found.'], 404);
+}
+
+
 public function getNotifications() {
     return response()->json(Auth::user()->notifications);
 }

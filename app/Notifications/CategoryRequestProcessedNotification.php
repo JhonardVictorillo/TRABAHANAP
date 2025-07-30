@@ -37,44 +37,36 @@ class CategoryRequestProcessedNotification extends Notification
     /**
      * Get the mail representation of the notification.
      */
-    public function toMail(object $notifiable): MailMessage
+    public function toMail($notifiable)
     {
-        $message = (new MailMessage)
-                    ->subject($this->isApproved ? 'Category Request Approved' : 'Category Request Declined')
-                    ->greeting('Hello ' . $notifiable->firstname . '!');
-                    
-        if ($this->isApproved) {
-            $message->line('Good news! Your category request has been approved.')
-                    ->line('Requested Category: ' . $this->categoryRequest->category_name)
-                    ->line('This category is now available for selection in your profile.');
-        } else {
-            $message->line('Your category request could not be approved at this time.')
-                    ->line('Requested Category: ' . $this->categoryRequest->category_name);
-                    
-            if ($this->categoryRequest->admin_notes) {
-                $message->line('Reason: ' . $this->categoryRequest->admin_notes);
-            }
+        // Get the freelancer amount
+        $platformRevenue = \DB::table('platform_revenues')
+            ->where('appointment_id', $this->appointment->id)
+            ->where('source', 'final_payment_freelancer')
+            ->first();
             
-            $message->line('You can submit a different category request if needed.');
-        }
+        $amount = $platformRevenue ? $platformRevenue->amount : $this->appointment->total_amount;
         
-        return $message->action('Update Your Profile', url('/freelancer/profile'))
-                      ->line('Thank you for helping us improve our platform!');
+        return (new MailMessage)
+            ->subject('Payment Received')
+            ->line('Good news! You have received payment for your completed service.')
+            ->line('Appointment details:')
+            ->line('Date: ' . $this->appointment->date)
+            ->line('Time: ' . $this->appointment->time)
+            ->line('Client: ' . $this->appointment->customer->firstname . ' ' . $this->appointment->customer->lastname)
+            ->line('Amount: ₱' . number_format($amount, 2))
+            ->action('View Details', url('/freelancer/appointments'))
+            ->line('Thank you for using our platform!');
     }
-
-    /**
-     * Get the array representation of the notification.
-     *
-     * @return array<string, mixed>
-     */
-     public function toArray(object $notifiable): array
+    
+    public function toDatabase($notifiable)
     {
         return [
-            'category_request_id' => $this->categoryRequest->id,
-            'category_name' => $this->categoryRequest->category_name,
-            'status' => $this->isApproved ? 'approved' : 'declined',
-            'admin_notes' => $this->categoryRequest->admin_notes,
-            'type' => 'category_request_processed'
+            'appointment_id' => $this->appointment->id,
+            'title' => 'Payment Received',
+            'message' => 'You have received payment for your completed service with ' . 
+                         $this->appointment->customer->firstname . ' ' . $this->appointment->customer->lastname,
+            'type' => 'payment',
         ];
     }
 }

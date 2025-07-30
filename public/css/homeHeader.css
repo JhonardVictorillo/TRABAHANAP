@@ -1,0 +1,260 @@
+/* CSS variables */
+:root {
+  --primary-color: #2563eb;
+  --text-color: #333333;
+  --background-color: #f8fafc;
+}
+
+/* This ensures the header doesn't overlap with content */
+body {
+  padding-top: 65px;
+}
+
+@media (max-width: 576px) {
+  body {
+    padding-top: 60px;
+  }
+}
+
+
+.header {
+  background: white;
+  padding: 1rem 5%;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  position: fixed;
+  width: 100%;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logo-header {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: var(--primary-color);
+}
+
+.mingla-part {
+  
+  color: #2563eb;
+}
+.gawa-part {
+  color:#3b82f6;
+}
+
+.navbar {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.navbar a {
+  font-size: 1rem;
+  padding: 0.5rem;
+  text-decoration: none;
+  color: var(--text-color);
+  position: relative;
+  transition: color 0.3s ease;
+}
+
+.navbar a.active,
+.navbar a:hover {
+  color: var(--primary-color);
+}
+
+.navbar a::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: var(--primary-color);
+  transition: width 0.3s;
+}
+
+.navbar a:hover::after {
+  width: 100%;
+}
+
+.navbar button {
+  background: transparent;
+  border: 2px solid var(--text-color);
+  color: var(--text-color);
+  border-radius: 20px;
+  padding: 5px 15px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.navbar button.active-btn {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.logo-header a {
+  text-decoration: none;
+  color: inherit;
+}
+
+.navbar button:hover {
+  background: var(--primary-color);
+  color: #fff;
+}
+
+.navbar button.logbtn:hover {
+  background: var(--primary-color);
+  color: #fff;
+}
+
+.navbar button.regisbtn:hover {
+  background: var(--primary-color);
+  color: #fff;
+}
+
+/* Mobile menu toggle button */
+/* Enhanced mobile menu toggle button */
+.menu-toggle {
+  display: none;
+  background: transparent;
+  border: 2px solid var(--primary-color);
+  border-radius: 6px;
+  padding: 5px 8px;
+  font-size: 1.2rem;
+  color: var(--primary-color);
+  cursor: pointer;
+  outline: none;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.menu-toggle:hover, 
+.menu-toggle:focus {
+  background-color: rgba(37, 99, 235, 0.08);
+  transform: translateY(-2px);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.menu-toggle:active {
+  transform: translateY(0);
+}
+
+.menu-toggle i {
+  transition: transform 0.3s ease;
+}
+
+/* Animated hamburger icon effect */
+.menu-toggle.active i.fa-bars {
+  transform: rotate(90deg);
+}
+
+
+/* Small devices (landscape phones, less than 768px) */
+@media (max-width: 768px) {
+  /* Mobile menu toggle */
+ .menu-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  /* When menu is active/open, change button style */
+  .menu-toggle.active {
+    background-color: var(--primary-color);
+    color: white;
+  }
+  
+  .navbar {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    flex-direction: column;
+    padding: 1rem 0;
+    box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+    transform: translateY(-150%);
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    z-index: 99;
+  }
+  
+  .navbar.active {
+    transform: translateY(0);
+    opacity: 1;
+    visibility: visible;
+  }
+  
+  .navbar a {
+    width: 100%;
+    text-align: center;
+    padding: 0.75rem;
+  }
+  
+  .navbar a:hover::after {
+    width: 0;
+  }
+  
+  .navbar button {
+    margin: 0.5rem 0;
+    width: 80%;
+  }
+}
+
+@media (max-width: 576px) {
+  .header {
+    padding: 0.8rem 4%;
+  }
+  
+  .logo-header {
+    font-size: 1.5rem;
+  }
+}
+
+ /* footer styles */
+.footer {
+    background: #333;
+    color: #ddd;
+    padding: 2.5rem 5%;
+  }
+  .footer .container {
+    max-width: 1200px;
+    margin: auto;
+  }
+  .footer .row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+  }
+  .footer-col {
+    flex: 1;
+    min-width: 200px;
+  }
+  .footer-col h4 {
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+  }
+  .footer-col ul {
+    list-style: none;
+  }
+  .footer-col ul li {
+    margin-bottom: 0.5rem;
+  }
+  .footer-col ul li a {
+    text-decoration: none;
+    color: #ddd;
+    transition: color 0.3s ease;
+  }
+  .footer-col ul li a:hover {
+    color: var(--primary-color);
+  }
+  .footer-bottom {
+    text-align: center;
+    padding-top: 1rem;
+    border-top: 1px solid #555;
+    margin-top: 2rem;
+    font-size: 0.9rem;
+  }

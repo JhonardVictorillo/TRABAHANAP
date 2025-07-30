@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Post;
+use App\Models\Category;
 
 class HomepageController extends Controller
 {
@@ -23,7 +24,9 @@ class HomepageController extends Controller
         ->latest()
         ->take(10)
         ->get();
-       
-    return view('homepage', compact('posts'));
+
+         $categories =Category::all();
+
+    return view('homepage', compact('posts', 'categories'));
     }
 }

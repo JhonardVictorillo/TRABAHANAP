@@ -15,12 +15,13 @@ class AppointmentCanceled extends Notification
      * Create a new notification instance.
      */
     public $appointment;
+    public $isLateCancellation;
 
-    public function __construct($appointment)
-    {
-         $this->appointment = $appointment;
-    }
-
+    public function __construct(Appointment $appointment, $isLateCancellation = false)
+{
+    $this->appointment = $appointment;
+    $this->isLateCancellation = $isLateCancellation;
+}
     /**
      * Get the notification's delivery channels.
      *
@@ -62,7 +63,11 @@ class AppointmentCanceled extends Notification
     public function toArray(object $notifiable): array
     {
         return [
-            //
+             'message' => 'The appointment scheduled on ' . $this->appointment->date . ' at ' . $this->appointment->time . ' has been canceled by the customer.',
+        'appointment_id' => $this->appointment->id,
+        'date' => $this->appointment->date,
+        'time' => $this->appointment->time,
+        'type' => 'cancellation'
         ];
     }
 }

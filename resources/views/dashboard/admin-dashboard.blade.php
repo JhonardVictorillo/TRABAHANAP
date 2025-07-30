@@ -26,16 +26,7 @@ function getStatusColor($status) {
         
        
 
-    
-  <!-- Success message -->
-  @if(session('success'))
-        <div class="alert alert-success">
-        <i class='bx bx-check-circle'></i> <!-- Success icon -->
-        {{ session('success') }}
-        </div>
-        @endif
-
-
+@include('successMessage')
    
 
         <!-- @if ($errors->any())

@@ -289,7 +289,7 @@
           <div class="p-input-icon">
             <i class='bx bx-medal'></i>
             <select id="experience_level" name="experience_level" class="p-select" required>
-              <option value="" disabled {{ !$user->experience_level ? 'selected' : '' }}>Select level</option>
+              <option value="">Select level</option>
               <option value="Beginner" {{ $user->experience_level === 'Beginner' ? 'selected' : '' }}>Beginner</option>
               <option value="Intermediate" {{ $user->experience_level === 'Intermediate' ? 'selected' : '' }}>Intermediate</option>
               <option value="Expert" {{ $user->experience_level === 'Expert' ? 'selected' : '' }}>Expert</option>

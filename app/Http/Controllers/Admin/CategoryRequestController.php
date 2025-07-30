@@ -165,7 +165,7 @@ class CategoryRequestController extends Controller
     /**
      * Decline a category request
      */
-    public function decline(Request $request, $id)
+   public function decline(Request $request, $id)
 {
     try {
         // Log the request for debugging
@@ -178,7 +178,7 @@ class CategoryRequestController extends Controller
         
         // Only process pending requests
         if ($categoryRequest->status !== 'pending') {
-            if ($request->ajax()) {
+            if ($request->expectsJson()) {
                 return response()->json([
                     'success' => false,
                     'message' => 'This request has already been processed.'
@@ -187,17 +187,8 @@ class CategoryRequestController extends Controller
             return redirect()->back()->with('error', 'This request has already been processed.');
         }
         
-        // For AJAX requests, get the notes from the request data
-        if ($request->ajax()) {
-            $adminNotes = $request->input('admin_notes') ?? 'Declined via admin dashboard';
-        } else {
-            // Validate input
-            $validatedData = $request->validate([
-                'admin_notes' => 'required|string',
-            ]);
-            
-            $adminNotes = $validatedData['admin_notes'];
-        }
+        // For AJAX requests
+        $adminNotes = $request->input('admin_notes', 'Declined via admin dashboard');
         
         // Update the request status
         $categoryRequest->status = 'declined';
@@ -217,10 +208,11 @@ class CategoryRequestController extends Controller
                     'request_id' => $categoryRequest->id,
                     'error' => $e->getMessage()
                 ]);
+                // Continue processing - don't throw the error to the user
             }
         }
         
-        if ($request->ajax()) {
+        if ($request->expectsJson()) {
             return response()->json([
                 'success' => true,
                 'message' => 'Category request declined successfully.',
@@ -238,7 +230,7 @@ class CategoryRequestController extends Controller
             'trace' => $e->getTraceAsString()
         ]);
         
-        if ($request->ajax()) {
+        if ($request->expectsJson()) {
             return response()->json([
                 'success' => false,
                 'message' => 'An error occurred while processing this request.',

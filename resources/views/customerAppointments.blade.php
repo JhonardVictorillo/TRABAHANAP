@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Customer Appointments</title>
     <link rel="stylesheet" href="{{ asset('css/customerAppointment.css') }}">
+    <link rel ="stylesheet" href="{{asset ('css/customerHeader.css')}}" />
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -27,8 +28,8 @@
         theme: {
           extend: {
             colors: {
-              primary: "#118f39",
-              secondary: "#64748B",
+             primary: "#2563eb", // Changed from #118f39 to royal blue
+          secondary: "#64748B",
             },
             borderRadius: {
               none: "0px",
@@ -53,182 +54,17 @@
 </head>
 <body>
 
-<header class="sticky top-0 z-50 bg-white shadow-sm">
-      <div class="flex items-center justify-between px-8 h-16">
-      <a href="/" class="font-poppins text-2xl font-extrabold">
-          <span class="text-[#118f39]">Mingla</span><span class="text-[#4CAF50]">Gawa</span> 
-        </a>
-        <div class="flex items-center flex-1 max-w-xl mx-8">
-          <div class="relative w-full">
-          <form action="{{ route('search') }}" method="GET" style="display: flex; align-items: center; width: 100%;">
-            <input
-              type="text"
-              name="q" 
-              class="search-bar w-full h-10 pl-10 pr-4 text-sm bg-gray-50 border-none !rounded-button"
-              placeholder="Search for services or freelancers..."
-              value="{{ request('q') }}"
-            />
-            <div
-              class="absolute left-3 top-0 w-4 h-10 flex items-center justify-center text-gray-400"
-            >
-              <i class="ri-search-line"></i>
-            </div>
-            </form>
-          </div>
-        </div>
-        <div class="flex items-center gap-6">
-        <div class="relative inline-block text-left">
-    <!-- Notification Icon -->
-    <button id="notification-icon" class="flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-primary">
-        <div class="relative w-6 h-6 flex items-center justify-center">
-            <i class="ri-notification-line"></i>
-            @if(auth()->user()->unreadNotifications->count() > 0)
-                <span class="absolute -top-1 -right-2 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
-                    {{ auth()->user()->unreadNotifications->count() }}
-                </span>
-            @endif
-        </div>
-        <span>Notifications</span>
-    </button>
-
-    <!-- Notification Dropdown -->
-    <div id="notification-dropdown" class="hidden absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg z-50">
-        <div class="p-4 border-b">
-            <h3 class="text-lg font-semibold text-gray-700">Notifications</h3>
-        </div>
-        <ul id="notification-list" class="max-h-64 overflow-y-auto">
-            @foreach(auth()->user()->notifications as $notification)
-                <li class="flex items-start justify-between px-4 py-3 border-b hover:bg-gray-50 {{ $notification->read_at ? 'bg-gray-100' : '' }}">
-                    <div>
-                        <p class="text-sm {{ $notification->read_at ? 'text-gray-500' : 'text-gray-600' }}">
-                            {{ $notification->data['message'] }}
-                        </p>
-                        <p class="text-xs text-gray-400">{{ $notification->created_at->diffForHumans() }}</p>
-                    </div>
-                    @if(!$notification->read_at)
-                        <button
-                            class="text-sm text-primary hover:underline mark-as-read"
-                            data-id="{{ $notification->id }}"
-                        >
-                            Mark as Read
-                        </button>
-                    @endif
-                </li>
-            @endforeach
-        </ul>
-        @if(auth()->user()->unreadNotifications->count() > 0)
-            <div class="p-4 border-t">
-                <button id="mark-all-read" class="w-full py-2 text-sm font-medium text-white bg-primary hover:bg-primary/90 rounded-lg">
-                    Mark All as Read
-                </button>
-            </div>
-        @endif
-    </div>
-</div>
-                    <button
-            class="flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-primary !rounded-button"
-            >
-            <div class="relative w-6 h-6 flex items-center justify-center">
-                <i class="ri-message-3-line"></i>
-                <span class="absolute -top-1 -right-2 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
-                3
-                </span>
-            </div>
-            Messages
-            </button>
-           
-<div class="relative inline-block text-left">
-
-  <button id="profileBtn" class="w-12 h-12 rounded-full overflow-hidden focus:outline-none">
-    <img  src="{{ $user->profile_picture ? asset('storage/' . $user->profile_picture) : asset('images/defaultprofile.png') }}" alt="User" class="w-full h-full object-cover" />
-  </button>
-
-
-  <div id="dropdownMenu" class="hidden absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg z-50">
-
-    <div class="flex items-center gap-3 p-4 border-b">
-      <img src="{{ $user->profile_picture ? asset('storage/' . $user->profile_picture) : asset('images/defaultprofile.png') }}" alt="User" class="w-12 h-12 rounded-full object-cover" />
-      <div>
-        <p class="font-bold leading-tight">{{ $user->firstname }} {{ $user->lastname }}</p>
-      
-      </div>
-    </div>
-
- 
-    <!-- Menu Items -->
-<ul class="py-2 text-sm text-gray-700">
-  <li>
-    <a href="{{ route('customer.profile') }}" class="flex items-center px-4 py-2 hover:bg-gray-100">
-      <!-- Profile Icon -->
-      <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-3 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A4 4 0 017 16h10a4 4 0 011.879.804M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-      </svg>
-      Profile
-    </a>
-  </li>
-  
-  <li>
-    <a href="{{ route('customer.appointments.view') }}" class="flex items-center px-4 py-2 hover:bg-gray-100">
-      <!-- Appointment Icon -->
-      <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-3 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10m-13 5h16a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v7a2 2 0 002 2z" />
-      </svg>
-      Appointment
-    </a>
-  </li>
-
-  <li>
-    <a href="#" class="flex items-center px-4 py-2 hover:bg-gray-100">
-      <!-- Settings Icon -->
-      <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-3 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-      </svg>
-      Settings
-    </a>
-  </li>
-  
-  <li>
-    <a href="#" class="flex items-center px-4 py-2 hover:bg-gray-100">
-      <!-- Help Icon -->
-      <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-3 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16h6m2 4H7a2 2 0 01-2-2V6a2 2 0 012-2h4l2 2h6a2 2 0 012 2v10a2 2 0 01-2 2z" />
-      </svg>
-      Help
-    </a>
-  </li>
-  
-  <li>
-  <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
-                @csrf
-      </form>
-    <a href="#"onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="flex items-center px-4 py-2 text-red-600 hover:bg-gray-100">
-      <!-- Logout Icon -->
-      <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-3 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7" />
-      </svg>
-      Logout
-    </a>
-  </li>
-</ul>
-
-  </div>
-</div>
-
-        </div>
-
-      </div>
-    </header>
+      @include('customer.customerHeader')
 
     <main>
-    <a href="{{ route('customer.dashboard') }}">
-            <button class="back-btn">Back</button>
+    <div class="mb-4 max-w-7xl mx-auto px-4 md:px-8 pt-6">
+        <a href="{{ route('customer.dashboard') }}">
+            <button class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-blue-600 bg-white border border-blue-600 hover:bg-blue-600 hover:text-white transition rounded-lg shadow-sm">
+            <i class="ri-arrow-left-line text-lg"></i>
+            </button>
         </a>
-    @if(session('success'))
-        <div class="alert alert-success">
-        <i class='bx bx-check-circle'></i> <!-- Success icon -->
-        {{ session('success') }}
-        </div>
-        @endif
+    </div>
+   @include('successMessage')
 
         <div id="calendar-container">
           <div id="calendar"></div>
@@ -239,7 +75,7 @@
     <div class="bg-white rounded-xl shadow-lg w-full max-w-lg">
         <div class="flex items-center justify-between px-6 py-4 border-b">
             <div class="flex items-center gap-2">
-                <i class="ri-calendar-check-line text-2xl text-primary"></i>
+               <i class="ri-calendar-check-line text-2xl text-blue-600"></i>
                 <h5 class="text-lg font-semibold text-gray-800">Appointment Details</h5>
             </div>
             <button type="button" class="text-gray-400 hover:text-gray-600 close-modal">
@@ -287,18 +123,31 @@
                 <span class="font-medium">Commitment Fee Status:</span>
                 <span id="feeStatus"></span>
             </div>
+            <div class="flex items-center gap-2" id="finalPaymentContainer" style="display: none;">
+            <i class="ri-secure-payment-line text-primary"></i>
+            <span class="font-medium">Final Payment:</span>
+            <span id="finalPaymentStatus"></span>
+        </div>
+        <div class="flex items-center gap-2" id="totalAmountContainer" style="display: none;">
+            <i class="ri-money-dollar-circle-line text-primary"></i>
+            <span class="font-medium">Total Amount:</span>
+            ₱<span id="totalAmount"></span>
+        </div>
         </div>
         <div class="flex justify-end gap-2 px-6 py-4 border-t">
-            <button id="rescheduleButton" class="btn btn-primary flex items-center gap-1">
+            <button id="rescheduleButton" class="btn btn-primary flex items-center gap-1 bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded">
                 <i class="ri-calendar-event-line"></i> Re-schedule
             </button>
-            <button id="cancelButton" class="btn btn-danger flex items-center gap-1">
+           <button id="cancelButton" class="btn btn-danger flex items-center gap-1 bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded">
                 <i class="ri-close-circle-line"></i> Cancel
             </button>
-            <button id="rateButton" class="btn btn-success flex items-center gap-1" style="display: none;">
+           <button id="rateButton" class="btn btn-success flex items-center gap-1 bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded" style="display: none;">
                 <i class="ri-star-line"></i> Rate & Review
             </button>
-            <button type="button" class="btn btn-secondary close-modal flex items-center gap-1">
+            <button id="payButton" class="btn btn-success flex items-center gap-1 bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded" style="display: none;">
+                <i class="ri-bank-card-line"></i> Pay Now
+            </button>
+           <button type="button" class="btn btn-secondary close-modal flex items-center gap-1 bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded">
                 <i class="ri-arrow-go-back-line"></i> Close
             </button>
             <form id="noShowForm" method="POST" action="{{ route('appointments.no_show', 0) }}" style="display:none;">
@@ -352,6 +201,54 @@
     </div>
 </div>
 
+<!-- Payment Modal -->
+<div id="paymentModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" style="display: none;">
+    <div class="bg-white rounded-xl shadow-lg w-full max-w-md">
+        <div class="flex items-center justify-between px-6 py-4 border-b">
+            <div class="flex items-center gap-2">
+                <i class="ri-bank-card-line text-xl text-primary"></i>
+                <h5 class="text-lg font-semibold text-gray-800">Complete Payment</h5>
+            </div>
+            <button type="button" class="text-gray-400 hover:text-gray-600 close-modal">
+                <i class="ri-close-line text-2xl"></i>
+            </button>
+        </div>
+        <div class="px-6 py-4">
+            <p class="mb-4 text-gray-700">Please enter the payment amount to complete the transaction for this service.</p>
+            
+            <div class="mb-4">
+                <div id="appointmentSummary" class="bg-gray-50 p-4 rounded-lg mb-4">
+                    <p><span class="font-medium">Freelancer:</span> <span id="summaryFreelancer"></span></p>
+                    <p><span class="font-medium">Service:</span> <span id="summaryService"></span></p>
+                    <p><span class="font-medium">Date:</span> <span id="summaryDate"></span></p>
+                    <p><span class="font-medium">Time:</span> <span id="summaryTime"></span></p>
+                    <p><span class="font-medium">Commitment Fee (Already Paid):</span> ₱<span id="summaryCommitmentFee">0.00</span></p>
+                </div>
+                
+                <form id="paymentForm" action="{{ route('payment.final', ['id' => ':appointmentId']) }}" method="POST">
+                    @csrf
+                    <div class="mb-4">
+                        <label for="amount" class="block text-sm font-medium text-gray-700">Amount (₱)</label>
+                        <div class="mt-1 relative rounded-md shadow-sm">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <span class="text-gray-500 sm:text-sm">₱</span>
+                            </div>
+                            <input type="number" name="amount" id="paymentAmount" step="0.01" min="0" 
+                                class="focus:ring-primary focus:border-primary block w-full pl-7 pr-12 sm:text-sm border-gray-300 rounded-md"
+                                placeholder="0.00" required>
+                        </div>
+                        <p class="mt-2 text-sm text-gray-500">This is the total payment for the completed service.</p>
+                    </div>
+                    
+                    <button type="submit" class="w-full py-2 text-white bg-primary hover:bg-primary/90 rounded-lg flex items-center justify-center gap-2">
+                        <i class="ri-secure-payment-line"></i> Process Payment
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
  <!-- Review Modal -->
 <div id="reviewModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" style="display: none;">
     <div class="bg-white rounded-xl shadow-lg w-full max-w-md">
@@ -391,107 +288,17 @@
 </div>
     </main>
 
-    
+    @include('customer.footer')
     <script>
 
-const profileBtn = document.getElementById('profileBtn');
-          const dropdownMenu = document.getElementById('dropdownMenu');
 
-          profileBtn.addEventListener('click', () => {
-            dropdownMenu.classList.toggle('hidden');
-          });
-
-          document.addEventListener('click', (e) => {
-            if (!profileBtn.contains(e.target) && !dropdownMenu.contains(e.target)) {
-              dropdownMenu.classList.add('hidden');
-            }
-          });
-       
-       document.addEventListener('DOMContentLoaded', function () {
-    const notificationIcon = document.getElementById('notification-icon');
-    const notificationDropdown = document.getElementById('notification-dropdown');
-    const markAsReadButtons = document.querySelectorAll('.mark-as-read');
-    const markAllReadButton = document.getElementById('mark-all-read');
-
-    // Toggle Notification Dropdown
-    notificationIcon.addEventListener('click', function () {
-        notificationDropdown.classList.toggle('hidden');
-    });
-
-    // Mark Individual Notification as Read
-    markAsReadButtons.forEach(button => {
-        button.addEventListener('click', function () {
-            const notificationId = this.getAttribute('data-id');
-            fetch(`/notifications/mark-as-read/${notificationId}`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                },
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        const notificationItem = this.closest('li');
-                        notificationItem.classList.add('bg-gray-100');
-                        notificationItem.querySelector('p').classList.replace('text-gray-600', 'text-gray-500');
-                        this.remove(); // Remove the "Mark as Read" button
-                        updateNotificationCount();
-                    }
-                });
-        });
-    });
-
-    // Mark All Notifications as Read
-    if (markAllReadButton) {
-        markAllReadButton.addEventListener('click', function () {
-            fetch(`/notifications/mark-all-as-read`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                },
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        const notificationItems = document.querySelectorAll('#notification-list li');
-                        notificationItems.forEach(item => {
-                            item.classList.add('bg-gray-100');
-                            const message = item.querySelector('p');
-                            if (message) {
-                                message.classList.replace('text-gray-600', 'text-gray-500');
-                            }
-                            const markAsReadButton = item.querySelector('.mark-as-read');
-                            if (markAsReadButton) {
-                                markAsReadButton.remove();
-                            }
-                        });
-                        updateNotificationCount();
-                    }
-                });
-        });
-    }
-
-    // Update Notification Count
-    function updateNotificationCount() {
-        const countElement = notificationIcon.querySelector('span');
-        const currentCount = parseInt(countElement.textContent) || 0;
-        if (currentCount > 1) {
-            countElement.textContent = currentCount - 1;
-        } else {
-            countElement.remove();
-        }
-    }
-});
-
-
-      let calendar;  
-  document.addEventListener('DOMContentLoaded', function () {
+      document.addEventListener('DOMContentLoaded', function () {
     const calendarEl = document.getElementById('calendar');
 
     const calendar = new FullCalendar.Calendar(calendarEl, {
-        initialView: 'dayGridMonth',
+        initialView: window.innerWidth < 768 ? 'listWeek' : 'dayGridMonth',
         locale: 'en',
-        height: 600,
+        height: window.innerWidth < 768 ? 'auto' : 600,
         headerToolbar: {
             left: 'prev,next today',
             center: 'title',
@@ -511,6 +318,17 @@ const profileBtn = document.getElementById('profileBtn');
                 .catch(error => {
                     console.error('Error fetching appointment details:', error);
                 });
+        },
+        // Responsive options
+        windowResize: function(view) {
+            if (window.innerWidth < 768) {
+                if (calendar.view.type === 'dayGridMonth') {
+                    calendar.changeView('listWeek');
+                }
+                calendar.setOption('height', 'auto');
+            } else {
+                calendar.setOption('height', 600);
+            }
         }
     });
 
@@ -521,17 +339,25 @@ function handleButtonVisibility(status) {
     const rescheduleButton = document.getElementById('rescheduleButton');
     const cancelButton = document.getElementById('cancelButton');
     const rateButton = document.getElementById('rateButton');
-
+     const payButton = document.getElementById('payButton');
     // Hide or show buttons based on status
     rescheduleButton.style.display = 'inline-block';
     cancelButton.style.display = 'inline-block';
     rateButton.style.display = 'none';
+      payButton.style.display = 'none';
 
     if (status.toLowerCase() === 'declined') {
         rescheduleButton.style.display = 'none'; // Hide reschedule button
         cancelButton.style.display = 'none'; // Hide cancel button
     } else if (status.toLowerCase() === 'completed') {
-        rateButton.style.display = 'inline-block'; // Show rate button
+        rateButton.style.display = 'inline-block';
+         
+        if (currentAppointmentData && 
+            (!currentAppointmentData.final_payment_status || 
+             currentAppointmentData.final_payment_status === 'pending')) {
+            payButton.style.display = 'inline-block'; // Show pay button
+        } 
+
         rescheduleButton.style.display = 'none'; // Hide reschedule button
         cancelButton.style.display = 'none'; // Hide cancel button
     } else if (status.toLowerCase() === 'accepted') {
@@ -547,6 +373,10 @@ function handleButtonVisibility(status) {
         cancelButton.style.display = 'inline-block';
     }
 }
+
+// Add a variable to store current appointment data
+let currentAppointmentData = null;
+
 function openAppointmentModal(data) {
     // Populate modal with appointment details
     console.log('Full appointment data:', data);
@@ -561,6 +391,7 @@ function openAppointmentModal(data) {
     
     document.getElementById('appointmentId').value = data.id;
     
+    currentAppointmentData = data;
     // Show the decline reason if the status is "declined"
     const declineReasonContainer = document.getElementById('declineReasonContainer');
     const declineReason = document.getElementById('declineReason');
@@ -570,6 +401,26 @@ function openAppointmentModal(data) {
         declineReason.textContent = data.decline_reason ? data.decline_reason : 'No reason provided';
     } else {
         declineReasonContainer.style.display = 'none';
+    }
+
+     const finalPaymentContainer = document.getElementById('finalPaymentContainer');
+    const finalPaymentStatus = document.getElementById('finalPaymentStatus');
+    const totalAmountContainer = document.getElementById('totalAmountContainer');
+    const totalAmount = document.getElementById('totalAmount');
+    
+    if (data.status.toLowerCase() === 'completed') {
+        finalPaymentContainer.style.display = 'flex';
+        finalPaymentStatus.textContent = data.final_payment_status || 'pending';
+        
+        if (data.final_payment_status === 'paid' && data.total_amount) {
+            totalAmountContainer.style.display = 'flex';
+            totalAmount.textContent = parseFloat(data.total_amount).toFixed(2);
+        } else {
+            totalAmountContainer.style.display = 'none';
+        }
+    } else {
+        finalPaymentContainer.style.display = 'none';
+        totalAmountContainer.style.display = 'none';
     }
     
     
@@ -863,6 +714,7 @@ function closeAllModals() {
     document.getElementById('appointmentModal').style.display = 'none';
     document.getElementById('rescheduleModal').style.display = 'none';
     document.getElementById('reviewModal').style.display = 'none';
+    document.getElementById('paymentModal').style.display = 'none';
 }
 
 // Attach close modal listeners
@@ -981,6 +833,113 @@ document.addEventListener('DOMContentLoaded', function () {
                   }, 3000); // 3 seconds
               }
           });
+
+document.addEventListener('DOMContentLoaded', function () {
+    const appointmentModal = document.getElementById('appointmentModal');
+    const paymentModal = document.getElementById('paymentModal');
+    const payButton = document.getElementById('payButton');
+    const paymentForm = document.getElementById('paymentForm');
+    
+    // Open Payment Modal when "Pay Now" button is clicked
+    if (payButton) {
+        payButton.addEventListener('click', function() {
+            // Hide appointment modal
+            appointmentModal.style.display = 'none';
+            
+            // Get current appointment ID
+            const appointmentId = currentAppointmentData?.id;
+            
+            if (!appointmentId) {
+                alert('Error: Cannot process payment. Appointment data is missing.');
+                return;
+            }
+            
+            // Update form action URL with correct appointment ID
+            const formAction = paymentForm.getAttribute('action').replace(':appointmentId', appointmentId);
+            paymentForm.setAttribute('action', formAction);
+            
+            // Populate payment summary
+            document.getElementById('summaryFreelancer').textContent = document.getElementById('freelancerName').textContent;
+            document.getElementById('summaryService').textContent = currentAppointmentData?.services_list || 'Service';
+            document.getElementById('summaryDate').textContent = document.getElementById('appointmentDate').textContent;
+            document.getElementById('summaryTime').textContent = document.getElementById('appointmentTime').textContent;
+            
+            // Get commitment fee from data and format it properly
+            const commitmentFee = currentAppointmentData?.commitment_fee || '0.00';
+            document.getElementById('summaryCommitmentFee').textContent = parseFloat(commitmentFee).toFixed(2);
+            
+            // Reset payment amount field
+            document.getElementById('paymentAmount').value = '';
+            
+            // Show payment modal
+            paymentModal.style.display = 'flex';
+        });
+    }
+    
+    // Add close modal functionality
+    paymentModal.querySelectorAll('.close-modal').forEach(button => {
+        button.addEventListener('click', function() {
+            paymentModal.style.display = 'none';
+        });
+    });
+    
+    // Handle payment form submission - CHOOSE ONE APPROACH:
+    
+    // OPTION 1: Let the form submit naturally to the route (recommended)
+    if (paymentForm) {
+        paymentForm.addEventListener('submit', function(e) {
+            // Validate amount before submission
+            const amount = document.getElementById('paymentAmount').value;
+            if (isNaN(parseFloat(amount)) || parseFloat(amount) <= 0) {
+                e.preventDefault();
+                alert('Please enter a valid payment amount greater than zero.');
+                return;
+            }
+            
+            // Show loading state
+            const submitButton = this.querySelector('button[type="submit"]');
+            submitButton.disabled = true;
+            submitButton.innerHTML = '<i class="ri-loader-4-line animate-spin"></i> Processing...';
+            
+            // Form will submit naturally to the route specified in the action attribute
+        });
+    }
+})  
+
+// Improve mobile modal handling
+function adjustModalForMobile() {
+    const modals = [
+        document.getElementById('appointmentModal'), 
+        document.getElementById('rescheduleModal'),
+        document.getElementById('reviewModal'),
+        document.getElementById('paymentModal')
+    ];
+    
+    modals.forEach(modal => {
+        if (!modal) return;
+        
+        const modalContent = modal.querySelector('.bg-white');
+        
+        if (window.innerWidth <= 576) {
+            modalContent.style.width = 'calc(100% - 20px)';
+            modalContent.style.maxHeight = '90vh';
+        } else {
+            modalContent.style.width = '';
+            modalContent.style.maxHeight = '';
+        }
+    });
+}
+
+// Call the function on window resize
+window.addEventListener('resize', adjustModalForMobile);
+
+// Call once on page load
+document.addEventListener('DOMContentLoaded', function() {
+    adjustModalForMobile();
+});
+
+   
+
 </script>
  <!-- FullCalendar JS -->
  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>

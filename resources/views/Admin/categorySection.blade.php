@@ -28,40 +28,79 @@
             <div id="categoriesTab" class="category-tab-pane active">
                 <div class="admin-table-container">
                     <table class="admin-table">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Name</th>
-                                <th>Freelancers</th>
-                                <th>Created At</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse($categories as $category)
-                                <tr>
-                                    <td>{{ $category->id }}</td>
-                                    <td>{{ $category->name }}</td>
-                                    <td>{{ $category->users_count ?? 0 }}</td>
-                                    <td>{{ $category->created_at->format('M d, Y') }}</td>
-                                    <td>
-                                        <div class="category-action-buttons">
-                                           <button class="edit-category" data-id="{{ $category->id }}" data-name="{{ $category->name }}">
-                                                <i class="fas fa-edit"></i> Edit
-                                            </button>
-                                            <button class="delete-btn" data-id="{{ $category->id }}">
-                                                <i class="fas fa-trash"></i> Delete
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="5" class="category-empty-state">No categories found.</td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Image</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Freelancers</th>
+                    <th>Created At</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($categories as $category)
+                    <tr>
+                        <td>{{ $category->id }}</td>
+                        <td>
+                            @if($category->image_path)
+                                <img src="{{ asset('storage/'.$category->image_path) }}" alt="{{ $category->name }}" 
+                                    style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">
+                            @else
+                                <div style="width: 50px; height: 50px; background-color: #f3f4f6; border-radius: 4px; display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-image" style="color: #9ca3af;"></i>
+                                </div>
+                            @endif
+                        </td>
+                        <td>{{ $category->name }}</td>
+                        <td>
+                            @if($category->description)
+                                <span class="description-preview" style="display: block; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                    {{ $category->description }}
+                                </span>
+                                @if(strlen($category->description) > 50)
+                                    <button class="view-description" data-description="{{ $category->description }}" 
+                                            style="background: none; border: none; color: #2563eb; font-size: 0.75rem; padding: 0; cursor: pointer; text-decoration: underline;">
+                                        View more
+                                    </button>
+                                @endif
+                            @else
+                                <span style="color: #9ca3af; font-style: italic;">No description</span>
+                            @endif
+                        </td>
+                        <td>
+                            <span class="user-count" style="background-color: #e5e7eb; color: #4b5563; padding: 2px 6px; border-radius: 9999px; font-size: 0.75rem;">
+                                {{ $category->users_count ?? 0 }}
+                            </span>
+                            <button class="view-users" data-id="{{ $category->id }}" data-name="{{ $category->name }}" 
+                                    style="background: #2563eb; color: white; border: none; width: 22px; height: 22px; border-radius: 50%; font-size: 0.7rem; cursor: pointer; margin-left: 5px;">
+                                <i class="fas fa-users"></i>
+                            </button>
+                        </td>
+                        <td>{{ $category->created_at->format('M d, Y') }}</td>
+                        <td>
+                            <div class="category-action-buttons">
+                               <button class="edit-category" 
+                                      data-id="{{ $category->id }}" 
+                                      data-name="{{ $category->name }}"
+                                      data-description="{{ $category->description ?? '' }}"
+                                      data-image="{{ $category->image_path ? asset('storage/'.$category->image_path) : '' }}">
+                                    <i class="fas fa-edit"></i> Edit
+                                </button>
+                                <button class="delete-btn" data-id="{{ $category->id }}">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="7" class="category-empty-state">No categories found.</td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
                 </div>
                 
                 <!-- Categories Pagination -->
@@ -201,45 +240,7 @@
 </div>
 </div>
 
-<!-- Categories Section -->
-<!-- <div class="details-section" id="categoriesSection" style="display: none;">
-<h2>
-    <span class="material-symbols-outlined align-middle">category</span>
-    Categories
-  </h2>
-      <button id="addCategoryBtn">Add Category</button>
-      <table>
 
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Category Name</th>
-            <th>Created</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-        @if($categories->count() > 0)
-        @foreach($categories as $category)
-        <tr data-id="{{ $category->id }}">
-            <td>{{ $category->id }}</td>
-            <td>{{ $category->name }}</td>
-            <td>{{ $category->created_at->format('Y-m-d H:i') }}</td>
-            <td>
-            <button class="verify-btn edit-category-btn" data-id="{{ $category->id }}">Edit</button>
-            <button type="button" class="delete-btn" data-id="{{ $category->id }}">Delete</button>
-          </tr>
-          @endforeach
-    @else
-        <tr>
-            <td colspan="4">No categories found.</td>
-        </tr>
-    @endif
-            
-        </tbody>
-      </table>
-   </div>
-    -->
     
   </main>
 
@@ -249,34 +250,83 @@
   <div class="modal-content">
       <span class="close">&times;</span>
       <h2>Add Category</h2>
-      <form action="{{ route('categories.store') }}" method="POST">
-      @csrf
-      <label for="categoryName">Category Name:</label>
-      <input type="text" id="categoryName"  name="name" value="{{ old('name') }}"  class="{{ $errors->has('name') ? 'input-error' : '' }}" required>
-        @error('name')
-        <div class="error-message" style="color: red; margin-top: 5px;">{{ $message }}</div>
-    @enderror
-     
-      <button id="saveCategory">Add</button>
+      <form action="{{ route('categories.store') }}" method="POST" enctype="multipart/form-data">
+          @csrf
+          <div class="category-form-group">
+              <label for="categoryName">Category Name:</label>
+              <input type="text" id="categoryName" name="name" value="{{ old('name') }}" 
+                    class="category-form-control {{ $errors->has('name') ? 'input-error' : '' }}" required>
+              @error('name')
+                  <div class="error-message" style="color: red; margin-top: 5px;">{{ $message }}</div>
+              @enderror
+          </div>
+          
+          <div class="category-form-group">
+              <label for="categoryDescription">Description (Optional):</label>
+              <textarea id="categoryDescription" name="description" 
+                      class="category-form-control" rows="3">{{ old('description') }}</textarea>
+          </div>
+          
+          <div class="category-form-group">
+              <label for="categoryImage">Category Image (Optional):</label>
+              <input type="file" id="categoryImage" name="image" 
+                    class="category-form-control" accept="image/*">
+              <div class="category-form-help" style="font-size: 0.8rem; color: #666; margin-top: 5px;">
+                  Recommended size: 200x200px. Max size: 5MB.
+              </div>
+              <div id="imagePreviewContainer" style="display: none; margin-top: 10px;">
+                  <img id="imagePreview" src="#" alt="Preview" style="max-width: 100px; max-height: 100px; border: 1px solid #ddd; padding: 3px;">
+                  <button type="button" id="removeImage" style="background: #f44336; color: white; border: none; border-radius: 50%; width: 24px; height: 24px; font-size: 12px; margin-left: 5px;">×</button>
+              </div>
+          </div>
+          
+          <button id="saveCategory" style="background-color: #2563eb; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; margin-top: 10px;">Add Category</button>
+      </form>
   </div>
 </div>
 
 <!-- Edit Category Modal -->
 <div id="editCategoryModal" class="modal">
   <div class="modal-content">
+      <span class="close">&times;</span>
       <h2>Edit Category</h2>
-      <form id="editCategoryForm" method="POST">
-            @csrf
-      <input type="hidden" id="editCategoryId">
-      <label for="name">Category Name:</label>
-    <input type="text" id="editCategoryName" placeholder="Category Name">
-      <div class="modal-buttons">
-          <button id="updateCategory">Update</button>
-          <button id="cancelEditCategory" class="cancel-btn">Cancel</button>
-      </div>
+      <form id="editCategoryForm" method="POST" enctype="multipart/form-data">
+          @csrf
+          <input type="hidden" id="editCategoryId">
+          
+          <div class="category-form-group">
+              <label for="editCategoryName">Category Name:</label>
+              <input type="text" id="editCategoryName" name="name" class="category-form-control" required>
+          </div>
+          
+          <div class="category-form-group">
+              <label for="editCategoryDescription">Description (Optional):</label>
+              <textarea id="editCategoryDescription" name="description" 
+                      class="category-form-control" rows="3"></textarea>
+          </div>
+          
+          <div class="category-form-group">
+              <label for="editCategoryImage">Category Image:</label>
+              <input type="file" id="editCategoryImage" name="image" 
+                    class="category-form-control" accept="image/*">
+              <div class="category-form-help" style="font-size: 0.8rem; color: #666; margin-top: 5px;">
+                  Leave empty to keep the current image. Recommended size: 200x200px. Max size: 5MB.
+              </div>
+              <div id="editImagePreviewContainer" style="margin-top: 10px;">
+                  <img id="editImagePreview" src="#" alt="Preview" style="max-width: 100px; max-height: 100px; border: 1px solid #ddd; padding: 3px;">
+                  <button type="button" id="removeEditImage" style="background: #f44336; color: white; border: none; border-radius: 50%; width: 24px; height: 24px; font-size: 12px; margin-left: 5px;">×</button>
+              </div>
+          </div>
+          
+          <div class="modal-buttons">
+              <button type="button" id="updateCategory" style="background-color: #2563eb; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; margin-top: 10px; margin-right: 10px;">Update</button>
+              <button type="button" id="cancelEditCategory" class="cancel-btn" style="background-color: #f3f4f6; color: #4b5563; border: 1px solid #d1d5db; padding: 10px 15px; border-radius: 5px; cursor: pointer; margin-top: 10px;">Cancel</button>
+          </div>
       </form>
   </div>
 </div>
+
+
 
 <!-- View Request Modal -->
 <div id="viewRequestModal" class="category-modal">
@@ -356,29 +406,118 @@
 </div>
 
 <script>
+    
+
     document.addEventListener("DOMContentLoaded", function () {
     // EDIT CATEGORY FUNCTIONALITY
     // 1. Make sure we find the edit buttons
-    const editButtons = document.querySelectorAll(".edit-category");
-    console.log("Found edit buttons:", editButtons.length);
-    
-    // 2. Add click handler to all edit buttons
-    editButtons.forEach(function(button) {
-        button.addEventListener("click", function() {
-            // Get the category data from data attributes
-            const categoryId = this.getAttribute("data-id");
-            const categoryName = this.getAttribute("data-name");
-            
-            console.log("Edit clicked for:", categoryId, categoryName);
-            
-            // Set the form values
-            document.getElementById("editCategoryId").value = categoryId;
-            document.getElementById("editCategoryName").value = categoryName;
-            
-            // Show the modal
-            document.getElementById("editCategoryModal").style.display = "flex";
-        });
+   // EDIT CATEGORY - UPDATE TO HANDLE IMAGE AND DESCRIPTION
+const editButtons = document.querySelectorAll(".edit-category");
+editButtons.forEach(function(button) {
+    button.addEventListener("click", function() {
+        // Get the category data from data attributes
+        const categoryId = this.getAttribute("data-id");
+        const categoryName = this.getAttribute("data-name");
+        const categoryDescription = this.getAttribute("data-description") || '';
+        const categoryImage = this.getAttribute("data-image");
+        
+        console.log("Edit clicked for:", categoryId, categoryName);
+        
+        // Set the form values
+        document.getElementById("editCategoryId").value = categoryId;
+        document.getElementById("editCategoryName").value = categoryName;
+        document.getElementById("editCategoryDescription").value = categoryDescription;
+        
+        // Set the image preview if available
+        const imagePreview = document.getElementById("editImagePreview");
+        const previewContainer = document.getElementById("editImagePreviewContainer");
+        
+        if (categoryImage && categoryImage !== '') {
+            imagePreview.src = categoryImage;
+            previewContainer.style.display = "block";
+        } else {
+            imagePreview.src = "";
+            previewContainer.style.display = "none";
+        }
+        
+        // Show the modal
+        document.getElementById("editCategoryModal").style.display = "flex";
     });
+});
+
+// IMAGE PREVIEW HANDLERS
+document.addEventListener('DOMContentLoaded', function() {
+    // Image preview for Add Category
+    const categoryImage = document.getElementById('categoryImage');
+    if (categoryImage) {
+        categoryImage.addEventListener('change', function(event) {
+            const previewContainer = document.getElementById('imagePreviewContainer');
+            const preview = document.getElementById('imagePreview');
+            const file = event.target.files[0];
+            
+            if (file) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    previewContainer.style.display = 'block';
+                };
+                
+                reader.readAsDataURL(file);
+            } else {
+                previewContainer.style.display = 'none';
+            }
+        });
+    }
+
+    // Remove image button for Add Category
+    const removeImage = document.getElementById('removeImage');
+    if (removeImage) {
+        removeImage.addEventListener('click', function() {
+            const input = document.getElementById('categoryImage');
+            if (input) input.value = '';
+            
+            const container = document.getElementById('imagePreviewContainer');
+            if (container) container.style.display = 'none';
+        });
+    }
+    
+    // Image preview for Edit Category
+    const editCategoryImage = document.getElementById('editCategoryImage');
+    if (editCategoryImage) {
+        editCategoryImage.addEventListener('change', function(event) {
+            const preview = document.getElementById('editImagePreview');
+            const container = document.getElementById('editImagePreviewContainer');
+            const file = event.target.files[0];
+            
+            if (file) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    container.style.display = 'block';
+                };
+                
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+    
+    // Remove image button for Edit Category
+    const removeEditImage = document.getElementById('removeEditImage');
+    if (removeEditImage) {
+        removeEditImage.addEventListener('click', function() {
+            const input = document.getElementById('editCategoryImage');
+            if (input) input.value = '';
+            
+            const preview = document.getElementById('editImagePreview');
+            if (preview) preview.src = '';
+            
+            // Don't hide the container if there's an existing image
+            // Just clear the file input
+        });
+    }
+});
     
     // DELETE CATEGORY FUNCTIONALITY - Direct approach
     const deleteButtons = document.querySelectorAll(".delete-btn");
@@ -428,63 +567,93 @@
     // ADD CATEGORY AJAX
     const saveCategoryBtn = document.getElementById("saveCategory");
     saveCategoryBtn.addEventListener("click", function (e) {
-        e.preventDefault();
+    e.preventDefault();
 
-        const categoryName = document.getElementById("categoryName").value;
-        const csrfToken = document.querySelector('input[name="_token"]').value;
+    const form = this.closest("form");
+    const formData = new FormData(form);
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-        fetch("{{ route('categories.store') }}", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "X-CSRF-TOKEN": csrfToken
-            },
-            body: JSON.stringify({ name: categoryName })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert(data.message);
-                addCategoryRow(data.category); // update table
-                document.getElementById("categoryModal").style.display = "none";
-                document.getElementById("categoryName").value = "";
-            } else {
-                alert("Failed to add category.");
-            }
-        })
-        .catch(error => console.error(error));
+    // Show loading state
+    this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+    this.disabled = true;
+
+    fetch(form.action, {
+        method: "POST",
+        headers: {
+            "X-CSRF-TOKEN": csrfToken,
+            "X-Requested-With": "XMLHttpRequest"
+        },
+        body: formData // Use FormData to include files
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Reset button state
+        this.innerHTML = 'Add Category';
+        this.disabled = false;
+        
+        if (data.success) {
+            alert(data.message);
+            // Reload the page to show updated list with proper images
+            window.location.reload();
+        } else {
+            alert("Failed to add category: " + (data.message || "Unknown error"));
+        }
+    })
+    .catch(error => {
+        console.error("Error:", error);
+        this.innerHTML = 'Add Category';
+        this.disabled = false;
+        alert("An error occurred while adding the category");
     });
+});
 
     // UPDATE CATEGORY AJAX
-    const updateCategoryBtn = document.getElementById("updateCategory");
-    updateCategoryBtn.addEventListener("click", function (e) {
-        e.preventDefault();
+  const updateCategoryBtn = document.getElementById("updateCategory");
+updateCategoryBtn.addEventListener("click", function (e) {
+    e.preventDefault();
 
-        const categoryId = document.getElementById("editCategoryId").value;
-        const categoryName = document.getElementById("editCategoryName").value;
-        const csrfToken = document.querySelector('input[name="_token"]').value;
+    const categoryId = document.getElementById("editCategoryId").value;
+    const form = document.getElementById("editCategoryForm");
+    const formData = new FormData(form);
+    
+    // Add method-spoofing field for PUT request
+    formData.append('_method', 'PUT');
+    
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    
+    // Show loading state
+    this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updating...';
+    this.disabled = true;
 
-        fetch(`/categories/${categoryId}`, {
-            method: "PUT",
-            headers: {
-                "Content-Type": "application/json",
-                "X-CSRF-TOKEN": csrfToken
-            },
-            body: JSON.stringify({ name: categoryName })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert(data.message);
-                updateCategoryRow(data.category); // update row
-                document.getElementById("editCategoryModal").style.display = "none";
-            } else {
-                alert("Failed to update category.");
-            }
-        })
-        .catch(error => console.error(error));
+    fetch(`/categories/${categoryId}`, {
+        method: "POST", // Always POST with FormData, _method field handles the rest
+        headers: {
+            "X-CSRF-TOKEN": csrfToken,
+            "X-Requested-With": "XMLHttpRequest"
+        },
+        body: formData // Use FormData to include files
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Reset button state
+        this.innerHTML = 'Update';
+        this.disabled = false;
+        
+        if (data.success) {
+            alert(data.message);
+            // Reload the page to show updated list with proper images
+            window.location.reload();
+        } else {
+            alert("Failed to update category: " + (data.message || "Unknown error"));
+        }
+    })
+    .catch(error => {
+        console.error("Error:", error);
+        this.innerHTML = 'Update';
+        this.disabled = false;
+        alert("An error occurred while updating the category");
     });
-
+});
     // Helper function to update row after edit
     function updateCategoryRow(category) {
         // Find the row in the table
@@ -918,7 +1087,6 @@ if (approveModalSubmit) {
         });
     }
     
-    // Decline Modal Submit Button
     const declineModalSubmit = document.getElementById('declineModalSubmit');
 if (declineModalSubmit) {
     declineModalSubmit.addEventListener('click', function() {
@@ -949,32 +1117,55 @@ if (declineModalSubmit) {
         formData.append('admin_notes', notes);
         formData.append('_token', csrfToken);
         
-        // CORRECTED URL: Removed /admin prefix to match your routes
+        // Add explicit Accept header for JSON
         fetch(`/admin/category-requests/${requestId}/decline`, {
-                method: 'POST',
-                body: formData
-            })
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: formData
+        })
         .then(response => {
             console.log("Response status:", response.status);
             
-            // Check if the response is JSON
-            const contentType = response.headers.get('content-type');
-            if (contentType && contentType.includes('application/json')) {
-                return response.json();
-            } else {
-                // For non-JSON responses (like HTML error pages)
-                throw new Error(`Server returned ${response.status} with non-JSON response`);
-            }
+            // Always try to parse as JSON first
+            return response.text().then(text => {
+                try {
+                    return JSON.parse(text);
+                } catch(e) {
+                    console.error("Failed to parse response as JSON:", text);
+                    throw new Error(`Server returned ${response.status} with invalid JSON response`);
+                }
+            });
         })
         .then(data => {
             console.log("Response data:", data);
             
-            if (data.success) {
+            if (data && data.success) {
                 // Update the table
                 updateRequestRow(requestId, 'declined');
                 
-                // Close the modal
-                document.getElementById('declineRequestModal').style.display = 'none';
+                // Close the modal using vanilla JavaScript
+                const modal = document.getElementById('declineRequestModal');
+                
+                // If using Bootstrap 5
+                if (typeof bootstrap !== 'undefined') {
+                    const bootstrapModal = bootstrap.Modal.getInstance(modal);
+                    if (bootstrapModal) {
+                        bootstrapModal.hide();
+                    }
+                } 
+                // Fallback method
+                else {
+                    modal.style.display = 'none';
+                    document.body.classList.remove('modal-open');
+                    // Remove backdrop if present
+                    const backdrops = document.getElementsByClassName('modal-backdrop');
+                    while(backdrops.length > 0) {
+                        backdrops[0].parentNode.removeChild(backdrops[0]);
+                    }
+                }
                 
                 // Show success message
                 alert(data.message || 'Category request declined successfully');
@@ -991,7 +1182,7 @@ if (declineModalSubmit) {
                 declineModalSubmit.disabled = false;
                 
                 // Show error message
-                alert(data.message || 'Failed to decline category request');
+                alert(data?.message || 'Failed to decline category request');
             }
         })
         .catch(error => {
@@ -1001,11 +1192,10 @@ if (declineModalSubmit) {
             declineModalSubmit.innerHTML = 'Decline Request';
             declineModalSubmit.disabled = false;
             
-            alert('An error occurred while processing the request');
+            alert('An error occurred while processing the request: ' + error.message);
         });
     });
 }
-
     
     // Function to update a request row in the table
     function updateRequestRow(requestId, newStatus) {
@@ -1149,4 +1339,145 @@ if (declineModalSubmit) {
     
     console.log('Category request management script initialized');
 });
+
+// VIEW DESCRIPTION MODAL
+document.addEventListener('click', function(e) {
+    if (e.target.closest('.view-description')) {
+        const button = e.target.closest('.view-description');
+        const description = button.getAttribute('data-description');
+        
+        // Create modal if it doesn't exist
+        let descriptionModal = document.getElementById('viewDescriptionModal');
+        if (!descriptionModal) {
+            const modalHTML = `
+                <div id="viewDescriptionModal" class="category-modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.4); align-items: center; justify-content: center;">
+                    <div class="category-modal-content" style="background-color: #fefefe; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); width: 80%; max-width: 500px; position: relative;">
+                        <div class="category-modal-header" style="border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 15px;">
+                            <h4 class="category-modal-title" style="margin: 0; font-size: 1.2rem;">Category Description</h4>
+                            <span class="category-modal-close" style="position: absolute; top: 10px; right: 15px; font-size: 1.5rem; cursor: pointer;">&times;</span>
+                        </div>
+                        <div class="category-modal-body">
+                            <div id="fullDescription" style="white-space: pre-wrap; font-size: 0.9rem; line-height: 1.5; max-height: 300px; overflow-y: auto; padding: 1rem; background-color: #f9fafb; border-radius: 4px;"></div>
+                        </div>
+                        <div class="category-modal-footer" style="margin-top: 15px; text-align: right;">
+                            <button type="button" class="category-btn category-btn-secondary" style="background-color: #f3f4f6; color: #4b5563; border: 1px solid #d1d5db; padding: 8px 16px; border-radius: 5px; cursor: pointer;">Close</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+            descriptionModal = document.getElementById('viewDescriptionModal');
+            
+            // Add close button handler
+            descriptionModal.querySelector('.category-modal-close').addEventListener('click', function() {
+                descriptionModal.style.display = 'none';
+            });
+            
+            // Add close button handler
+            descriptionModal.querySelector('.category-btn-secondary').addEventListener('click', function() {
+                descriptionModal.style.display = 'none';
+            });
+        }
+        
+        // Set the description in the modal
+        document.getElementById('fullDescription').textContent = description;
+        
+        // Show the modal
+        descriptionModal.style.display = 'flex';
+    }
+});
+
+// VIEW USERS MODAL
+document.addEventListener('click', function(e) {
+    if (e.target.closest('.view-users')) {
+        const button = e.target.closest('.view-users');
+        const categoryId = button.getAttribute('data-id');
+        const categoryName = button.getAttribute('data-name');
+        
+        // Create modal if it doesn't exist
+        let usersModal = document.getElementById('viewUsersModal');
+        if (!usersModal) {
+            const modalHTML = `
+                <div id="viewUsersModal" class="category-modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.4); align-items: center; justify-content: center;">
+                    <div class="category-modal-content" style="background-color: #fefefe; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); width: 80%; max-width: 500px; position: relative;">
+                        <div class="category-modal-header" style="border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 15px;">
+                            <h4 class="category-modal-title" style="margin: 0; font-size: 1.2rem;">Users in <span id="categoryNameTitle"></span></h4>
+                            <span class="category-modal-close" style="position: absolute; top: 10px; right: 15px; font-size: 1.5rem; cursor: pointer;">&times;</span>
+                        </div>
+                        <div class="category-modal-body">
+                            <div style="max-height: 300px; overflow-y: auto;">
+                                <ul id="categoryUsersList" style="list-style: none; padding: 0; margin: 0;">
+                                    <li style="text-align: center; padding: 1rem; color: #6b7280;">Loading users...</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="category-modal-footer" style="margin-top: 15px; text-align: right;">
+                            <button type="button" class="category-btn category-btn-secondary" style="background-color: #f3f4f6; color: #4b5563; border: 1px solid #d1d5db; padding: 8px 16px; border-radius: 5px; cursor: pointer;">Close</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+            usersModal = document.getElementById('viewUsersModal');
+            
+            // Add close button handler
+            usersModal.querySelector('.category-modal-close').addEventListener('click', function() {
+                usersModal.style.display = 'none';
+            });
+            
+            // Add close button handler
+            usersModal.querySelector('.category-btn-secondary').addEventListener('click', function() {
+                usersModal.style.display = 'none';
+            });
+        }
+        
+        // Set category name in modal title
+        document.getElementById('categoryNameTitle').textContent = categoryName;
+        
+        // Show loading state
+        document.getElementById('categoryUsersList').innerHTML = '<li style="text-align: center; padding: 1rem; color: #6b7280;">Loading users...</li>';
+        
+        // Show the modal
+        usersModal.style.display = 'flex';
+        
+        // Fetch users for this category
+        fetch(`/categories/${categoryId}/users`)
+            .then(response => response.json())
+            .then(data => {
+                const usersList = document.getElementById('categoryUsersList');
+                usersList.innerHTML = '';
+                
+                if (data.users && data.users.length > 0) {
+                    data.users.forEach(user => {
+                        const li = document.createElement('li');
+                        li.style.padding = '0.75rem';
+                        li.style.borderBottom = '1px solid #e5e7eb';
+                        li.style.display = 'flex';
+                        li.style.alignItems = 'center';
+                        
+                        li.innerHTML = `
+                            <img src="${user.avatar || '/images/defaultprofile.jpg'}" alt="${user.name}" 
+                                style="width: 32px; height: 32px; border-radius: 50%; margin-right: 10px; object-fit: cover;">
+                            <div>
+                                <div style="font-weight: 600;">${user.name}</div>
+                                <div style="font-size: 0.8rem; color: #6b7280;">${user.email}</div>
+                            </div>
+                        `;
+                        usersList.appendChild(li);
+                    });
+                } else {
+                    usersList.innerHTML = '<li style="text-align: center; padding: 1rem; color: #6b7280;">No users in this category</li>';
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching users:', error);
+                document.getElementById('categoryUsersList').innerHTML = 
+                    '<li style="text-align: center; padding: 1rem; color: #ef4444;">Error loading users. Please try again.</li>';
+            });
+    }
+});
+
+
+
+
 </script>

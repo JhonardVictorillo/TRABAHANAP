@@ -6,6 +6,7 @@
     <title>Freelancer Profile</title>
     <meta name="csrf-token" content="{{ csrf_token() }}" />
     <link rel ="stylesheet" href="{{asset ('css/PostSeeProfile.css')}}" />
+     <link rel ="stylesheet" href="{{asset ('css/customerHeader.css')}}" />
     <script src="https://cdn.tailwindcss.com/3.4.16"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"rel="stylesheet"/>
@@ -24,8 +25,8 @@
         theme: {
           extend: {
             colors: {
-              primary: "#118f39",
-              secondary: "#64748B",
+            primary: "#2563eb", // Changed from #118f39 to royal blue
+          secondary: "#64748B",
             },
             borderRadius: {
               none: "0px",
@@ -60,191 +61,28 @@
     </style>
   </head>
   <body class="bg-[#F8F9FA] font-inter">
-    <header class="sticky top-0 z-50 bg-white shadow-sm">
-      <div class="flex items-center justify-between px-8 h-16">
-      <a href="/" class="font-poppins text-2xl font-semibold">
-          <span class="text-[#118f39]">Mingla</span><span class="text-[#4CAF50]">Gawa</span> 
-        </a>
-        <div class="flex items-center flex-1 max-w-xl mx-8">
-          <div class="relative w-full">
-          <form action="{{ route('search') }}" method="GET" style="display: flex; align-items: center; width: 100%;">
-            <input
-              type="text"
-              name="q" 
-              class="search-bar w-full h-10 pl-10 pr-4 text-sm bg-gray-50 border-none !rounded-button"
-              placeholder="Search for services or freelancers..."
-              value="{{ request('q') }}"
-            />
-            <div
-              class="absolute left-3 top-0 w-4 h-10 flex items-center justify-center text-gray-400"
-            >
-              <i class="ri-search-line"></i>
-            </div>
-            </form>
-          </div>
-        </div>
-        <div class="flex items-center gap-6">
-        <div class="relative inline-block text-left">
-    <!-- Notification Icon -->
-    <button id="notification-icon" class="flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-primary">
-        <div class="relative w-6 h-6 flex items-center justify-center">
-            <i class="ri-notification-line"></i>
-            @if(auth()->user()->unreadNotifications->count() > 0)
-                <span class="absolute -top-1 -right-2 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
-                    {{ auth()->user()->unreadNotifications->count() }}
-                </span>
-            @endif
-        </div>
-        <span>Notifications</span>
-    </button>
+   @include('customer.customerHeader')
 
-    <!-- Notification Dropdown -->
-    <div id="notification-dropdown" class="hidden absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg z-50">
-        <div class="p-4 border-b">
-            <h3 class="text-lg font-semibold text-gray-700">Notifications</h3>
-        </div>
-        <ul id="notification-list" class="max-h-64 overflow-y-auto">
-            @foreach(auth()->user()->notifications as $notification)
-                <li class="flex items-start justify-between px-4 py-3 border-b hover:bg-gray-50 {{ $notification->read_at ? 'bg-gray-100' : '' }}">
-                    <div>
-                        <p class="text-sm {{ $notification->read_at ? 'text-gray-500' : 'text-gray-600' }}">
-                            {{ $notification->data['message'] }}
-                        </p>
-                        <p class="text-xs text-gray-400">{{ $notification->created_at->diffForHumans() }}</p>
-                    </div>
-                    @if(!$notification->read_at)
-                        <button
-                            class="text-sm text-primary hover:underline mark-as-read"
-                            data-id="{{ $notification->id }}"
-                        >
-                            Mark as Read
-                        </button>
-                    @endif
-                </li>
-            @endforeach
-        </ul>
-        @if(auth()->user()->unreadNotifications->count() > 0)
-            <div class="p-4 border-t">
-                <button id="mark-all-read" class="w-full py-2 text-sm font-medium text-white bg-primary hover:bg-primary/90 rounded-lg">
-                    Mark All as Read
-                </button>
-            </div>
-        @endif
-    </div>
-</div>
-                    <button
-            class="flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-primary !rounded-button"
-            >
-            <div class="relative w-6 h-6 flex items-center justify-center">
-                <i class="ri-message-3-line"></i>
-                <span class="absolute -top-1 -right-2 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
-                3
-                </span>
-            </div>
-            Messages
-            </button>
-           
-<div class="relative inline-block text-left">
-
-  <button id="profileBtn" class="w-12 h-12 rounded-full overflow-hidden focus:outline-none">
-    <img  src="{{ $user->profile_picture ? asset('storage/' . $user->profile_picture) : asset('images/defaultprofile.png') }}" alt="User" class="w-full h-full object-cover" />
-  </button>
-
-
-  <div id="dropdownMenu" class="hidden absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg z-50">
-
-    <div class="flex items-center gap-3 p-4 border-b">
-      <img src="{{ $user->profile_picture ? asset('storage/' . $user->profile_picture) : asset('images/defaultprofile.png') }}" alt="User" class="w-12 h-12 rounded-full object-cover" />
-      <div>
-        <p class="font-bold leading-tight">{{ $user->firstname }} {{ $user->lastname }}</p>
-      
-      </div>
-    </div>
-
- 
-    <!-- Menu Items -->
-<ul class="py-2 text-sm text-gray-700">
-  <li>
-    <a href="{{ route('customer.profile') }}" class="flex items-center px-4 py-2 hover:bg-gray-100">
-      <!-- Profile Icon -->
-      <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-3 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A4 4 0 017 16h10a4 4 0 011.879.804M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-      </svg>
-      Profile
-    </a>
-  </li>
-  
-  <li>
-    <a href="{{ route('customer.appointments.view') }}" class="flex items-center px-4 py-2 hover:bg-gray-100">
-      <!-- Appointment Icon -->
-      <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-3 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10m-13 5h16a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v7a2 2 0 002 2z" />
-      </svg>
-      Appointment
-    </a>
-  </li>
-
-  <li>
-    <a href="#" class="flex items-center px-4 py-2 hover:bg-gray-100">
-      <!-- Settings Icon -->
-      <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-3 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-      </svg>
-      Settings
-    </a>
-  </li>
-  
-  <li>
-    <a href="#" class="flex items-center px-4 py-2 hover:bg-gray-100">
-      <!-- Help Icon -->
-      <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-3 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16h6m2 4H7a2 2 0 01-2-2V6a2 2 0 012-2h4l2 2h6a2 2 0 012 2v10a2 2 0 01-2 2z" />
-      </svg>
-      Help
-    </a>
-  </li>
-  
-  <li>
-  <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
-                @csrf
-      </form>
-    <a href="#"onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="flex items-center px-4 py-2 text-red-600 hover:bg-gray-100">
-      <!-- Logout Icon -->
-      <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-3 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7" />
-      </svg>
-      Logout
-    </a>
-  </li>
-</ul>
-
-  </div>
-</div>
-   </div>
-     </div>
-    </header>
-
-    <main class="max-w-7xl mx-auto px-8 py-8">
-    <div class="mb-4">
+   <main class="max-w-7xl mx-auto px-4 md:px-8 py-6 md:py-8">
+  <div class="mb-4">
     <a href="{{ route('customer.dashboard') }}">
-        <button class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-primary bg-white border border-primary hover:bg-primary hover:text-white transition rounded-lg shadow-sm">
-            <i class="ri-arrow-left-line text-lg"></i>
-            
-        </button>
+      <button class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-primary bg-white border border-primary hover:bg-primary hover:text-white transition rounded-lg shadow-sm">
+        <i class="ri-arrow-left-line text-lg"></i>
+      </button>
     </a>
-</div>
-    <div class="grid grid-cols-3 gap-8">
+  </div>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-8">
         <!-- Left Section -->
-        <div class="col-span-2">
-            <div class="bg-white rounded-lg p-8 mb-8">
+       <div class="lg:col-span-2">
+         <div class="bg-white rounded-lg p-4 md:p-8 mb-8">
                 <!-- Profile Section -->
-                <div class="flex gap-6 mb-6">
-                    <img
-                        src="{{ $freelancer->profile_picture ? asset('storage/' . $freelancer->profile_picture) : asset('images/defaultprofile.jpg') }}"
-                        alt="{{ $freelancer->firstname }}"
-                        class="w-40 h-40 rounded-full object-cover"
-                    />
-                    <div class="flex-1">
+                 <div class="flex flex-col sm:flex-row gap-4 sm:gap-6 mb-6">
+                  <img
+                    src="{{ $freelancer->profile_picture ? asset('storage/' . $freelancer->profile_picture) : asset('images/defaultprofile.jpg') }}"
+                    alt="{{ $freelancer->firstname }}"
+                    class="w-32 h-32 sm:w-40 sm:h-40 rounded-full object-cover mx-auto sm:mx-0"
+                  />
+                     <div class="flex-1 text-center sm:text-left">
                         <div class="flex items-start justify-between mb-4">
                             <div>
                                 <h2 class="text-2xl font-semibold mb-1">{{ $freelancer->firstname }} {{ $freelancer->lastname }}</h2>
@@ -293,7 +131,7 @@
                     </div>
                 </div>
                 <!-- Stats Section -->
-                <div class="grid grid-cols-4 gap-4 p-4 bg-gray-50 rounded-lg mb-6">
+                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 bg-gray-50 rounded-lg mb-6">
                     <div class="text-center">
                         <div class="text-2xl font-semibold mb-1">98%</div>
                         <p class="text-sm text-gray-600">Job Success</p>
@@ -377,8 +215,8 @@
             </div>
         </div>
         <!-- Right Section -->
-        <div class="col-span-1">
-                <div class="bg-white rounded-lg p-6 shadow-lg sticky top-20">
+        <div class="col-span-1 order-first lg:order-none mb-6 lg:mb-0">
+          <div class="bg-white rounded-lg p-6 shadow-lg sticky top-20">
                 <h3 class="text-lg font-semibold mb-6">Book Appointment Here</h3>
                 <p class="text-sm text-gray-600 mb-6">
                     Book a consultation to discuss your digital marketing needs and goals.
@@ -394,8 +232,9 @@
     </div>
     
    <!-- Booking Modal -->
-<div id="bookingModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
-  <div class="bg-white rounded-lg p-6 max-w-lg w-full mx-4 relative" style="max-height:100vh;">
+<div id="bookingModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50 px-4">
+  <div class="bg-white rounded-lg p-4 sm:p-6 w-full max-w-lg mx-auto relative" style="max-height:90vh;">
+    <!-- Modal content remains the same but with adjusted padding -->
     <div class="flex justify-between items-center mb-6">
       <h3 class="text-xl font-semibold">Book an Appointment</h3>
       <button id="closeModal" class="text-gray-400 hover:text-gray-600">
@@ -480,232 +319,12 @@
  
  
       <!-- Success message -->
-      @if(session('success'))
-        <div class="alert alert-success">
-        <i class='bx bx-check-circle'></i> 
-        {{ session('success') }}
-        </div>
-        @endif
-        <footer class="bg-gray-50 pt-16 pb-8">
-      <div class="max-w-7xl mx-auto px-8">
-        <div class="grid grid-cols-4 gap-8 pb-12 border-b">
-          <div>
-            <a
-              href="/"
-              class="font-['Pacifico'] text-2xl text-primary block mb-4"
-              >MinglaGawa</a
-            >
-            <p class="text-sm text-gray-600 mb-6">
-              Your trusted platform for finding and hiring local freelance
-              talent.
-            </p>
-            <div class="flex gap-4">
-              <a
-                href="#"
-                class="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-primary"
-              >
-                <i class="ri-twitter-x-line"></i>
-              </a>
-              <a
-                href="#"
-                class="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-primary"
-              >
-                <i class="ri-facebook-circle-line"></i>
-              </a>
-              <a
-                href="#"
-                class="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-primary"
-              >
-                <i class="ri-instagram-line"></i>
-              </a>
-              <a
-                href="#"
-                class="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-primary"
-              >
-                <i class="ri-linkedin-box-line"></i>
-              </a>
-            </div>
-          </div>
-          <div>
-            <h4 class="font-medium mb-4">Company</h4>
-            <ul class="space-y-3 text-sm">
-              <li>
-                <a href="#" class="text-gray-600 hover:text-primary"
-                  >About Us</a
-                >
-              </li>
-              <li>
-                <a href="#" class="text-gray-600 hover:text-primary">Careers</a>
-              </li>
-              <li>
-                <a href="#" class="text-gray-600 hover:text-primary"
-                  >Press & News</a
-                >
-              </li>
-              <li>
-                <a href="#" class="text-gray-600 hover:text-primary"
-                  >Partnerships</a
-                >
-              </li>
-            </ul>
-          </div>
-          <div>
-            <h4 class="font-medium mb-4">Support</h4>
-            <ul class="space-y-3 text-sm">
-              <li>
-                <a href="#" class="text-gray-600 hover:text-primary"
-                  >Help & Support</a
-                >
-              </li>
-              <li>
-                <a href="#" class="text-gray-600 hover:text-primary"
-                  >Trust & Safety</a
-                >
-              </li>
-              <li>
-                <a href="#" class="text-gray-600 hover:text-primary"
-                  >Contact Us</a
-                >
-              </li>
-              <li>
-                <a href="#" class="text-gray-600 hover:text-primary">FAQ</a>
-              </li>
-            </ul>
-          </div>
-          <div>
-            <h4 class="font-medium mb-4">Legal</h4>
-            <ul class="space-y-3 text-sm">
-              <li>
-                <a href="#" class="text-gray-600 hover:text-primary"
-                  >Privacy Policy</a
-                >
-              </li>
-              <li>
-                <a href="#" class="text-gray-600 hover:text-primary"
-                  >Terms of Service</a
-                >
-              </li>
-              <li>
-                <a href="#" class="text-gray-600 hover:text-primary"
-                  >Cookie Policy</a
-                >
-              </li>
-              <li>
-                <a href="#" class="text-gray-600 hover:text-primary"
-                  >Accessibility</a
-                >
-              </li>
-            </ul>
-          </div>
-        </div>
-        <div class="pt-8 text-sm text-center text-gray-600">
-       
-        </div>
-      </div>
-    </footer>
+    @include('successMessage')
+      
+    @include('customer.footer')
 
 
     <script>
-
-const profileBtn = document.getElementById('profileBtn');
-          const dropdownMenu = document.getElementById('dropdownMenu');
-
-          profileBtn.addEventListener('click', () => {
-            dropdownMenu.classList.toggle('hidden');
-          });
-
-          document.addEventListener('click', (e) => {
-            if (!profileBtn.contains(e.target) && !dropdownMenu.contains(e.target)) {
-              dropdownMenu.classList.add('hidden');
-            }
-          });
-       
-       document.addEventListener('DOMContentLoaded', function () {
-    const notificationIcon = document.getElementById('notification-icon');
-    const notificationDropdown = document.getElementById('notification-dropdown');
-    const markAsReadButtons = document.querySelectorAll('.mark-as-read');
-    const markAllReadButton = document.getElementById('mark-all-read');
-
-    // Toggle Notification Dropdown
-    notificationIcon.addEventListener('click', function () {
-        notificationDropdown.classList.toggle('hidden');
-    });
-
-    // Mark Individual Notification as Read
-    markAsReadButtons.forEach(button => {
-        button.addEventListener('click', function () {
-            const notificationId = this.getAttribute('data-id');
-            fetch(`/notifications/mark-as-read/${notificationId}`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                },
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        const notificationItem = this.closest('li');
-                        notificationItem.classList.add('bg-gray-100');
-                        notificationItem.querySelector('p').classList.replace('text-gray-600', 'text-gray-500');
-                        this.remove(); // Remove the "Mark as Read" button
-                        updateNotificationCount();
-                    }
-                });
-        });
-    });
-
-    // Mark All Notifications as Read
-    if (markAllReadButton) {
-        markAllReadButton.addEventListener('click', function () {
-            fetch(`/notifications/mark-all-as-read`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                },
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        const notificationItems = document.querySelectorAll('#notification-list li');
-                        notificationItems.forEach(item => {
-                            item.classList.add('bg-gray-100');
-                            const message = item.querySelector('p');
-                            if (message) {
-                                message.classList.replace('text-gray-600', 'text-gray-500');
-                            }
-                            const markAsReadButton = item.querySelector('.mark-as-read');
-                            if (markAsReadButton) {
-                                markAsReadButton.remove();
-                            }
-                        });
-                        updateNotificationCount();
-                    }
-                });
-        });
-    }
-
-    // Update Notification Count
-    function updateNotificationCount() {
-        const countElement = notificationIcon.querySelector('span');
-        const currentCount = parseInt(countElement.textContent) || 0;
-        if (currentCount > 1) {
-            countElement.textContent = currentCount - 1;
-        } else {
-            countElement.remove();
-        }
-    }
-});
-
-  // succes message time duration
-  document.addEventListener('DOMContentLoaded', function () {
-        const alert = document.querySelector('.alert-success');
-        if (alert) {
-            setTimeout(() => {
-                alert.remove();
-            }, 3000); // 3 seconds
-        }
-    });
-
 
 
     document.addEventListener("DOMContentLoaded", function () {
@@ -784,7 +403,7 @@ const profileBtn = document.getElementById('profileBtn');
         calendarGrid.innerHTML += `
             <div class="text-sm py-2 ${
                 isAvailable
-                    ? "bg-green-600 text-white rounded-full cursor-pointer"
+                    ? "bg-blue-600 text-white rounded-full cursor-pointer"
                     : "bg-gray-200 text-gray-400 cursor-not-allowed"
             }" data-date="${date}" ${isAvailable ? "" : "disabled"}>
                 ${day}
@@ -797,8 +416,8 @@ const profileBtn = document.getElementById('profileBtn');
             day.addEventListener("click", function () {
                 document
                     .querySelectorAll("#calendarGrid div")
-                    .forEach((d) => d.classList.remove("bg-green-600", "text-white"));
-                this.classList.add("bg-green-600", "text-white");
+                    .forEach((d) => d.classList.remove("bg-blue-600", "text-white"));
+                this.classList.add("bg-blue-600", "text-white");
                 selectedDateInput.value = this.getAttribute("data-date");
 
                 // Update time slots for the selected date
@@ -881,8 +500,8 @@ function updateTimeSlots(selectedDate, availability) {
         document.querySelectorAll(".time-btn:not([disabled])").forEach((button) => {
             button.addEventListener("click", function() {
                 document.querySelectorAll(".time-btn").forEach((btn) => 
-                    btn.classList.remove("bg-green-600", "text-white"));
-                this.classList.add("bg-green-600", "text-white");
+                    btn.classList.remove("bg-blue-600", "text-white"));
+                this.classList.add("bg-blue-600", "text-white");
                 document.getElementById("selectedTime").value = this.getAttribute("data-time");
             });
         });
@@ -933,7 +552,7 @@ function convertTo12HourFormat(hour) {
           theme: {
             extend: {
               colors: {
-                primary: "#118f39",
+               primary: "#2563eb", // Changed from #118f39 to royal blue
                 secondary: "#64748B",
               },
               borderRadius: {

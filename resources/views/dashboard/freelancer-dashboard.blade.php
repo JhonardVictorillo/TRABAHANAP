@@ -14,18 +14,8 @@
  @include('freelancer.revenueSection')
   @include('freelancer.postSection')
   
- 
-   
-           
+   @include('successMessage')
 
-       <!-- Success message -->
-       @if(session('success'))
-        <div class="alert alert-success">
-        <i class='bx bx-check-circle'></i> <!-- Success icon -->
-        {{ session('success') }}
-        </div>
-        @endif
-    
 
     @if(!$user->profile_completed)
 <script>
@@ -38,18 +28,6 @@
 
 
    <script>
-    document.addEventListener('DOMContentLoaded', function () {
-    // Success message duration
-    const alert = document.querySelector('.alert-success');
-    if (alert) {
-        setTimeout(() => {
-            alert.remove();
-        }, 3000); // 3 seconds
-    }
-    })
-
-  
-
     document.addEventListener('DOMContentLoaded', function () {
     // FullCalendar Initialization
     const calendarEl = document.getElementById('calendar');
@@ -191,6 +169,60 @@ function formatTime(date) {
     minutes = minutes < 10 ? '0' + minutes : minutes;
     return `${hours}:${minutes} ${ampm}`;
 }
+
+
+document.addEventListener('DOMContentLoaded', function() {
+  // Create mobile menu toggle button
+  const topNav = document.querySelector('.top-nav');
+  if (topNav) {
+    const toggleBtn = document.createElement('button');
+    toggleBtn.className = 'mobile-menu-toggle';
+    toggleBtn.innerHTML = '<span class="material-symbols-outlined">menu</span>';
+    toggleBtn.setAttribute('aria-label', 'Toggle menu');
+    
+    // Insert toggle button as first child of top-nav
+    topNav.insertBefore(toggleBtn, topNav.firstChild);
+  }
+  
+  // Create overlay element for mobile
+  const overlay = document.createElement('div');
+  overlay.className = 'sidebar-overlay';
+  document.body.appendChild(overlay);
+  
+  // Add click event to toggle button
+  document.addEventListener('click', function(event) {
+    if (event.target.closest('.mobile-menu-toggle')) {
+      const sidebar = document.querySelector('.sidebar');
+      sidebar.classList.toggle('active');
+      document.body.classList.toggle('sidebar-active');
+    }
+  });
+  
+  // Close sidebar when clicking overlay
+  overlay.addEventListener('click', function() {
+    document.querySelector('.sidebar').classList.remove('active');
+    document.body.classList.remove('sidebar-active');
+  });
+  
+  // Handle window resize
+  window.addEventListener('resize', function() {
+    if (window.innerWidth > 768) {
+      document.querySelector('.sidebar').classList.remove('active');
+      document.body.classList.remove('sidebar-active');
+    }
+  });
+  
+  // Close sidebar when clicking links on mobile
+  const sidebarLinks = document.querySelectorAll('.sidebar-links a');
+  sidebarLinks.forEach(link => {
+    link.addEventListener('click', function() {
+      if (window.innerWidth <= 768) {
+        document.querySelector('.sidebar').classList.remove('active');
+        document.body.classList.remove('sidebar-active');
+      }
+    });
+  });
+});
 
 </script>
   <!-- FullCalendar JS -->

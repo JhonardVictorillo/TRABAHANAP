@@ -5,34 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sign In - Mingla Gawa</title>
   <link href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="{{'css/login.css'    }}">
-  <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{{asset('css/login.css')}}">
+   <link rel="stylesheet" href="{{asset('css/homeHeader.css')}}">
+   <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet' />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" />
+ 
 </head>
 
 <body>
- @if(session('success'))
-        <div class="alert alert-success">
-        <i class='bx bx-check-circle'></i> <!-- Success icon -->
-        {{ session('success') }}
-        </div>
-        @endif
-
-
-
-    <header class="header">
-        <div class="logo-header">
-          Mingla<span class="brand-span">Gawa</span>
-        </div>
-        <nav class="navbar">
-          <a href="{{route('homepage')}}">Home</a>
-          <a href="{{route('homepage')}}">Categories</a>
-          <a href="{{route('homepage')}}">How It Works</a>
-          <a href="{{route('homepage')}}">Contact</a>
-          <a href="{{route('login')}}"><button class="active">Login</button></a>
-          <a href="{{route('register.form')}}"><button>Register</button></a>
-        </nav>
-      </header>
-
+  @include('successMessage')
+  @include('homepage.homepageHeader')
      
 
     <main class="auth-container">
@@ -49,7 +31,7 @@
         <h1>Login</h1>
         <p class="subtitle">Enter your credentials to access your account.</p>
 
-        <div class="social-signin">
+        <!-- <div class="social-signin">
           <button class="social-btn google">
             <i class='bx bxl-google'></i>
             Continue with Google
@@ -58,7 +40,7 @@
             <i class='bx bxl-facebook'></i>
             Continue with Facebook
           </button>
-        </div>
+        </div> -->
 
         <form action="{{ route('login') }}" method="POST" id="signinForm">
           @csrf
@@ -103,7 +85,6 @@
     </div>
   </main>
 
-  
   <!-- Forgot Password Modal -->
 <div id="forgotPasswordModal" class="modal" style="display: none;">
     <div class="modal-content">
@@ -117,17 +98,12 @@
         </form>
     </div>
 </div>
+
+  @include('homepage.homepageFooter')
+  
   <script>
 
- document.addEventListener('DOMContentLoaded', function () {
-    // Success message duration
-    const alert = document.querySelector('.alert-success');
-    if (alert) {
-        setTimeout(() => {
-            alert.remove();
-        }, 3000); // 3 seconds
-    }
-    })
+ 
     // Modal functionality
     const modal = document.getElementById('forgotPasswordModal');
     const forgotPasswordLink = document.getElementById('forgotPasswordLink');

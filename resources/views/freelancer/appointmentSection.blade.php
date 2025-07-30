@@ -34,7 +34,9 @@
       <p><i class="fas fa-map-marker-alt"></i> <strong>Address:</strong> <span id="appointmentAddress" class="font-medium"></span></p>
       <p><i class="fas fa-phone"></i> <strong>Contact:</strong> <span id="appointmentContact" class="font-medium"></span></p>
       <p><i class="fas fa-info-circle"></i> <strong>Status:</strong> <span id="appointmentStatus" class="font-medium"></span></p>
-      <p><i class="fas fa-sticky-note"></i> <strong>Notes:</strong> <span id="appointmentNotes" class="font-medium"></span></p>
+       <p><i class="fas fa-money-bill-wave"></i> <strong>Payment Status:</strong> <span id="appointmentPaymentStatus" class="font-medium"></span></p>
+      <p><i class="fas fa-coins"></i> <strong>Payment Amount:</strong> <span id="appointmentPaymentAmount" class="font-medium"></span></p>
+        <p><i class="fas fa-sticky-note"></i> <strong>Notes:</strong> <span id="appointmentNotes" class="font-medium"></span></p>
     </div>
     <div class="modal-actions enhanced-actions">
       <button id="acceptAppointmentBtn" class="action-button accept-button enhanced-btn" data-id="">
@@ -95,6 +97,34 @@
     document.getElementById('appointmentContact').textContent = data.contact || 'N/A';
     document.getElementById('appointmentStatus').textContent = data.status || 'N/A';
     document.getElementById('appointmentNotes').textContent = data.notes || 'None';
+
+    const paymentStatusElement = document.getElementById('appointmentPaymentStatus');
+    if (data.status.toLowerCase() === 'completed') {
+        if (data.final_payment_status === 'paid') {
+            paymentStatusElement.textContent = 'Paid';
+            paymentStatusElement.className = 'font-medium text-green-600';
+        } else if (parseFloat(data.commitment_fee || 0) > 0) {
+            paymentStatusElement.textContent = 'Partial (Commitment Fee Only)';
+            paymentStatusElement.className = 'font-medium text-yellow-600';
+        } else {
+            paymentStatusElement.textContent = 'Unpaid';
+            paymentStatusElement.className = 'font-medium text-red-600';
+        }
+    } else {
+        paymentStatusElement.textContent = 'N/A';
+        paymentStatusElement.className = 'font-medium text-gray-600';
+    }
+    
+    // Payment amount
+    const paymentAmountElement = document.getElementById('appointmentPaymentAmount');
+    if (data.final_payment_status === 'paid' && data.total_amount) {
+        paymentAmountElement.textContent = `₱${parseFloat(data.total_amount).toFixed(2)}`;
+    } else if (parseFloat(data.commitment_fee || 0) > 0) {
+        paymentAmountElement.textContent = `₱${parseFloat(data.commitment_fee).toFixed(2)} (Commitment Fee)`;
+    } else {
+        paymentAmountElement.textContent = '₱0.00';
+    }
+
 
     acceptBtn.dataset.id = eventId;
     declineBtn.dataset.id = eventId;

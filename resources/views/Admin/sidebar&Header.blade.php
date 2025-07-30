@@ -1,7 +1,4 @@
-
-
-
-    <!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -22,6 +19,7 @@
   <link rel="stylesheet" href="{{asset('css/newAdmin.css')}}" />
   <!-- Add this to your layout's <head> section -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
 </head>
 
 <body>
@@ -29,9 +27,8 @@
   <aside class="sidebar">
     <div class="sidebar-header">
         <h2 class="logo-header">
-            <span class="logo-icon">MG</span>
-            Mingla<span class="brand-span">Gawa</span>
-        </h2>          
+            <span class="text-[#2563eb]">Mingla</span><span class="text-[#3b82f6]">Gawa</span>
+        </h2>     
     </div>
     <ul class="sidebar-links">
     

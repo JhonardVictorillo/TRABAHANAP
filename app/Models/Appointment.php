@@ -27,6 +27,12 @@ class Appointment extends Model
         'cancelled_at',
         'status',
         'stripe_session_id',
+         'total_amount',
+        'final_payment_status',
+        'final_stripe_session_id',
+        'completed_at',
+        'review',
+        'no_show_by',
     ];
 
     public function customer()

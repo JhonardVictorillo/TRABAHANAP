@@ -1,10 +1,10 @@
 :root {
-    --primary-color: #118f39;;
+    --primary-color: #2563eb; /* Royal Blue - matching home page */
     --secondary-color: #2d3436;
     --error-color: #e74c3c;
     --success-color: #2ecc71;
-    --background-color: #f8f9fa;
-    --text-color: #2d3436;
+    --background-color: #f8fafc; /* Match home page background */
+    --text-color: #333333; /* Match home page text color */
     --border-color: #e9ecef;
 }
 
@@ -21,107 +21,35 @@ body {
 }
 
 
-.header {
-    background: white;
-    padding: 1rem 5%;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-    position: fixed;
-    width: 100%;
-    top: 0;
-    z-index: 100;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  
-  .logo-header {
-    font-size: 1.8rem;
-    font-weight: bold;
-    color: var(--primary-color);
-  }
-  
-  .navbar {
-    display: flex;
-    align-items: center;
-    gap: 2rem;
-  }
-  
-  .navbar a {
-    font-size: 1rem;
-    padding: 0.5rem;
-    text-decoration: none;
-    color: var(--text-color);
-    position: relative;
-    transition: color 0.3s ease;
-  }
-  
-  
-  .navbar button.active {
-    background-color: #0e7a31;
-    color: #fff;
-  }
-  .navbar a:hover {
-    color: var(--primary-color);
-  }
-  
-  .navbar a::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 0;
-    height: 2px;
-    background: var(--primary-color);
-    transition: width 0.3s;
-  }
-  
-  .navbar a:hover::after {
-    width: 100%;
-  }
-  
-  
-.navbar button{
-    background: transparent;
-    border: 2px solid #118f39;
-    color: #118f39;
-    border-radius: 20px;
-    padding: 5px 15px;
-    cursor: pointer;
-    transition: 0.3s;
-}
-.navbar button:hover{
-    background: #118f39;
-    color: #fff;
-}
-
 
 .auth-container {
-    display: flex;
-    min-height: 100vh;
-    padding-top: 100px; 
+  display: flex;
+  min-height: auto; /* Change from 100vh to auto */
+  padding-top: 40px; /* Reduced from 80px */
+  flex-wrap: wrap;
 }
 
-
 .welcome-section {
-    flex: 1;
-    background: #fff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 2rem;
-    margin-top: -15em;
+     flex: 1;
+  background: #fff;
+  display: flex;
+  align-items: flex-start; /* Changed from center to flex-start */
+  justify-content: center;
+  padding: 2rem;
+  margin-top: 10%; 
 }
 
 .welcome-content {
-    text-align: left;
-    color: #176f33;;
+   text-align: left;
+    color: #2563eb; /* Updated from green */
     max-width: 500px;
+     padding-top: 2rem;
 }
 
 .welcome-content h2 {
     font-size: 3.5rem;
     margin-bottom: 1.5rem;
-    color: #118f39;
+   color: #2563eb;
 }
 
 .welcome-content p {
@@ -139,11 +67,11 @@ body {
 
 .signup-box {
     flex: 1;
-    background: white;
-    padding: 2rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  background: white;
+  padding: 2rem;
+  display: flex;
+  align-items: flex-start; /* Changed from center to flex-start */
+  justify-content: center;
 }
 
 .signup-content {
@@ -153,7 +81,7 @@ body {
 
 .signup-content h1 {
     font-size: 2.5rem;
-    color: #118f39;
+   color: #2563eb;
     margin-bottom: 0.5rem;
 }
 
@@ -236,7 +164,7 @@ body {
 }
 
 .signup-btn:hover {
-    background: #e69a00;
+     background: #1d4ed8;
     transform: translateY(-2px);
 }
 
@@ -279,29 +207,58 @@ body {
 }
 
 .error {
-    color: #d9534f; /* Bootstrap danger color */
-    font-size: 0.85rem;
-    margin-top: 5px;
-    display: block;
-    font-weight: 500;
-  }
-  
-  /* Input field with error styling */
-  .input-field input:invalid,
-  .input-field input.error {
-    border: 1px solid #d9534f;
-    background-color: #fce4e4;
-  }
-  
-  .input-field input:focus.error {
-    outline: none;
-    box-shadow: 0 0 5px rgba(217, 83, 79, 0.5);
-  }
-  
-  /* Error message container for better spacing */
-  .form-group .error {
-    margin-left: 5px;
-  }
+  color: #d9534f;
+  font-size: 0.85rem;
+  margin-top: 8px;  /* Space between input and error */
+  display: block;
+  font-weight: 500;
+  text-align: left;
+  padding-left: 1rem; /* Align with input text (accounting for the icon) */
+}
+
+/* Input field with error styling */
+.input-field input:invalid,
+.input-field input.error {
+  border: 1px solid #d9534f;
+  background-color: rgba(217, 83, 79, 0.05); /* Lighter error background */
+}
+
+.input-field input:focus.error {
+  outline: none;
+  box-shadow: 0 0 5px rgba(217, 83, 79, 0.5);
+}
+
+/* Better positioning for field validation messages */
+.form-group .error {
+  margin-left: 0; /* Remove the side margin */
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+/* Specific for checkbox errors (terms) */
+.terms .error {
+  padding-left: 0; /* No padding needed for checkbox error */
+  margin-top: 5px;
+}
+
+/* Style for validation error messages displayed to the right in your screenshot */
+.firstname-error, 
+.lastname-error,
+.email-error,
+.password-error,
+.contact-error {
+  position: static; /* Change from absolute to static */
+  display: block;
+  margin-top: 8px;
+  color: #d9534f;
+  font-size: 0.85rem;
+  padding-left: 3rem;
+}
+
+/* For the specific form layout, ensure role selection error is centered */
+.role-selection-container + .error {
+  text-align: center;
+  padding-left: 0;
+}
   
   /* Optional: Add animation for error messages */
   @keyframes fadeIn {
@@ -362,48 +319,7 @@ body {
   }
   
   
-  /* Animation for the success message */
-  
-.alert-success {
-  position: fixed;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  background-color: #d4edda; /* Light green background */
-  color: #155724; /* Dark green text */
-  border: 1px solid #c3e6cb; /* Green border */
-  padding: 15px 20px;
-  border-radius: 5px;
-  font-size: 1rem;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  z-index: 1000;
-  width: 90%; /* Adjust width as needed */
-  max-width: 600px;
-  animation: slideDown 0.5s ease-in-out;
-}
-
-/* Icon inside the success message */
-.alert-success i {
-  font-size: 1.2rem;
-  color: #155724;
-}
-
-/* Slide Down Animation */
-@keyframes slideDown {
-  from {
-      transform: translateX(-50%) translateY(-100%);
-      opacity: 0;
-  }
-  to {
-      transform: translateX(-50%) translateY(0);
-      opacity: 1;
-  }
-}
+ 
 
 /* Responsive Design */
 @media (max-width: 968px) {
@@ -449,11 +365,9 @@ body {
         .role-selection-container {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 25px;
-            gap: 20px; /* Increased gap for 2 options */
-            max-width: 600px; /* Control maximum width */
-            margin-left: auto;
-            margin-right: auto;
+            gap: 20px;
+            max-width: 100%; /* Ensure it doesn't exceed container width */
+            margin: 0 auto 25px auto;
         }
 
         .role-option {
@@ -489,15 +403,15 @@ body {
         }
 
         .role-option input[type="radio"]:checked + label {
-            border-color: #118f39;
-            background-color: rgba(17, 143, 57, 0.05);
-            box-shadow: 0 0 0 2px #118f39;
+           border-color: #2563eb; /* Updated from green */
+            background-color: rgba(37, 99, 235, 0.05); /* Light blue background */
+            box-shadow: 0 0 0 2px #2563eb;
         }
 
         .role-icon {
             font-size: 4rem; /* Larger icons */
             margin-bottom: 15px;
-            color: #118f39;
+            color: #2563eb; 
         }
 
         .role-title {
@@ -514,9 +428,9 @@ body {
         }
 
         .form-group h3 {
+            font-size: 1.2rem; /* Larger icons */
             margin-bottom: 15px;
-            color: #118f39;
-            font-size: 1.2rem;
+            color: #2563eb; 
             text-align: center; /* Center the heading */
         }
 
@@ -530,3 +444,161 @@ body {
                 margin-bottom: 15px;
             }
           }
+
+          @media (min-width: 969px) {
+            .auth-container {
+                align-items: stretch; /* Stretch items to fill container height */
+            }
+            
+            .welcome-section, .signup-box {
+                height: auto; /* Let height be determined by content */
+            }
+            }
+
+
+@media (max-width: 968px) {
+    .auth-container {
+        flex-direction: column;
+        padding-top: 70px; /* Further reduce padding on mobile */
+    }
+    
+    .welcome-section {
+        display: block; /* Don't hide it completely */
+        margin-top: 0; /* Reset negative margin */
+        padding: 1.5rem;
+        text-align: center;
+    }
+    
+    .welcome-content {
+        text-align: center;
+        margin: 0 auto;
+    }
+    
+    .welcome-content h2 {
+        font-size: 2rem; /* Smaller on mobile */
+    }
+    
+    .welcome-content p {
+        font-size: 1.1rem; /* Smaller on mobile */
+    }
+    
+    .signup-box {
+        padding: 1.5rem 1rem;
+    }
+    
+    .form-row {
+        flex-direction: column;
+        gap: 0;
+    }
+    
+    .form-group {
+        margin-bottom: 1rem; /* Less space between form fields on mobile */
+    }
+    
+    /* Role selection improvements */
+    .role-selection-container {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .role-option {
+        width: 100%;
+    }
+    
+    .role-option label {
+        padding: 15px; /* Less padding on mobile */
+    }
+    
+    .role-icon {
+        font-size: 2.5rem; /* Smaller icon on mobile */
+    }
+    
+    .role-title {
+        font-size: 1.1rem; /* Smaller title on mobile */
+        margin-bottom: 5px;
+    }
+    
+    .role-description {
+        font-size: 0.85rem; /* Smaller description */
+    }
+    
+    /* Form field improvements */
+    .input-field input {
+        padding: 0.9rem 1rem 0.9rem 2.5rem; /* Slightly smaller padding */
+        font-size: 0.95rem; /* Slightly smaller text */
+    }
+    
+    .input-field i {
+        left: 0.8rem; /* Adjust icon position */
+    }
+    
+    /* Button improvements */
+    .signup-btn {
+        padding: 0.9rem;
+    }
+    
+    /* Fix the password toggle positioning */
+    .password-toggle-text {
+        right: 8px;
+        font-size: 0.8rem;
+    }
+}
+
+/* Small mobile improvements */
+@media (max-width: 480px) {
+    .welcome-section {
+        padding: 1rem 0.5rem;
+    }
+    
+    .welcome-content h2 {
+        font-size: 1.6rem;
+        margin-bottom: 1rem;
+    }
+    
+    .welcome-content p {
+        font-size: 1rem;
+    }
+    
+    .signup-content {
+        padding: 0.5rem;
+    }
+    
+    .signup-content h1 {
+        font-size: 1.8rem;
+    }
+    
+    .subtitle {
+        font-size: 0.9rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    /* Make alert messages more compact on small screens */
+    .alert-success {
+        padding: 10px 15px;
+        font-size: 0.9rem;
+    }
+}
+
+/* Improve layout for tablets */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .auth-container {
+        padding-top: 75px;
+    }
+    
+    .welcome-section {
+        margin-top: -8em; /* Less negative margin on tablets */
+    }
+    
+    .welcome-content h2 {
+        font-size: 2.8rem;
+    }
+    
+    .welcome-content p {
+        font-size: 1.2rem;
+    }
+}
+
+/* Fix the header spacing issue */
+body {
+    padding-top: 0; /* Remove any extra padding if it exists */
+}

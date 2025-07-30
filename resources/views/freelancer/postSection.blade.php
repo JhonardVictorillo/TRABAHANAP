@@ -1,9 +1,12 @@
 <section class="post-section" >
       
-      <div class="details-section" id="postContainer" style="display: none;">
-        <button id="createPostBtn" class="mt-2 px-4 py-2 bg-blue-500 text-white rounded-lg">
-          Create New Post
-      </button>
+    <div class="details-section" id="postContainer" style="display: none;">
+        <div class="section-header flex justify-between items-center flex-wrap mb-4">
+            <h2 class="text-lg font-bold text-gray-800 mb-2 sm:mb-0">My Posts</h2>
+            <button id="createPostBtn" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition flex items-center">
+                <i class="fas fa-plus mr-2"></i> Create New Post
+            </button>
+        </div>
       
       
         <div class="post-grid mt-4">
@@ -84,6 +87,16 @@
             </div>
           </div>
           @endforeach
+
+            @if($posts->isEmpty())
+          <div class="col-span-full text-center py-10">
+            <div class="text-gray-400 mb-4">
+              <i class="fas fa-file-alt text-5xl"></i>
+            </div>
+            <h3 class="text-xl font-semibold text-gray-600 mb-2">No posts yet</h3>
+            <p class="text-gray-500 mb-4">Create your first post to showcase your services</p>
+          </div>
+          @endif
         </div>
       </div>
     
@@ -473,36 +486,52 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
   
-    // Handle Delete Post
-    document.querySelectorAll('.delete-btn').forEach(button => {
-        button.addEventListener('click', () => {
-            const postId = button.getAttribute('data-post-id');
-            if (confirm('Are you sure you want to delete this post? This action cannot be undone.')) {
-                const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-                fetch(`/posts/${postId}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': csrfToken
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        document.querySelector(`.post-card[data-post-id="${postId}"]`).remove();
-                        alert(data.message);
+  // Handle Delete Post
+document.querySelectorAll('.delete-btn').forEach(button => {
+    button.addEventListener('click', () => {
+        const postId = button.getAttribute('data-post-id');
+        if (!postId) {
+            console.error('No post ID found on delete button');
+            return;
+        }
+        
+        if (confirm('Are you sure you want to delete this post? This action cannot be undone.')) {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            fetch(`/posts/${postId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    // Find the parent post-card element and remove it
+                    const postCard = button.closest('.post-card');
+                    if (postCard) {
+                        postCard.remove();
+                        alert(data.message || 'Post deleted successfully!');
                     } else {
-                        alert(data.message || 'Failed to delete the post.');
+                        console.warn('Post card parent element not found, refreshing page');
+                        location.reload();
                     }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Something went wrong.');
-                });
-            }
-        });
+                } else {
+                    alert(data.message || 'Failed to delete the post.');
+                }
+            })
+            .catch(error => {
+                console.error('Error deleting post:', error);
+                alert('Failed to delete post. Please try again.');
+            });
+        }
     });
-
+});
     // Function to display validation errors
     function showValidationErrors(errors, errorContainerId) {
         const errorContainer = document.getElementById(errorContainerId) || document.createElement('div');

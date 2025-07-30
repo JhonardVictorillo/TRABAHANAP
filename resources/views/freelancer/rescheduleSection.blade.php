@@ -21,21 +21,21 @@
             </div>
             
             <!-- Calendar Grid -->
-            <div class="calendar-container">
+         <div class="calendar-container overflow-hidden">
                 <!-- Days of week header -->
-                <div class="calendar-header grid grid-cols-7 gap-1 mb-1 text-center">
-                    <div class="text-sm font-medium text-gray-600">Sun</div>
-                    <div class="text-sm font-medium text-gray-600">Mon</div>
-                    <div class="text-sm font-medium text-gray-600">Tue</div>
-                    <div class="text-sm font-medium text-gray-600">Wed</div>
-                    <div class="text-sm font-medium text-gray-600">Thu</div>
-                    <div class="text-sm font-medium text-gray-600">Fri</div>
-                    <div class="text-sm font-medium text-gray-600">Sat</div>
+                 <div class="calendar-header grid grid-cols-7 gap-1 mb-1 text-center">
+                    <div class="text-sm font-medium text-gray-600">S</div>
+                    <div class="text-sm font-medium text-gray-600">M</div>
+                    <div class="text-sm font-medium text-gray-600">T</div>
+                    <div class="text-sm font-medium text-gray-600">W</div>
+                    <div class="text-sm font-medium text-gray-600">T</div>
+                    <div class="text-sm font-medium text-gray-600">F</div>
+                    <div class="text-sm font-medium text-gray-600">S</div>
                 </div>
                 
                 <!-- Calendar days - will be populated by JavaScript -->
-                <div id="calendarDays" class="grid grid-cols-7 gap-1"></div>
-            </div>
+                   <div id="calendarDays" class="grid grid-cols-7 gap-1"></div>
+                </div>
             
             <!-- Legend -->
             <div class="flex items-center gap-4 mt-4 text-sm">
@@ -420,4 +420,40 @@
         // Initialize calendar
         renderCalendar();
     });
+
+    // Function to adjust calendar for mobile screens
+function adjustCalendarResponsiveness() {
+  const calendarContainer = document.querySelector('.calendar-container');
+  const isMobile = window.innerWidth <= 768;
+  
+  // Check if we're on mobile
+  if (isMobile) {
+    // Add touch-optimized class
+    calendarContainer.classList.add('mobile-optimized');
+    
+    // Fix height of day cells
+    document.querySelectorAll('.calendar-day').forEach(day => {
+      if (!day.classList.contains('empty')) {
+        // Ensure content fits properly
+        const dayInfo = day.querySelector('.day-info');
+        if (dayInfo && dayInfo.scrollHeight > dayInfo.clientHeight) {
+          dayInfo.style.fontSize = '8px';
+        }
+      }
+    });
+  } else {
+    // Remove mobile optimizations on larger screens
+    calendarContainer.classList.remove('mobile-optimized');
+    
+    // Reset font size
+    document.querySelectorAll('.day-info').forEach(info => {
+      info.style.fontSize = '';
+    });
+  }
+}
+
+// Call this function on load and resize
+window.addEventListener('load', adjustCalendarResponsiveness);
+window.addEventListener('resize', adjustCalendarResponsiveness);
+
 </script>
