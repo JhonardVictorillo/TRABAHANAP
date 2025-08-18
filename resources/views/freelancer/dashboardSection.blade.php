@@ -52,7 +52,7 @@
       <div class="profile-main">
         <div class="profile-header">
           <div class="profile-title">
-            <h2>Professional Profile</h2>
+            <h2>Profile</h2>
             <p class="profile-tagline">{{ $user->bio ?? 'Experienced professional ready to help with your projects' }}</p>
           </div>
           

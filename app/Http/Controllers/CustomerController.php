@@ -18,6 +18,7 @@ use App\Models\FreelancerEarning;
 
 
 
+
 class CustomerController extends Controller
 {
     /**
@@ -50,24 +51,17 @@ class CustomerController extends Controller
     }
     
     // Price filter - using either hourly_rate or price depending on your structure
-    if ($request->filled('price_range')) {
-    $priceRange = $request->price_range;
-    
-    // Use whereHas to filter based on the related user's hourly_rate
-    if ($priceRange == 'low') {
-        $query->whereHas('freelancer', function($q) {
-            $q->where('hourly_rate', '<', 1000);
-        });
-    } elseif ($priceRange == 'medium') {
-        $query->whereHas('freelancer', function($q) {
-            $q->whereBetween('hourly_rate', [1000, 3000]);
-        });
-    } elseif ($priceRange == 'high') {
-        $query->whereHas('freelancer', function($q) {
-            $q->where('hourly_rate', '>', 3000);
-        });
-    }
-}
+        if ($request->filled('price_range')) {
+            $priceRange = $request->price_range;
+
+            if ($priceRange == 'low') {
+                $query->where('rate', '<', 1000);
+            } elseif ($priceRange == 'medium') {
+                $query->whereBetween('rate', [1000, 3000]);
+            } elseif ($priceRange == 'high') {
+                $query->where('rate', '>', 3000);
+            }
+        }
     
     // Experience level filter
     if ($request->filled('experience')) {
@@ -106,28 +100,44 @@ class CustomerController extends Controller
             if ($request->filled('sort')) {
                 $sort = $request->sort;
                 
-                if ($sort == 'price_low') {
-                    // Use hourly_rate from users table instead of price
-                    $query->join('users', 'posts.freelancer_id', '=', 'users.id')
-                        ->orderBy('users.hourly_rate', 'asc')
-                        ->select('posts.*'); // Ensure we only select posts columns
+             if ($sort == 'price_low') {
+                    $query->orderBy('rate', 'asc');
                 } elseif ($sort == 'price_high') {
-                    $query->join('users', 'posts.freelancer_id', '=', 'users.id')
-                        ->orderBy('users.hourly_rate', 'desc')
-                        ->select('posts.*'); // Ensure we only select posts columns
+                    $query->orderBy('rate', 'desc');
+                 // Ensure we only select posts columns
                 } elseif ($sort == 'rating') {
                     $query->orderBy(DB::raw('IFNULL(average_rating, 0)'), 'desc');
                 } elseif ($sort == 'newest') {
                     $query->orderBy('posts.created_at', 'desc');
                 }
-            } else {
-                // Default sort
-                $query->orderBy(DB::raw('IFNULL(average_rating, 0)'), 'desc');
-            }
+                } else {
+                    // Default sort
+                    $query->orderBy(DB::raw('IFNULL(average_rating, 0)'), 'desc');
+                }
     $posts = $query->paginate(12);
     // dd(DB::getQueryLog());
 
         $notifications = auth()->user()->notifications; // Get all notifications
+
+        
+    // Fetch popular categories based on actual bookings and ratings
+   $mostBookedCategories = DB::table('categories')
+    ->select('categories.id', 'categories.name', 'categories.created_at', 'categories.updated_at', 'categories.image_path', DB::raw('COUNT(appointments.id) as booking_count'))
+    ->join('category_user', 'categories.id', '=', 'category_user.category_id')
+    ->join('posts', 'category_user.user_id', '=', 'posts.freelancer_id')
+    ->join('appointments', 'posts.id', '=', 'appointments.post_id')
+    ->whereIn('appointments.status', ['completed', 'paid'])
+    ->groupBy('categories.id', 'categories.name', 'categories.created_at', 'categories.updated_at', 'categories.image_path') // Added image_path
+    ->orderBy('booking_count', 'desc')
+    ->limit(4)
+    ->get();
+
+// Convert to collection and add default rating
+$popularCategories = collect($mostBookedCategories)->map(function($category) {
+    // Set a default average rating of 0
+    $category->average_rating = 0;
+    return $category;
+});        
     
         // If profile is complete, show the dashboard without the modal
         return view('dashboard.customer-dashboard', [
@@ -135,6 +145,7 @@ class CustomerController extends Controller
             'categories' => $categories, 
            'posts' => $posts,
            'notifications' => $notifications,
+             'popularCategories' => $popularCategories,
            
         ]);
     }
@@ -183,9 +194,10 @@ public function showFreelancerProfile($id)
     $totalStars = $reviews->sum('rating'); // Sum of all ratings
     $totalReviews = $reviews->count();
    
+      $commitmentFee = 15; // Fixed ₱15
     
-   
-    return view('PostSeeProfile', compact('freelancer', 'user','reviews', 'notifications','totalStars', 'totalReviews' ));
+
+    return view('PostSeeProfile', compact('freelancer', 'user','reviews', 'notifications','totalStars', 'totalReviews', 'commitmentFee'));
 }
 
 
@@ -261,7 +273,9 @@ public function getAppointments(Request $request)
         'decline_reason' => $appointment->decline_reason,
         'final_payment_status' => $appointment->final_payment_status ?? 'pending',
         'total_amount' => $appointment->total_amount,
-        'name' => $appointment->name
+        'name' => $appointment->name,
+        'rate' => $appointment->post->rate ?? 0,
+        'rate_type' => $appointment->post->rate_type ?? '',
     ];
 
     // Add subservices as a simple concatenated string
@@ -281,86 +295,200 @@ public function getAppointments(Request $request)
 
    public function cancelAppointment($id)
 {
-    $appointment = Appointment::where('id', $id)
-        ->where('customer_id', auth()->id())
-        ->firstOrFail();
-    
-    // Check if appointment is in a valid state to cancel
-    if (!in_array($appointment->status, ['pending', 'accepted'])) {
-        return response()->json([
-            'error' => 'This appointment cannot be cancelled in its current state.'
-        ], 400);
-    }
-    
-    // Check if this is a late cancellation (less than 24 hours before appointment)
-    $appointmentTime = \Carbon\Carbon::parse($appointment->date . ' ' . $appointment->time);
-    $now = \Carbon\Carbon::now();
-    $isLateCancellation = $now->diffInHours($appointmentTime) < 24;
-    
-    // Handle payment status based on cancellation timing
-    if ($appointment->fee_status === 'paid' && $appointment->stripe_session_id) {
-        if ($isLateCancellation) {
-            // Late cancellation - commitment fee is forfeited
-            $appointment->fee_status = 'forfeited';
-            $appointment->decline_reason = 'late_cancellation';
-            
-            // Record platform revenue (10% commission)
-            PlatformRevenue::create([
-                'amount' => $appointment->commitment_fee * 0.1, // 10% platform fee
-                'source' => 'late_cancellation_commission',
-                'appointment_id' => $appointment->id,
-                'user_id' => $appointment->freelancer_id,
-                'date' => Carbon::now()->format('Y-m-d'),
-                'notes' => 'Platform commission from late cancellation fee'
-            ]);
-            
-            // Record freelancer earning (90% of commitment fee)
-            FreelancerEarning::create([
-                'freelancer_id' => $appointment->freelancer_id,
-                'appointment_id' => $appointment->id,
-                'amount' => $appointment->commitment_fee * 0.9, // 90% to freelancer
-                'source' => 'late_cancellation_fee',
-                'date' => Carbon::now()->format('Y-m-d'),
-                'notes' => "Late cancellation fee for appointment #{$appointment->id}"
-            ]);
-            
-        } else {
-            // Early cancellation - try to refund the commitment fee
-            try {
-                \Stripe\Stripe::setApiKey(env('STRIPE_SECRET'));
-                $session = \Stripe\Checkout\Session::retrieve($appointment->stripe_session_id);
-                $paymentIntentId = $session->payment_intent;
-                $refund = \Stripe\Refund::create(['payment_intent' => $paymentIntentId]);
-                
-                $appointment->fee_status = 'refunded';
-                
-            } catch (\Exception $e) {
-                \Log::error('Stripe refund failed: ' . $e->getMessage());
-                return response()->json([
-                    'error' => 'Failed to refund commitment fee. Please contact support.'
-                ], 500);
-            }
-        }
-    }
-    
-    // Update appointment status
-    $appointment->status = 'cancelled'; // Using consistent lowercase spelling
-    $appointment->save();
-    
-    // Notify the freelancer
-    $freelancer = $appointment->freelancer;
-    $freelancer->notify(new AppointmentCanceled($appointment));
-    
-    // Return appropriate message
-    $message = ($appointment->fee_status === 'forfeited') 
-        ? 'Appointment cancelled. As this is a late cancellation, your commitment fee will not be refunded.'
-        : 'Appointment cancelled successfully.';
+    try {
+        // Find the appointment
+        $appointment = Appointment::where('id', $id)
+            ->where('customer_id', auth()->id())
+            ->firstOrFail();
         
-    return response()->json(['message' => $message]);
+        // Check if appointment can be cancelled
+        if (!in_array($appointment->status, ['pending', 'accepted'])) {
+            return response()->json([
+                'error' => 'This appointment cannot be cancelled in its current state.'
+            ], 400);
+        }
+        
+        // Check if this is a late cancellation (less than 24 hours before)
+        $appointmentTime = \Carbon\Carbon::parse($appointment->date . ' ' . $appointment->time);
+        $now = \Carbon\Carbon::now();
+        $isLateCancellation = $now->diffInHours($appointmentTime) < 24;
+        
+        // Start transaction
+        DB::beginTransaction();
+        
+        // Set status based on timing
+        if ($appointment->fee_status === 'paid') {
+            if ($isLateCancellation) {
+                // Late cancellation - fee is forfeited
+                $appointment->fee_status = 'forfeited';
+                $message = 'Appointment cancelled. As this is a late cancellation, your commitment fee will not be refunded.';
+                
+                // Update platform revenue record if it exists
+                $heldFee = PlatformRevenue::where('appointment_id', $appointment->id)
+                    ->where('source', 'commitment_fee_held')
+                    ->first();
+                
+                if ($heldFee) {
+                    $heldFee->status = 'forfeited';
+                    $heldFee->source = 'commitment_fee_forfeited';
+                    $heldFee->save();
+                }
+                
+                // Record the late cancellation as a violation
+                $user = auth()->user();
+                
+                // Create a violation record in the violations table
+                $violation = new \App\Models\Violation();
+                $violation->user_id = auth()->id();
+                $violation->user_role = 'customer';
+                $violation->violation_type = 'late_cancellation';
+                $violation->appointment_id = $appointment->id;
+                $violation->notes = 'Customer cancelled less than 24 hours before appointment time';
+                $violation->status = 'active'; // Set as active violation
+                $violation->created_at = now();
+                $violation->save();
+                
+                // Update the user's violation counters
+                $user->increment('violation_count');
+                $user->increment('late_cancel_count');
+                $user->last_violation_at = now();
+                $user->save();
+                
+                // Check for violation threshold and apply penalties if needed
+                $violationCount = Violation::where('user_id', auth()->id())
+                    ->where('violation_type', 'late_cancellation')
+                    ->where('created_at', '>=', now()->subDays(30))
+                    ->count();
+                
+                // If multiple violations within 30 days, create violation action
+                if ($violationCount >= 3) {
+                    $violationAction = new \App\Models\ViolationAction();
+                    $violationAction->violation_id = $violation->id;
+                    $violationAction->action_type = 'warning';
+                    $violationAction->notes = 'Automatic warning for repeated late cancellations';
+                    $violationAction->action_data = json_encode([
+                        'violation_count' => $violationCount,
+                        'user_id' => auth()->id(),
+                        'timestamp' => now()
+                    ]);
+                    $violationAction->save();
+                    
+                    // If 5 or more violations, trigger suspension
+                    if ($violationCount >= 5) {
+                        // Get suspension settings from violation settings
+                        $settings = \App\Models\ViolationSetting::where('role', 'customer')->first();
+                        $suspensionDays = $settings ? $settings->suspension_days : 7; // Default 7 days
+                        
+                        // Set user suspension
+                        $user->is_suspended = true;
+                        $user->suspension_end = now()->addDays($suspensionDays);
+                        $user->suspension_reason = 'Multiple late cancellations';
+                        $user->save();
+                        
+                        // Record suspension action
+                        $suspensionAction = new \App\Models\ViolationAction();
+                        $suspensionAction->violation_id = $violation->id;
+                        $suspensionAction->action_type = 'suspension';
+                        $suspensionAction->notes = "Automatic {$suspensionDays}-day suspension for repeated late cancellations";
+                        $suspensionAction->action_data = json_encode([
+                            'suspension_days' => $suspensionDays,
+                            'violation_count' => $violationCount,
+                            'end_date' => now()->addDays($suspensionDays)
+                        ]);
+                        $suspensionAction->save();
+                    }
+                }
+            } else {
+                // For immediate refunds using the stripe_session_id
+                try {
+                    if (!empty($appointment->stripe_session_id)) {
+                        // Set Stripe API key
+                        \Stripe\Stripe::setApiKey(config('services.stripe.secret'));
+                        
+                        // First retrieve the session to get the payment intent
+                        $session = \Stripe\Checkout\Session::retrieve($appointment->stripe_session_id);
+                        
+                        // Check if the session has a payment intent
+                        if (!empty($session->payment_intent)) {
+                            // Create a refund using the payment intent
+                            $refund = \Stripe\Refund::create([
+                                'payment_intent' => $session->payment_intent
+                            ]);
+                            
+                            $appointment->fee_status = 'refunded';
+                            $message = 'Appointment cancelled. Your commitment fee has been refunded.';
+                            
+                            // Log the successful refund
+                            \Log::info('Refund processed successfully', [
+                                'appointment_id' => $appointment->id,
+                                'refund_id' => $refund->id,
+                                'session_id' => $appointment->stripe_session_id
+                            ]);
+                            
+                            // Update platform revenue record if it exists
+                            $heldFee = PlatformRevenue::where('appointment_id', $appointment->id)
+                                ->where('source', 'commitment_fee_held')
+                                ->first();
+                                
+                            if ($heldFee) {
+                                $heldFee->status = 'refunded';
+                                $heldFee->source = 'commitment_fee_refunded';
+                                $heldFee->save();
+                            }
+                        } else {
+                            throw new \Exception('No payment intent found in session');
+                        }
+                    } else {
+                        throw new \Exception('No Stripe session ID available');
+                    }
+                } catch (\Exception $e) {
+                    // If automatic refund fails, mark for manual refund
+                    \Log::warning('Automatic refund failed: ' . $e->getMessage(), [
+                        'appointment_id' => $appointment->id,
+                        'stripe_session_id' => $appointment->stripe_session_id ?? 'not set'
+                    ]);
+                    
+                    $appointment->fee_status = 'refund_pending';
+                    $message = 'Appointment cancelled. Your refund is being processed and will be reflected within 3-5 business days.';
+                }
+            }
+        } else {
+            // No payment to handle
+            $message = 'Appointment cancelled successfully.';
+        }
+        
+        // Update appointment status
+        $appointment->status = 'cancelled';
+        $appointment->save();
+        
+        // Notify the freelancer
+        try {
+            $freelancer = $appointment->freelancer;
+            if ($freelancer) {
+                $freelancer->notify(new AppointmentCanceled($appointment));
+            }
+        } catch (\Exception $e) {
+            \Log::error('Failed to send notification: ' . $e->getMessage());
+            // Continue even if notification fails
+        }
+        
+        DB::commit();
+        return response()->json(['message' => $message]);
+        
+    } catch (\Exception $e) {
+        DB::rollBack();
+        \Log::error('Error cancelling appointment: ' . $e->getMessage(), [
+            'appointment_id' => $id,
+            'user_id' => auth()->id(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+            'trace' => $e->getTraceAsString() // Add full stack trace
+        ]);
+        return response()->json(['error' => 'Failed to cancel appointment. Please try again.'], 500);
+    }
 }
-
-    public function rescheduleAppointment(Request $request, $id)
-{
+public function rescheduleAppointment(Request $request, $id)
+    {
      try {
         $validated = $request->validate([
             'date' => 'required|date',
@@ -395,42 +523,38 @@ public function getAppointments(Request $request)
 
 public function search(Request $request)
 {
-    $searchTerm = $request->query('q');
+   
+    $user = Auth::user();
+    $searchTerm = $request->query('q'); // Get the search term
+    $categories = Category::all(); // Fetch all categories
 
-    if (empty($searchTerm)) {
-        // If no search term is provided, fetch all posts
-        $posts = Post::where('status', 'approved')
+    $posts = Post::where('status', 'approved')
         ->whereHas('freelancer', function ($query) {
-            $query->where('is_verified', true);  // Only verified freelancers
+            $query->where('is_verified', true);
         })
-        ->with(['freelancer', 'freelancer.categories'])
-        ->get();
-    } else {
-        // Search posts based on the query
-        $posts = Post::where('status', 'approved')
-        ->whereHas('freelancer', function ($query) {
-            $query->where('is_verified', true); // Only verified freelancers
-        })
-        ->where(function ($query) use ($searchTerm) {
+        ->with(['freelancer', 'freelancer.categories']);
+
+    if (!empty($searchTerm)) {
+        $posts = $posts->where(function ($query) use ($searchTerm) {
             $query->where('description', 'LIKE', '%' . $searchTerm . '%')
                 ->orWhereHas('freelancer', function ($subQuery) use ($searchTerm) {
                     $subQuery->where('firstname', 'LIKE', '%' . $searchTerm . '%')
-                             ->orWhere('lastname', 'LIKE', '%' . $searchTerm . '%');
+                             ->orWhere('lastname', 'LIKE', '%' . $searchTerm . '%')
+                             ->orWhere('barangay', 'LIKE', '%' . $searchTerm . '%') // <-- Add this line
+                             ->orWhere('city', 'LIKE', '%' . $searchTerm . '%')
+                             ->orWhere('province', 'LIKE', '%' . $searchTerm . '%');
                 })
                 ->orWhereHas('freelancer.categories', function ($subQuery) use ($searchTerm) {
                     $subQuery->where('name', 'LIKE', '%' . $searchTerm . '%');
                 });
-        })
-        ->with(['freelancer', 'freelancer.categories'])
-        ->get();
-    
+        });
     }
 
-    // Fetch notifications for the logged-in user
-    $notifications = auth()->user()->unreadNotifications;
-    // Fetch the authenticated user
-    $user = auth()->user();
-     $categories = Category::all();
+    $posts = $posts->with(['freelancer', 'freelancer.categories'])->get();
+    $notifications = $user->unreadNotifications;
+
+    // If your view expects popularCategories, fetch and pass it as well
+    $popularCategories = Category::orderBy('name')->take(4)->get();
 
     return view('dashboard.customer-dashboard', [
         'posts' => $posts,
@@ -438,6 +562,7 @@ public function search(Request $request)
         'user' => $user,
         'notifications' => $notifications,
         'categories' => $categories,
+        'popularCategories' => $popularCategories,
     ]);
 }
 

@@ -84,7 +84,7 @@
         <!-- Pagination Links -->
        <div class="category-pagination-container">
             @if($appointments->previousPageUrl())
-            <a href="{{ $appointments->appends(['search' => request('search'), 'section' => 'bookings'])->previousPageUrl() }}" class="category-pagination-btn">
+            <a href="{{ $appointments->appends(['search' => request('search'), 'activeSection' => 'violations', 'role' => request('role', 'all')])->previousPageUrl() }}" class="category-pagination-btn">
                 <i class="fas fa-arrow-left"></i> Previous
             </a>
             @else
@@ -94,7 +94,7 @@
             @endif
             
             @if($appointments->hasMorePages())
-            <a href="{{ $appointments->appends(['search' => request('search'), 'section' => 'bookings'])->nextPageUrl() }}" class="category-pagination-btn">
+            <a href="{{ $appointments->appends(['search' => request('search'), 'activeSection' => 'violations', 'role' => request('role', 'all')])->nextPageUrl() }}" class="category-pagination-btn">
                 Next <i class="fas fa-arrow-right"></i>
             </a>
             @else
@@ -109,91 +109,175 @@
 
 
 <!-- Booking Details Modal -->
-<div id="bookingDetailsModal" class="modal">
-    <div class="modal-content" style="max-width:400px; min-width:320px; text-align:left; position:relative;">
-        <button type="button" class="close close-modal" aria-label="Close" style="right:18px;top:18px;">&times;</button>
-        <h2 style="display:flex;align-items:center;gap:0.5rem;font-size:1.5rem;font-weight:700;color:#2563eb;margin-bottom:1.5rem;">
-            <span class="material-symbols-outlined align-middle" style="color:#2563eb;">event_available</span>
-            Appointment Details
-        </h2>
-        <div style="display:flex;flex-direction:column;gap:1rem;">
-            <div>
-                <span class="material-symbols-outlined align-middle" style="font-size:1.2em;color:#2563eb;">badge</span>
-                <span class="modal-label" style="font-weight:600;">ID:</span>
-                <span id="modalApptId" class="modal-value"></span>
+<div id="bookingDetailsModal" class="booking-details-modal">
+    <div class="booking-details-modal-content">
+        <div class="booking-details-modal-header">
+            <h3>
+                <span class="material-symbols-outlined">event_available</span>
+                Appointment Details
+            </h3>
+            <span class="booking-details-modal-close">&times;</span>
+        </div>
+        
+        <div class="booking-details-body" id="bookingDetailsBody">
+            <!-- Header with status and ID -->
+            <div class="booking-details-header">
+                <div class="booking-details-status">
+                    <span id="modalStatus" class="booking-status"></span>
+                </div>
+                <div class="booking-details-id">
+                    <h5>Appointment ID:</h5>
+                    <h2 id="modalApptId">-</h2>
+                </div>
             </div>
-            <div>
-                <span class="material-symbols-outlined align-middle" style="font-size:1.2em;color:#2563eb;">person</span>
-                <span class="modal-label" style="font-weight:600;">Customer:</span>
-                <span id="modalCustomer" class="modal-value"></span>
+            
+            <!-- Appointment schedule section -->
+            <div class="booking-details-section">
+                <h4>
+                    <span class="material-symbols-outlined">schedule</span>
+                    Appointment Schedule
+                </h4>
+                <div class="booking-details-stats">
+                    <div class="booking-details-stat">
+                        <span class="booking-details-stat-label">Date</span>
+                        <span class="booking-details-stat-value" id="modalDate">-</span>
+                    </div>
+                    <div class="booking-details-stat">
+                        <span class="booking-details-stat-label">Time</span>
+                        <span class="booking-details-stat-value" id="modalTime">-</span>
+                    </div>
+                    <div class="booking-details-stat">
+                        <span class="booking-details-stat-label">Fee Status</span>
+                        <span class="booking-details-stat-value" id="modalFeeStatus">-</span>
+                    </div>
+                </div>
             </div>
-            <div>
-                <span class="material-symbols-outlined align-middle" style="font-size:1.2em;color:#2563eb;">engineering</span>
-                <span class="modal-label" style="font-weight:600;">Freelancer:</span>
-                <span id="modalFreelancer" class="modal-value"></span>
+            
+            <!-- Customer info -->
+            <div class="booking-details-section">
+                <h4>
+                    <span class="material-symbols-outlined">person</span>
+                    Customer Information
+                </h4>
+                <div class="booking-details-profile">
+                    <div class="booking-user-avatar" id="customerAvatar">
+                        <span class="material-symbols-outlined">person</span>
+                    </div>
+                    <div class="booking-details-user-info">
+                        <h5 id="modalCustomer">-</h5>
+                    </div>
+                </div>
             </div>
-            <div>
-                <span class="material-symbols-outlined align-middle" style="font-size:1.2em;color:#2563eb;">calendar_month</span>
-                <span class="modal-label" style="font-weight:600;">Date:</span>
-                <span id="modalDate" class="modal-value"></span>
+            
+            <!-- Freelancer info -->
+            <div class="booking-details-section">
+                <h4>
+                    <span class="material-symbols-outlined">engineering</span>
+                    Freelancer Information
+                </h4>
+                <div class="booking-details-profile">
+                    <div class="booking-user-avatar" id="freelancerAvatar">
+                        <span class="material-symbols-outlined">engineering</span>
+                    </div>
+                    <div class="booking-details-user-info">
+                        <h5 id="modalFreelancer">-</h5>
+                    </div>
+                </div>
             </div>
-            <div>
-                <span class="material-symbols-outlined align-middle" style="font-size:1.2em;color:#2563eb;">schedule</span>
-                <span class="modal-label" style="font-weight:600;">Time:</span>
-                <span id="modalTime" class="modal-value"></span>
+            
+            <!-- Notes -->
+            <div class="booking-details-section" id="booking-notes-section">
+                <h4>
+                    <span class="material-symbols-outlined">note</span>
+                    Notes
+                </h4>
+                <div class="booking-details-notes" id="modalNotes">
+                    No notes available.
+                </div>
             </div>
-            <div>
-                <span class="material-symbols-outlined align-middle" style="font-size:1.2em;color:#2563eb;">check_circle</span>
-                <span class="modal-label" style="font-weight:600;">Status:</span>
-                <span id="modalStatus" class="status-badge"></span>
-            </div>
-            <div>
-                <span class="material-symbols-outlined align-middle" style="font-size:1.2em;color:#2563eb;">payments</span>
-                <span class="modal-label" style="font-weight:600;">Fee Status:</span>
-                <span id="modalFeeStatus" class="modal-value"></span>
-            </div>
-            <div>
-                <span class="material-symbols-outlined align-middle" style="font-size:1.2em;color:#2563eb;">note</span>
-                <span class="modal-label" style="font-weight:600;">Notes:</span>
-                <span id="modalNotes" class="modal-value"></span>
+            
+            <!-- Action buttons -->
+            <div class="booking-details-actions">
+                <button class="booking-details-btn booking-details-btn-back" id="closeBookingModal">
+                    <span class="material-symbols-outlined">close</span> Close
+                </button>
             </div>
         </div>
     </div>
 </div>
+
+
 <script>
+document.addEventListener('DOMContentLoaded', function() {
+    // View booking button click handler
     document.querySelectorAll('.view-booking-btn').forEach(btn => {
-    btn.addEventListener('click', function() {
-        const appt = JSON.parse(this.getAttribute('data-appt'));
-        document.getElementById('modalApptId').textContent = appt.id;
-        document.getElementById('modalCustomer').textContent = (appt.customer?.firstname ?? '') + ' ' + (appt.customer?.lastname ?? '');
-        document.getElementById('modalFreelancer').textContent = (appt.freelancer?.firstname ?? '') + ' ' + (appt.freelancer?.lastname ?? '');
-        document.getElementById('modalDate').textContent = appt.date;
-        document.getElementById('modalTime').textContent = appt.time;
-        document.getElementById('modalStatus').textContent = appt.status.replace(/_/g, ' ');
-        document.getElementById('modalStatus').style.background = getStatusColor(appt.status);
-        document.getElementById('modalFeeStatus').textContent = appt.fee_status;
-        document.getElementById('modalNotes').textContent = appt.notes ?? '';
-        document.getElementById('bookingDetailsModal').style.display = 'flex';
+        btn.addEventListener('click', function() {
+            // Get appointment data from the data-appt attribute
+            const appt = JSON.parse(this.getAttribute('data-appt'));
+            showBookingDetails(appt);
+        });
+    });
+
+    // Close modal handlers
+    document.querySelector('.booking-details-modal-close').addEventListener('click', function() {
+        document.getElementById('bookingDetailsModal').style.display = 'none';
+    });
+
+    document.getElementById('closeBookingModal').addEventListener('click', function() {
+        document.getElementById('bookingDetailsModal').style.display = 'none';
+    });
+
+    // Close when clicking outside
+    window.addEventListener('click', function(event) {
+        if (event.target == document.getElementById('bookingDetailsModal')) {
+            document.getElementById('bookingDetailsModal').style.display = 'none';
+        }
     });
 });
 
-function getStatusColor(status) {
-    switch ((status || '').toLowerCase()) {
-        case 'pending': return '#fbbf24'; // Yellow
-        case 'accepted': return '#2563eb'; // Changed to royal blue
-        case 'completed': return '#10b981'; // Green
-        case 'canceled': return '#ef4444'; // Red
-        case 'declined': return '#6b7280'; // Gray
-        case 'no_show_freelancer': return '#eab308'; // Amber/Orange
-        case 'no_show_customer': return '#a21caf'; // Purple
-        default: return '#6b7280'; // Default Gray
+// Show booking details function
+function showBookingDetails(appt) {
+    // Show modal
+    const modal = document.getElementById('bookingDetailsModal');
+    modal.style.display = 'block';
+    
+    // Set ID
+    document.getElementById('modalApptId').textContent = appt.id;
+    
+    // Set status badge
+    const statusText = appt.status.replace(/_/g, ' ');
+    const statusElement = document.getElementById('modalStatus');
+    statusElement.textContent = statusText.charAt(0).toUpperCase() + statusText.slice(1);
+    statusElement.className = `booking-status booking-status-${appt.status.toLowerCase()}`;
+    
+    // Set appointment schedule
+    document.getElementById('modalDate').textContent = appt.date || 'Not set';
+    document.getElementById('modalTime').textContent = appt.time || 'Not set';
+    document.getElementById('modalFeeStatus').textContent = appt.fee_status ? 
+        (appt.fee_status.charAt(0).toUpperCase() + appt.fee_status.slice(1)) : 'Unknown';
+    
+    // Set customer info
+    if (appt.customer) {
+        document.getElementById('modalCustomer').textContent = 
+            `${appt.customer.firstname || ''} ${appt.customer.lastname || ''}`.trim() || 'Unknown';
+    } else {
+        document.getElementById('modalCustomer').textContent = 'Customer information not available';
+    }
+    
+    // Set freelancer info
+    if (appt.freelancer) {
+        document.getElementById('modalFreelancer').textContent = 
+            `${appt.freelancer.firstname || ''} ${appt.freelancer.lastname || ''}`.trim() || 'Unknown';
+    } else {
+        document.getElementById('modalFreelancer').textContent = 'Freelancer information not available';
+    }
+    
+    // Set notes
+    if (appt.notes && appt.notes.trim() !== '') {
+        document.getElementById('modalNotes').textContent = appt.notes;
+    } else {
+        document.getElementById('modalNotes').textContent = 'No notes available for this appointment.';
     }
 }
 
-// Close modal logic
-document.querySelectorAll('.close-modal').forEach(btn => {
-    btn.addEventListener('click', function() {
-        this.closest('.modal').style.display = 'none';
-    });
-});
 </script>

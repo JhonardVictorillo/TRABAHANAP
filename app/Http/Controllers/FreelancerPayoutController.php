@@ -3,15 +3,31 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\User;
+use App\Models\Withdrawal;
+use App\Services\StripeConnectService;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
+use Stripe\Stripe;
+use App\Notifications\WithdrawalStatusNotification;
 
 class FreelancerPayoutController extends Controller
 {
+    protected $stripeConnectService;
+
+    public function __construct(StripeConnectService $stripeConnectService)
+    {
+        $this->stripeConnectService = $stripeConnectService;
+       
+    }
+
     private function setupStripe()
     {
         Stripe::setApiKey(config('services.stripe.secret'));
     }
 
-    public function store(Request $request)
+     public function store(Request $request)
     {
         // Validate request
         $validator = Validator::make($request->all(), [
@@ -28,6 +44,19 @@ class FreelancerPayoutController extends Controller
         $user = auth()->user();
         $availableBalance = $this->getAvailableBalance($user->id);
 
+        // Add debugging
+        Log::info('Withdrawal comparison', [
+            'requested_amount' => (float)$request->amount,
+            'available_balance' => (float)$availableBalance,
+            'comparison' => (float)$request->amount > (float)$availableBalance,
+            'raw_requested' => $request->amount,
+            'raw_balance' => $availableBalance,
+            'types' => [
+                'requested' => gettype($request->amount),
+                'balance' => gettype($availableBalance)
+            ]
+        ]);
+
         if ($request->amount > $availableBalance) {
             return redirect()->back()->with('error', 'Withdrawal amount exceeds your available balance')->withInput();
         }
@@ -40,19 +69,56 @@ class FreelancerPayoutController extends Controller
 
             // Create withdrawal record
             $withdrawal = Withdrawal::create([
-                'user_id' => $user->id,
+                'user_id' => $user->id, // Assuming your column is 'freelancer_id' not 'user_id'
                 'amount' => $request->amount,
                 'payment_method' => $request->payment_method,
                 'status' => 'pending',
-                'payment_details' => $paymentDetails,
+               'payment_details' => json_encode($paymentDetails), 
                 'notes' => $request->notes
             ]);
 
+            // Handle Stripe Connect withdrawals immediately
+            if ($request->payment_method === 'stripe') {
+                Log::info('Processing Stripe Connect withdrawal', [
+                    'withdrawal_id' => $withdrawal->id,
+                    'user_id' => $user->id
+                ]);
+                
+                // Process the withdrawal via Stripe Connect
+                $stripeResult = $this->stripeConnectService->processWithdrawal($withdrawal);
+                
+                if (!$stripeResult['success']) {
+                    // Instead of throwing an exception, mark as failed and continue
+                    $withdrawal->status = 'failed';
+                    $withdrawal->admin_notes = 'Stripe Connect processing failed: ' . $stripeResult['message'];
+                    $withdrawal->save();
+                  DB::commit(); // Still commit the transaction to record the attempt
+        
+                    Log::error('Stripe Connect withdrawal failed', [
+                        'withdrawal_id' => $withdrawal->id,
+                        'error' => $stripeResult['message']
+                    ]);
+                    
+                    return redirect()->back()->with('error', 'Failed to process withdrawal: ' . $stripeResult['message'])->withInput();
+                }
+
+                 // Update the withdrawal with Stripe details
+                    $withdrawal->stripe_transfer_id = $stripeResult['transfer_id'];
+                    $withdrawal->status = 'processing'; // Mark as processing, not completed yet
+                    $withdrawal->save();
+                    
+                    Log::info('Stripe Connect withdrawal initiated successfully', [
+                        'withdrawal_id' => $withdrawal->id,
+                        'transfer_id' => $stripeResult['transfer_id']
+                    ]);
+                }
+    
+
             // Deduct amount from available balance
-            DB::table('platform_revenues')->insert([
+            DB::table('freelancer_earnings')->insert([
                 'amount' => -$request->amount,
                 'source' => 'withdrawal_request',
-                'user_id' => $user->id,
+                'freelancer_id' => $user->id,
                 'date' => now()->format('Y-m-d'),
                 'notes' => 'Withdrawal request #' . $withdrawal->id,
                 'created_at' => now(),
@@ -61,26 +127,47 @@ class FreelancerPayoutController extends Controller
 
             DB::commit();
 
-            // Notify admin about withdrawal request
-            $admins = User::where('role', 'admin')->get();
-            foreach ($admins as $admin) {
-                $admin->notify(new WithdrawalRequestedNotification($withdrawal));
+            // Notify admin about withdrawal request (except for Stripe which is automatic)
+            if ($request->payment_method !== 'stripe') {
+                $admins = User::where('role', 'admin')->get();
+                foreach ($admins as $admin) {
+                    $admin->notify(new WithdrawalStatusNotification($withdrawal));
+                }
             }
 
-            return redirect()->route('freelancer.dashboard')->with('success', 'Withdrawal request submitted successfully!');
+            // Also notify the freelancer that their request was received
+            $user->notify(new WithdrawalStatusNotification($withdrawal));
+            // Customize success message based on payment method
+            $successMessage = $request->payment_method === 'stripe'
+               ? 'Your withdrawal has been initiated via Stripe Connect and is being processed!'
+                 : 'Withdrawal request submitted successfully!';
+
+            return redirect()->route('freelancer.dashboard')->with('success', $successMessage);
 
         } catch (\Exception $e) {
             DB::rollBack();
+            Log::error('Withdrawal processing error', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
             return redirect()->back()->with('error', 'An error occurred: ' . $e->getMessage())->withInput();
         }
     }
 
-    private function extractPaymentDetails(Request $request)
+      private function extractPaymentDetails(Request $request)
     {
         $method = $request->payment_method;
         $details = [];
 
         switch ($method) {
+            case 'stripe':
+                $details = [
+                   'method_type' => 'stripe_connect',
+                    'account_id' => auth()->user()->stripe_connect_id,
+                    'timestamp' => now()->timestamp
+                ];
+                break;
+                
             case 'bank_transfer':
                 $details = [
                     'bank_name' => $request->bank_name === 'other' ? $request->other_bank : $request->bank_name,
@@ -121,15 +208,15 @@ class FreelancerPayoutController extends Controller
 
             // Find withdrawal request
             $withdrawal = Withdrawal::where('id', $id)
-                ->where('user_id', auth()->id())
+                ->where('user_id', auth()->id()) // Assuming your column is 'user_id'
                 ->where('status', 'pending')
                 ->firstOrFail();
 
             // Return amount to available balance
-            DB::table('platform_revenues')->insert([
+            DB::table('freelancer_earnings')->insert([
                 'amount' => $withdrawal->amount,
                 'source' => 'withdrawal_cancelled',
-                'user_id' => auth()->id(),
+                'freelancer_id' => auth()->id(),
                 'date' => now()->format('Y-m-d'),
                 'notes' => 'Cancellation of withdrawal request #' . $withdrawal->id,
                 'created_at' => now(),
@@ -146,25 +233,82 @@ class FreelancerPayoutController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
+            Log::error('Withdrawal cancellation error', [
+                'message' => $e->getMessage(),
+                'withdrawal_id' => $id
+            ]);
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
 
     public function getAvailableBalance($userId)
     {
-        // Calculate balance from platform_revenues
-        $revenues = DB::table('platform_revenues')
-            ->where('user_id', $userId)
-            ->whereIn('source', [
-                'final_payment_freelancer', 
-                'commitment_fee_freelancer',
-                'withdrawal_request',
-                'withdrawal_cancelled',
-                'no_show_fee',
-                'late_cancellation_fee'
-            ])
-            ->sum('amount');
+        // Calculate balance from freelancer_earnings
+      $allEntries = DB::table('freelancer_earnings')
+        ->where('freelancer_id', $userId)
+        ->select('source', DB::raw('COUNT(*) as count'), DB::raw('SUM(amount) as total'))
+        ->groupBy('source')
+        ->get();
+    
+    Log::info('All earnings entries by source', [
+        'user_id' => $userId,
+        'sources' => $allEntries
+    ]);
+ $revenues = DB::table('freelancer_earnings')
+        ->where('freelancer_id', $userId)
+        ->whereIn('source', [
+            'service_payment', // Changed from 'final_payment_freelancer'
+            'commitment_fee', // Changed from 'commitment_fee_freelancer'
+            'withdrawal_request',
+            'withdrawal_cancelled',
+            'no_show_fee',
+            'late_cancellation_fee'
+            // Add any other sources that should be included
+        ])
+        ->sum('amount');
 
-        return $revenues;
+    Log::info('Calculated balance', [
+        'user_id' => $userId,
+        'balance' => $revenues
+    ]);
+
+    return $revenues;
     }
+
+
+    public function getDetails($id)
+{
+    try {
+        $withdrawal = Withdrawal::where('id', $id)
+            ->where('user_id', auth()->id())
+            ->first();
+            
+        if (!$withdrawal) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Withdrawal not found'
+            ], 404);
+        }
+        
+        // Handle payment details - ensure they're properly formatted
+        if (is_string($withdrawal->payment_details) && !empty($withdrawal->payment_details)) {
+            $withdrawal->payment_details = json_decode($withdrawal->payment_details, true);
+        }
+        
+        return response()->json([
+            'success' => true,
+            'withdrawal' => $withdrawal
+        ]);
+    } catch (\Exception $e) {
+        Log::error('Error fetching withdrawal details', [
+            'withdrawal_id' => $id,
+            'error' => $e->getMessage()
+        ]);
+        
+        return response()->json([
+            'success' => false,
+            'message' => 'Error fetching withdrawal details'
+        ], 500);
+    }
+}
 }

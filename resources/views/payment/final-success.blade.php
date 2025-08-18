@@ -30,7 +30,7 @@
                    class="inline-block px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded transition w-full">
                     View My Appointments
                 </a>
-                <a href="{{ route('homepage') }}"
+                <a href="{{ route('customer.dashboard') }}"
                    class="inline-block px-6 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded transition w-full">
                     Back to Home
                 </a>

@@ -53,7 +53,7 @@
         <!-- Pagination -->
         <div class="category-pagination-container">
             @if($userStats->previousPageUrl())
-            <a href="{{ $userStats->appends(['search' => request('search'), 'section' => 'userstats'])->previousPageUrl() }}" class="category-pagination-btn">
+            <a href="{{ $userStats->appends(['search' => request('search'), 'activeSection' => 'userstats'])->previousPageUrl() }}" class="category-pagination-btn">
                 <i class="fas fa-arrow-left"></i> Previous
             </a>
             @else
@@ -63,7 +63,7 @@
             @endif
             
             @if($userStats->hasMorePages())
-            <a href="{{ $userStats->appends(['search' => request('search'), 'section' => 'userstats'])->nextPageUrl() }}" class="category-pagination-btn">
+            <a href="{{ $userStats->appends(['search' => request('search'), 'activeSection' => 'userstats'])->nextPageUrl() }}" class="category-pagination-btn">
                 Next <i class="fas fa-arrow-right"></i>
             </a>
             @else

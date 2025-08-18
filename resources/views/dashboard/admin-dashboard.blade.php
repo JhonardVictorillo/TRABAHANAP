@@ -21,12 +21,14 @@ function getStatusColor($status) {
 @include('admin.violations')
 @include('admin.userstats')
 @include('admin.revenueSection')
+@include('admin.withdrawalSection')
 @include('admin.categorySection') 
 
-        
+  </main>     
        
 
 @include('successMessage')
+
    
 
         <!-- @if ($errors->any())
@@ -43,6 +45,7 @@ function getStatusColor($status) {
     <script>
 
 // Sidebar links and sections toggle
+const logoutBtn = document.getElementById('logout-button');
 const links = document.querySelectorAll('.sidebar-links li a');
 const sections = document.querySelectorAll('main > div');
 
@@ -107,6 +110,10 @@ function setActiveSection(selector) {
     localStorage.setItem('activeSection', selector);
   }
 }
+// Clear localStorage on logout
+    logoutBtn.addEventListener('click', () => {
+        localStorage.removeItem('activeSection');
+    });
 
 // Reusable function to toggle dashboard cards
 function toggleDashboardCards(activeCard) {
@@ -133,17 +140,6 @@ window.addEventListener('DOMContentLoaded', () => {
   setActiveSection(savedSection);
 });
 
-
-
-// Success message hide after 3 seconds
-document.addEventListener('DOMContentLoaded', function () {
-  const alert = document.querySelector('.alert-success');
-  if (alert) {
-    setTimeout(() => {
-      alert.remove();
-    }, 3000);
-  }
-});
 
 // Add Category Modal Handling
 document.addEventListener("DOMContentLoaded", function () {
@@ -209,6 +205,39 @@ document.querySelectorAll('input[name="search"]').forEach(function(input) {
             this.form.submit();
         }
     });
+});
+
+// Handle section visibility based on URL parameters (for pagination)
+document.addEventListener('DOMContentLoaded', function() {
+    // Check for activeSection and tab parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const activeSection = urlParams.get('activeSection');
+    const tab = urlParams.get('tab');
+    
+    if (activeSection) {
+        // First set active section in localStorage to maintain state
+        localStorage.setItem('activeSection', '#' + activeSection + 'Section');
+        
+        // Show the active section
+        setActiveSection('#' + activeSection + 'Section');
+        
+        // For categories section, handle tab
+        if (activeSection === 'categories' && tab) {
+            // Make sure showCategoryTab is available
+            if (typeof showCategoryTab === 'function') {
+                showCategoryTab(tab);
+            }
+        }
+        
+        // For withdrawals section, handle tab
+        if (activeSection === 'withdrawals' && tab) {
+            // Call your withdrawal tab function
+            const tabElement = document.querySelector(`#${tab}-withdrawals-tab`);
+            if (tabElement) {
+                tabElement.click();
+            }
+        }
+    }
 });
    
        

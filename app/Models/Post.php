@@ -12,10 +12,13 @@ class Post extends Model
         'freelancer_id',
         'description',
          'status',
+         'rate',
+         'rate_type',
+
     ];
 
     protected $casts = [
-     
+         'rate' => 'decimal:2',
     ];
 
    

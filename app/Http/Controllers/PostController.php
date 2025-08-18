@@ -14,12 +14,37 @@ class PostController extends Controller
 {
     public function store(Request $request)
     {  
+         // ADD THIS SECTION: Check if user can create posts
+    $user = auth()->user();
+    
+    if ($user->is_suspended || $user->is_banned) {
+        $message = $user->is_suspended 
+            ? 'Your account is currently suspended until ' . $user->suspended_until->format('M d, Y') . '.' 
+            : 'Your account has been banned due to policy violations.';
+            
+        return response()->json([
+            'success' => false,
+            'errors' => ['restriction' => ['Unable to create service. ' . $message . ' Please contact support for assistance.']]
+        ], 403);
+    }
+    
+    // Check for restrictions
+    if ($user->is_restricted && (!$user->restriction_end || now()->lessThan($user->restriction_end))) {
+        return response()->json([
+            'success' => false,
+            'errors' => ['restriction' => ['Your account is currently restricted from creating new services due to policy violations. Restrictions will be lifted on ' . 
+                $user->restriction_end->format('M d, Y') . '. Please contact support for more information.']]
+        ], 403);
+    }
+    
         $validator = \Validator::make($request->all(), [
             'description' => 'required|string',
             'sub_services' => 'required|array|min:1',
             'sub_services.*' => 'required|string|max:255',
             'post_picture' => 'required|array|min:1',
             'post_picture.*' => 'required|image|mimes:jpg,jpeg,png|max:2048',
+             'rate' => 'required|numeric|min:0',
+             'rate_type' => 'required|in:hourly,daily,fixed',
         ]);
 
         if ($validator->fails()) {
@@ -37,6 +62,8 @@ class PostController extends Controller
                 'freelancer_id' => Auth::id(),
                 'description' => $request->description,
                 'status' => 'pending',
+                'rate' => $request->rate,
+                'rate_type' => $request->rate_type,
             ]);
 
             // Store SubServices
@@ -44,6 +71,7 @@ class PostController extends Controller
                 PostSubService::create([
                     'post_id' => $post->id,
                     'sub_service' => $sub_service,
+                   
                 ]);
             }
 
@@ -116,6 +144,8 @@ class PostController extends Controller
             'sub_services' => 'required|array|min:1',
             'sub_services.*' => 'required|string|max:255',
             'post_picture.*' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'rate' => 'required|numeric|min:0',
+             'rate_type' => 'required|in:hourly,daily,fixed',
         ]);
 
         if ($validator->fails()) {
@@ -129,6 +159,8 @@ class PostController extends Controller
             DB::beginTransaction();
 
             $post->description = $request->description;
+            $post->rate = $request->rate;           // <-- Add this
+            $post->rate_type = $request->rate_type;
             $post->save();
 
             // Update SubServices

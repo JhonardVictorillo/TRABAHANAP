@@ -195,6 +195,17 @@
                 @endif
             </div>
 
+            <!-- Rate and Rate Type Display -->
+            <div class="mb-4">
+                @if($post->rate && $post->rate_type)
+                    <span class="text-blue-600 font-semibold text-base">
+                        ₱{{ number_format($post->rate, 2) }} / {{ ucfirst($post->rate_type) }}
+                    </span>
+                @else
+                    <span class="text-gray-400 text-sm">No rate specified</span>
+                @endif
+            </div>
+
             <!-- See Profile Button -->
             <a href="{{ route('freelancer.profile', $post->freelancer->id) }}" class="block">
                <button class="w-full py-2 text-sm font-medium text-white bg-[#2563eb] hover:bg-[#1d4ed8] rounded-lg">
@@ -204,94 +215,40 @@
         </div>
     @endforeach
 </div>
-      <h2 class="text-xl sm:text-2xl font-semibold font-poppins mt-10 sm:mt-12 mb-6 sm:mb-8">
-        Popular Services
-      </h2>
-       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-        <div
-          class="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow service-card"
-        >
-          <div class="relative h-48">
-            <img
-              src="https://readdy.ai/api/search-image?query=professional%20photography%20equipment%20and%20camera%20setup%20in%20studio%20with%20modern%20lighting%2C%20high-end%20photography%20gear&width=300&height=200&seq=13&orientation=landscape"
-              alt="Photography"
-              class="w-full h-full object-cover"
-            />
-            <div
-              class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"
-            ></div>
-            <div class="absolute bottom-4 left-4">
-              <span class="text-white font-medium">Photography</span>
-            </div>
-          </div>
-          <div class="p-4">
-            <p class="text-sm text-gray-600">Starting from</p>
-            <p class="font-medium">$100 per session</p>
-          </div>
+    <h2 class="text-xl sm:text-2xl font-semibold font-poppins mt-10 sm:mt-12 mb-6 sm:mb-8">
+  Popular Services
+</h2>
+<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+  @forelse($popularCategories as $category)
+    <div class="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow service-card">
+      <div class="relative h-48">
+        <img
+          src="{{ isset($category->image_path) ? asset('storage/' . $category->image_path) : asset('images/category_' . $category->id . '.jpg') }}"
+          alt="{{ $category->name }}"
+          class="w-full h-full object-cover"
+        />
+        <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+        <div class="absolute bottom-4 left-4">
+          <span class="text-white font-medium">{{ $category->name }}</span>
         </div>
-        <div
-          class="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow service-card"
-        >
-          <div class="relative h-48">
-            <img
-              src="https://readdy.ai/api/search-image?query=modern%20home%20interior%20cleaning%20service%20with%20professional%20equipment%20and%20supplies%2C%20clean%20organized%20space&width=300&height=200&seq=14&orientation=landscape"
-              alt="House Cleaning"
-              class="w-full h-full object-cover"
-            />
-            <div
-              class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"
-            ></div>
-            <div class="absolute bottom-4 left-4">
-              <span class="text-white font-medium">House Cleaning</span>
-            </div>
-          </div>
-          <div class="p-4">
-            <p class="text-sm text-gray-600">Starting from</p>
-            <p class="font-medium">$50 per visit</p>
-          </div>
-        </div>
-        <div
-          class="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow service-card"
-        >
-          <div class="relative h-48">
-            <img
-              src="https://readdy.ai/api/search-image?query=professional%20pet%20grooming%20service%20with%20modern%20equipment%20and%20clean%20environment%2C%20cute%20groomed%20dog&width=300&height=200&seq=15&orientation=landscape"
-              alt="Pet Grooming"
-              class="w-full h-full object-cover"
-            />
-            <div
-              class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"
-            ></div>
-            <div class="absolute bottom-4 left-4">
-              <span class="text-white font-medium">Pet Grooming</span>
-            </div>
-          </div>
-          <div class="p-4">
-            <p class="text-sm text-gray-600">Starting from</p>
-            <p class="font-medium">$40 per session</p>
-          </div>
-        </div>
-        <div
-          class="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow service-card"
-        >
-          <div class="relative h-48">
-            <img
-              src="https://readdy.ai/api/search-image?query=artisanal%20bakery%20with%20fresh%20pastries%20and%20cakes%2C%20professional%20baking%20presentation&width=300&height=200&seq=16&orientation=landscape"
-              alt="Baking & Pastries"
-              class="w-full h-full object-cover"
-            />
-            <div
-              class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"
-            ></div>
-            <div class="absolute bottom-4 left-4">
-              <span class="text-white font-medium">Baking & Pastries</span>
-            </div>
-          </div>
-          <div class="p-4">
-            <p class="text-sm text-gray-600">Starting from</p>
-            <p class="font-medium">$30 per order</p>
-          </div>
-        </div>
+      </div>
+      <div class="p-4">
+       
+        <a href="{{ route('customer.dashboard', ['category' => $category->id]) }}" class="text-[#2563eb] text-sm hover:underline">
+          Browse freelancers
+        </a>
+      </div>
+    </div>
+  @empty
+    <!-- Fallback content if needed -->
+    <div class="col-span-full text-center py-8">
+      <p class="text-gray-500">No popular services available at the moment.</p>
+    </div>
+  @endforelse
+</div>
+
+       
+       
       </div>
     </main>
 

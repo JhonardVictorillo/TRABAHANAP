@@ -228,11 +228,17 @@
                 <form id="paymentForm" action="{{ route('payment.final', ['id' => ':appointmentId']) }}" method="POST">
                     @csrf
                     <div class="mb-4">
+                        <div id="durationField" class="mb-4" style="display:none;">
+                                <label id="durationLabel" class="block text-sm font-medium text-gray-700"></label>
+                                <input type="number" id="durationInput" min="1" value="1"
+                                    class="focus:ring-primary focus:border-primary block w-full pl-7 pr-12 sm:text-sm border-gray-300 rounded-md">
+                            </div>
                         <label for="amount" class="block text-sm font-medium text-gray-700">Amount (₱)</label>
                         <div class="mt-1 relative rounded-md shadow-sm">
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                 <span class="text-gray-500 sm:text-sm">₱</span>
                             </div>
+                            
                             <input type="number" name="amount" id="paymentAmount" step="0.01" min="0" 
                                 class="focus:ring-primary focus:border-primary block w-full pl-7 pr-12 sm:text-sm border-gray-300 rounded-md"
                                 placeholder="0.00" required>
@@ -871,6 +877,41 @@ document.addEventListener('DOMContentLoaded', function () {
             // Reset payment amount field
             document.getElementById('paymentAmount').value = '';
             
+            // Show duration field for hourly/daily rate
+                const rateType = currentAppointmentData?.rate_type || '';
+                const rate = parseFloat(currentAppointmentData?.rate || '0');
+                const durationField = document.getElementById('durationField');
+                const durationLabel = document.getElementById('durationLabel');
+                const durationInput = document.getElementById('durationInput');
+                const paymentAmount = document.getElementById('paymentAmount');
+
+                if (rateType === 'hourly') {
+                    durationField.style.display = 'block';
+                    durationLabel.textContent = 'Number of Hours';
+                    durationInput.value = 1;
+                } else if (rateType === 'daily') {
+                    durationField.style.display = 'block';
+                    durationLabel.textContent = 'Number of Days';
+                    durationInput.value = 1;
+                } else {
+                    durationField.style.display = 'none';
+                    durationInput.value = 1;
+                }
+
+                // Calculate and update amount when duration changes
+                function updateAmount() {
+                    let duration = parseInt(durationInput.value) || 1;
+                    let total = rate * duration;
+                    paymentAmount.value = total.toFixed(2);
+                }
+
+                durationInput.oninput = updateAmount;
+                updateAmount(); // Initial calculation
+
+                // Make payment amount read-only
+                paymentAmount.readOnly = true;
+
+
             // Show payment modal
             paymentModal.style.display = 'flex';
         });

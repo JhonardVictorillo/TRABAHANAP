@@ -194,11 +194,7 @@ body {
   font-weight: 500;
 }
 
-/* Input field with error styling */
-.input-field input:invalid,
-.input-field input.error {
-  border: 1px solid var(--error-color);
-}
+
 
 .input-field input:focus.error {
   outline: none;
@@ -316,34 +312,6 @@ body {
   cursor: not-allowed;
 }
 
-/* Alert styling */
-.alert-success {
-  position: fixed;
-  top: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  background-color: #d4edda;
-  color: var(--success-color);
-  border: 1px solid #c3e6cb;
-  padding: 15px 20px;
-  border-radius: 5px;
-  font-size: 1rem;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  z-index: 1000;
-  width: 90%;
-  max-width: 600px;
-  animation: slideDown 0.5s ease-in-out;
-}
-
-.alert-success i {
-  font-size: 1.2rem;
-  color: var(--success-color);
-}
 
 @keyframes slideDown {
   from {

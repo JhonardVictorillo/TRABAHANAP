@@ -46,12 +46,18 @@ class User extends Authenticatable
         'specialization',
         'skills',
         'is_verified',
-        'hourly_rate',
-        'daily_rate',
         'current_mode',
         'role_updated_at',
         'freelancer_onboarded',
         'customer_onboarded',
+         'is_suspended',
+        'suspended_until',
+        'is_banned',
+         'is_restricted',
+        'restriction_end',
+        'restriction_reason',
+        'ban_reason',
+
     ];
 
     /**
@@ -74,6 +80,13 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+             'suspended_until' => 'datetime',
+            'last_violation_at' => 'datetime',
+            'is_suspended' => 'boolean',
+            'is_banned' => 'boolean',
+            'is_restricted' => 'boolean',
+             'restriction_end' => 'datetime',
+            
         ];
     }
 
@@ -214,5 +227,87 @@ public function becomeCustomer()
         $this->role_updated_at = now();
         $this->save();
     }
+}
+
+
+public function isSuspended(): bool
+{
+    if (!$this->is_suspended) {
+        return false;
+    }
+    
+    // If suspended but the suspension period has ended
+    if ($this->suspended_until && now()->greaterThan($this->suspended_until)) {
+        $this->is_suspended = false;
+        $this->suspended_until = null;
+        $this->save();
+        return false;
+    }
+    
+    return true;
+}
+
+/**
+ * Suspend user for specified number of days
+ */
+public function suspend(int $days = 7, string $reason = null): void
+{
+    $this->is_suspended = true;
+    $this->suspended_until = now()->addDays($days);
+    $this->save();
+}
+
+public function hasRestrictions(): bool
+{
+    return $this->is_restricted && 
+           (!$this->restriction_end || now()->lessThan($this->restriction_end));
+}
+
+/**
+ * Apply restrictions to user account
+ */
+public function applyRestrictions(int $days = 7): void
+{
+    $this->is_restricted = true;
+    $this->restriction_end = now()->addDays($days);
+    $this->restriction_reason = 'Multiple violations';
+    $this->save();
+}
+
+/**
+ * Remove restrictions from user account
+ */
+public function removeRestrictions(): void
+{
+    $this->is_restricted = false;
+    $this->restriction_end = null;
+    $this->restriction_reason = null;
+    $this->save();
+}
+
+/**
+ * Ban user permanently
+ */
+public function ban(string $reason = null): void
+{
+    $this->is_banned = true;
+    $this->ban_reason = $reason ?? 'Repeated violations';
+    $this->save();
+}
+
+/**
+ * Check if user can create posts
+ */
+public function canCreatePosts(): bool
+{
+    return !$this->isSuspended() && !$this->hasRestrictions() && !$this->is_banned;
+}
+
+/**
+ * Check if user can book appointments
+ */
+public function canBookAppointments(): bool
+{
+    return !$this->isSuspended() && !$this->is_banned;
 }
 }

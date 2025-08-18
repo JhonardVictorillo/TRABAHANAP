@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Freelancer Profile</title>
     <meta name="csrf-token" content="{{ csrf_token() }}" />
-    <link rel ="stylesheet" href="{{asset ('css/PostSeeProfile.css')}}" />
      <link rel ="stylesheet" href="{{asset ('css/customerHeader.css')}}" />
+    <link rel ="stylesheet" href="{{asset ('css/PostSeeProfile.css')}}" />
     <script src="https://cdn.tailwindcss.com/3.4.16"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"rel="stylesheet"/>
@@ -221,12 +221,45 @@
                 <p class="text-sm text-gray-600 mb-6">
                     Book a consultation to discuss your digital marketing needs and goals.
                 </p>
-                <button
-                    id="bookButton"
-                    class="w-full py-2 text-sm font-medium text-white bg-primary hover:bg-primary/90 !rounded-button"
-                >
-                    Book Appointment
-                </button>
+                  @if(auth()->check() && (auth()->user()->is_suspended || auth()->user()->is_banned))
+                        <button disabled
+                            class="w-full py-2 text-sm font-medium text-white bg-gray-400 cursor-not-allowed !rounded-button"
+                        >
+                            @if(auth()->user()->is_suspended)
+                                Account Suspended
+                            @else
+                                Account Banned
+                            @endif
+                        </button>
+                        <p class="text-xs text-red-600 mt-2">
+                            @if(auth()->user()->is_suspended)
+                                Your account is suspended until {{ auth()->user()->suspension_end->format('M d, Y') }}
+                            @else
+                                Your account has been banned. Please contact support.
+                            @endif
+                        </p>
+                   @elseif(auth()->check() && auth()->user()->is_restricted && (!auth()->user()->restriction_end || now()->lessThan(auth()->user()->restriction_end)))
+                    <button disabled
+                        class="w-full py-2 text-sm font-medium text-white bg-yellow-400 cursor-not-allowed !rounded-button"
+                    >
+                        Booking Restricted
+                    </button>
+                    <p class="text-xs text-yellow-600 mt-2">
+                        Your account is restricted from booking appointments.
+                        @if(auth()->user()->restriction_end)
+                            Restriction ends on {{ auth()->user()->restriction_end->format('M d, Y') }}.
+                        @endif
+                        Please contact support for more information.
+                    </p>
+                @else
+                    <button
+                        id="bookButton"
+                        class="w-full py-2 text-sm font-medium text-white bg-primary hover:bg-primary/90 !rounded-button"
+                    >
+                        Book Appointment
+                    </button>
+                @endif
+                
             </div>
         </div>
     </div>
@@ -300,7 +333,7 @@
           </div>
           <p class="text-sm text-yellow-700">
             To book this appointment, a non-refundable commitment fee of 
-            <span class="font-bold text-yellow-900">₱{{ number_format($commitment_fee ?? 100, 2) }}</span>
+             <span class="font-bold text-yellow-900">₱{{ number_format($commitmentFee, 2) }}</span>
             is required. This fee will not be refunded if you cancel after the freelancer accepts your booking.
           </p>
         </div>
@@ -383,12 +416,56 @@
     const month = currentDate.getMonth();
     const firstDay = new Date(year, month, 1).getDay();
     const lastDate = new Date(year, month + 1, 0).getDate();
+     const today = new Date();
 
+     // Check if current month is in the past
+    const isPastMonth = (year < today.getFullYear()) || 
+                      (year === today.getFullYear() && month < today.getMonth());
+                      
+    // Disable previous month button if we're at current month
+    prevMonthButton.disabled = (year === today.getFullYear() && month === today.getMonth());
+    prevMonthButton.classList.toggle("opacity-50", prevMonthButton.disabled);
+    
     monthTitle.textContent = `${months[month]} ${year}`;
     calendarGrid.innerHTML = "";
 
     // Fetch availability for the current month
     const availability = await fetchAvailability(year, month);
+
+    // Clear time slots for a new month selection
+    const timeButtonsContainer = document.querySelector("#bookingModal .grid-cols-3");
+    timeButtonsContainer.innerHTML = `
+        <p class="col-span-3 text-sm text-gray-600 py-4 text-center">
+            Please select a date to view available time slots.
+        </p>`;
+    // If this is a past month, disable all dates
+    if (isPastMonth) {
+        // Add empty cells for days before the first day of the month
+        for (let i = 0; i < firstDay; i++) {
+            calendarGrid.innerHTML += `<div class="text-sm text-gray-300"></div>`;
+        }
+        
+        // Add cells for each day of the month (all disabled)
+        for (let day = 1; day <= lastDate; day++) {
+            const date = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+            
+            calendarGrid.innerHTML += `
+                <div class="text-sm py-2 bg-gray-200 text-gray-400 cursor-not-allowed opacity-70" 
+                    data-date="${date}" disabled>
+                    ${day}
+                </div>`;
+        }
+        
+        // Clear time slots
+        const timeButtonsContainer = document.querySelector("#bookingModal .grid-cols-3");
+        timeButtonsContainer.innerHTML = `
+            <p class="col-span-3 text-sm text-gray-600 py-4 text-center">
+                Appointments cannot be scheduled for past months.
+                Please select a date in the current or future months.
+            </p>`;
+        
+        return;
+    }
 
     // Add empty cells for days before the first day of the month
     for (let i = 0; i < firstDay; i++) {
@@ -399,31 +476,37 @@
     for (let day = 1; day <= lastDate; day++) {
         const date = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
         const isAvailable = availability.some(avail => avail.date === date);
+        
+        // Check if this date is in the past (for current month)
+        const isPastDate = (year === today.getFullYear() && 
+                          month === today.getMonth() && 
+                          day < today.getDate());
+        
+        // Disable past dates even if they're available
+        const isSelectable = isAvailable && !isPastDate;
 
         calendarGrid.innerHTML += `
             <div class="text-sm py-2 ${
-                isAvailable
+                isSelectable
                     ? "bg-blue-600 text-white rounded-full cursor-pointer"
                     : "bg-gray-200 text-gray-400 cursor-not-allowed"
-            }" data-date="${date}" ${isAvailable ? "" : "disabled"}>
+            }" data-date="${date}" ${isSelectable ? "" : "disabled"}>
                 ${day}
             </div>`;
     }
 
     // Add click event to available days only
-    document.querySelectorAll("#calendarGrid div[data-date]").forEach((day) => {
-        if (!day.classList.contains("cursor-not-allowed")) {
-            day.addEventListener("click", function () {
-                document
-                    .querySelectorAll("#calendarGrid div")
-                    .forEach((d) => d.classList.remove("bg-blue-600", "text-white"));
-                this.classList.add("bg-blue-600", "text-white");
-                selectedDateInput.value = this.getAttribute("data-date");
+   document.querySelectorAll("#calendarGrid div[data-date]:not([disabled])").forEach((day) => {
+        day.addEventListener("click", function () {
+            document
+                .querySelectorAll("#calendarGrid div")
+                .forEach((d) => d.classList.remove("bg-blue-600", "text-white"));
+            this.classList.add("bg-blue-600", "text-white");
+            selectedDateInput.value = this.getAttribute("data-date");
 
-                // Update time slots for the selected date
-                updateTimeSlots(this.getAttribute("data-date"), availability);
-            });
-        }
+            // Update time slots for the selected date
+            updateTimeSlots(this.getAttribute("data-date"), availability);
+        });
     });
 }
 
@@ -431,6 +514,14 @@ function updateTimeSlots(selectedDate, availability) {
     const timeButtonsContainer = document.querySelector("#bookingModal .grid-cols-3");
     timeButtonsContainer.innerHTML = ""; // Clear previous time slots
     
+     if (!availability || availability.length === 0) {
+        timeButtonsContainer.innerHTML = `
+            <p class="col-span-3 text-sm text-gray-600 py-4 text-center">
+                No schedules have been set for this month.
+                Please try selecting a different month.
+            </p>`;
+        return;
+    }
     // Find the availability for the selected date
     const availableDay = availability.find(avail => avail.date === selectedDate);
     
@@ -533,9 +624,9 @@ function convertTo12HourFormat(hour) {
     // Open and close modal
     bookButton.addEventListener("click", () => {
         bookingModal.classList.remove("hidden");
+        currentDate = new Date(); // Reset to current month/year
         updateCalendar(); // Initialize calendar when modal opens
-    });
-
+});
     closeModal.addEventListener("click", () => {
         bookingModal.classList.add("hidden");
     });
@@ -548,29 +639,7 @@ function convertTo12HourFormat(hour) {
 });
 
 
-        tailwind.config = {
-          theme: {
-            extend: {
-              colors: {
-               primary: "#2563eb", // Changed from #118f39 to royal blue
-                secondary: "#64748B",
-              },
-              borderRadius: {
-                none: "0px",
-                sm: "4px",
-                DEFAULT: "8px",
-                md: "12px",
-                lg: "16px",
-                xl: "20px",
-                "2xl": "24px",
-                "3xl": "32px",
-                full: "9999px",
-                button: "8px",
-              },
-            },
-          },
-        };
-
+     
 
         document.getElementById('bookingForm').addEventListener('submit', function(e) {
     document.getElementById('notesInput').value = document.getElementById('notes').value;

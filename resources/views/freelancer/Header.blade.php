@@ -1,5 +1,4 @@
 
-
    <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -21,7 +20,7 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" 
       integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
       crossorigin=""/>
-      
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>  
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
         crossorigin=""></script>
@@ -78,12 +77,12 @@
       <span class="material-symbols-outlined">search</span>
       <input type="text" placeholder="Search..." />
     </div>
-
+   
     <div class="user-area">
       <div class="notification">
       <span class="material-symbols-outlined" id="notificationIcon">notifications</span>
         <span class="count" id="notificationCount">{{ $unreadNotifications->count() }}</span>
-
+       
        <!-- Notification Dropdown -->
 <div class="notification-container" id="notificationContainer" style="display: none;">
     <h3>Notifications</h3>
@@ -119,6 +118,24 @@
                     $title = 'Payment Received';
                     $iconSymbol = 'payments';
                     $iconClass = 'payment';
+                }
+                 elseif (str_contains($notification->type, 'WithdrawalStatusNotification')) {
+                    $title = 'Withdrawal ' . ucfirst($notification->data['status'] ?? 'Updated');
+                    $iconSymbol = 'account_balance_wallet';
+                    $iconClass = $notification->data['status'] == 'completed' ? 'success' : 'info';
+                }
+               elseif (str_contains($notification->type, 'ViolationNotification')) {
+                    $title = $notification->data['title'] ?? 'Violation Notice';
+                    $message = $notification->data['message'] ?? '';
+                    $iconSymbol = match($notification->data['action_type'] ?? '') {
+                        'warning' => 'warning',
+                        'suspension' => 'block',
+                        'fee' => 'payments',
+                        'ban' => 'cancel',
+                        'restrict' => 'not_interested',
+                        default => 'error'
+                    };
+                    $iconClass = in_array($notification->data['action_type'] ?? '', ['suspension', 'ban']) ? 'danger' : 'warning';
                 }
                 else {
                     $title = 'Notification';
@@ -187,10 +204,7 @@
     @endif
 </div>
       </div>
-      <div class="message">
-        <span class="material-symbols-outlined">email</span>
-        <span class="count">5</span>
-      </div>
+      
       <!-- Profile Picture in Header -->
        <img src="{{ Auth::user()->profile_picture ? asset('storage/' . Auth::user()->profile_picture) : asset('images/defaultprofile.jpg') }}"  alt="User Avatar" class="avatar cursor-pointer" id="profilePic" />
       <div class="user-info">

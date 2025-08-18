@@ -218,8 +218,9 @@ body {
   /* Star rating responsive styles */
 #starRating {
     display: flex;
-    flex-direction: row-reverse;
+    flex-direction: row;
     justify-content: flex-start;
+     gap: 4px;
 }
 
 .star {

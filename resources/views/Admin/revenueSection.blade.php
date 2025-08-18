@@ -147,7 +147,7 @@
       @if(isset($revenueTransactions) && method_exists($revenueTransactions, 'links'))
           <div class="category-pagination-container">
             @if($revenueTransactions->previousPageUrl())
-              <a href="{{ $revenueTransactions->appends(['section' => 'revenue', 'tab' => 'revenue', 'revenue_search' => request('revenue_search')])->previousPageUrl() }}" class="category-pagination-btn">
+             <a href="{{ $revenueTransactions->appends(['activeSection' => 'revenue', 'tab' => 'revenue', 'revenue_search' => request('revenue_search')])->previousPageUrl() }}" class="category-pagination-btn">
                 <i class="fas fa-arrow-left"></i> Previous
               </a>
             @else
@@ -157,7 +157,7 @@
             @endif
             
             @if($revenueTransactions->hasMorePages())
-              <a href="{{ $revenueTransactions->appends(['section' => 'revenue', 'tab' => 'revenue', 'revenue_search' => request('revenue_search')])->nextPageUrl() }}" class="category-pagination-btn">
+             <a href="{{ $revenueTransactions->appends(['activeSection' => 'revenue', 'tab' => 'revenue', 'revenue_search' => request('revenue_search')])->nextPageUrl() }}" class="category-pagination-btn">
                 Next <i class="fas fa-arrow-right"></i>
               </a>
             @else
@@ -196,40 +196,65 @@
       
       <div class="admin-table-container">
         <table class="admin-table">
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Amount</th>
-              <th>Bank/Account</th>
-              <th>Reference</th>
-              <th>Processed By</th>
-              <th>Notes</th>
-            </tr>
-          </thead>
-          <tbody>
-            @forelse($platformWithdrawals ?? [] as $withdrawal)
-              <tr>
-                <td>{{ $withdrawal->created_at->format('M d, Y') }}</td>
-                <td>Php.{{ number_format($withdrawal->amount, 2) }}</td>
-                <td>{{ $withdrawal->bank_name }}</td>
-                <td>{{ $withdrawal->reference_number ?? 'N/A' }}</td>
-                <td>{{ $withdrawal->admin->firstname ?? 'N/A' }} {{ $withdrawal->admin->lastname ?? '' }}</td>
-                <td>{{ $withdrawal->notes ?? 'N/A' }}</td>
-              </tr>
-            @empty
-              <tr>
-                <td colspan="6" style="text-align: center;">No platform withdrawals recorded yet.</td>
-              </tr>
-            @endforelse
-          </tbody>
-        </table>
+  <thead>
+    <tr>
+      <th>Date</th>
+      <th>Amount</th>
+      <th>Status</th>
+      <th>Bank/Account</th>
+      <th>Reference</th>
+      <th>Processed By</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    @forelse($platformWithdrawals ?? [] as $withdrawal)
+      <tr>
+        <td>{{ $withdrawal->created_at->format('M d, Y') }}</td>
+        <td>Php.{{ number_format($withdrawal->amount, 2) }}</td>
+        <td>
+          <span class="status-badge {{ $withdrawal->status }}">
+            {{ ucfirst($withdrawal->status) }}
+          </span>
+        </td>
+        <td>{{ $withdrawal->bank_name }}</td>
+        <td>{{ $withdrawal->reference_number ?? 'N/A' }}</td>
+        <td>{{ $withdrawal->admin->firstname ?? 'N/A' }} {{ $withdrawal->admin->lastname ?? '' }}</td>
+       <td>
+          @if($withdrawal->status === 'processing')
+            <button 
+              class="complete-btn"
+              onclick="completePlatformWithdrawal({{ $withdrawal->id }})"
+            >
+              Mark Complete
+            </button>
+          @else
+            @if($withdrawal->processed_at)
+              @if(is_string($withdrawal->processed_at))
+                {{ \Carbon\Carbon::parse($withdrawal->processed_at)->format('M d, Y') }}
+              @else
+                {{ $withdrawal->processed_at->format('M d, Y') }}
+              @endif
+            @else
+              N/A
+            @endif
+          @endif
+      </td>
+      </tr>
+    @empty
+      <tr>
+        <td colspan="7" style="text-align: center;">No platform withdrawals recorded yet.</td>
+      </tr>
+    @endforelse
+  </tbody>
+</table>
       </div>
       
       <!-- Pagination for Withdrawals -->
        @if(isset($platformWithdrawals) && method_exists($platformWithdrawals, 'links'))
           <div class="category-pagination-container">
             @if($platformWithdrawals->previousPageUrl())
-              <a href="{{ $platformWithdrawals->appends(['section' => 'revenue', 'tab' => 'withdrawals', 'withdrawal_search' => request('withdrawal_search')])->previousPageUrl() }}" class="category-pagination-btn">
+                <a href="{{ $platformWithdrawals->appends(['activeSection' => 'revenue', 'tab' => 'withdrawals', 'withdrawal_search' => request('withdrawal_search')])->previousPageUrl() }}" class="category-pagination-btn">
                 <i class="fas fa-arrow-left"></i> Previous
               </a>
             @else
@@ -239,7 +264,7 @@
             @endif
             
             @if($platformWithdrawals->hasMorePages())
-              <a href="{{ $platformWithdrawals->appends(['section' => 'revenue', 'tab' => 'withdrawals', 'withdrawal_search' => request('withdrawal_search')])->nextPageUrl() }}" class="category-pagination-btn">
+               <a href="{{ $platformWithdrawals->appends(['activeSection' => 'revenue', 'tab' => 'withdrawals', 'withdrawal_search' => request('withdrawal_search')])->nextPageUrl() }}" class="category-pagination-btn">
                 Next <i class="fas fa-arrow-right"></i>
               </a>
             @else
@@ -259,77 +284,85 @@
     <span class="admin-withdrawal-modal-close" onclick="closeAdminWithdrawalModal()">&times;</span>
     <h2>Withdraw Platform Revenue</h2>
     
-    <form id="adminWithdrawalForm" method="POST" action=" ">
-      @csrf
-      <div class="admin-withdrawal-form-group">
-        <label for="withdrawal_amount">Amount (Php):</label>
-        <input 
-          type="number" 
-          id="withdrawal_amount" 
-          name="amount" 
-          min="1" 
-          step="0.01" 
-          required 
-          class="admin-withdrawal-form-control"
-          max="{{ $availableRevenue ?? 0 }}"
-        >
-        <small class="admin-withdrawal-balance-info">Available revenue: <span id="available-revenue">Php.{{ number_format($availableRevenue ?? 0, 2) }}</span></small>
-      </div>
-      
-      <div class="admin-withdrawal-form-group">
-        <label for="bank_name">Bank/Account Name:</label>
-        <input 
-          type="text" 
-          id="bank_name" 
-          name="bank_name" 
-          required 
-          class="admin-withdrawal-form-control"
-          placeholder="e.g., BDO, BPI, GCash"
-        >
-      </div>
-      
-      <div class="admin-withdrawal-form-group">
-        <label for="account_number">Account Number:</label>
-        <input 
-          type="text" 
-          id="account_number" 
-          name="account_number" 
-          required 
-          class="admin-withdrawal-form-control"
-          placeholder="e.g., 1234-5678-9012-3456"
-        >
-      </div>
-      
-      <div class="admin-withdrawal-form-group">
-        <label for="reference_number">Reference Number (Optional):</label>
-        <input 
-          type="text" 
-          id="reference_number" 
-          name="reference_number" 
-          class="admin-withdrawal-form-control"
-          placeholder="Transaction reference if available"
-        >
-      </div>
-      
-      <div class="admin-withdrawal-form-group">
-        <label for="withdrawal_notes">Notes:</label>
-        <textarea 
-          id="withdrawal_notes" 
-          name="notes" 
-          class="admin-withdrawal-form-control" 
-          rows="2"
-          placeholder="Optional notes about this transaction"
-        ></textarea>
-      </div>
-      
-      <div class="admin-withdrawal-form-actions">
-        <button type="button" onclick="closeAdminWithdrawalModal()" class="admin-withdrawal-btn-secondary">Cancel</button>
-        <button type="submit" class="admin-withdrawal-btn-primary">Withdraw Funds</button>
-      </div>
+      <form id="adminWithdrawalForm" method="POST" action="{{ route('admin.platform.withdrawals.store') }}">
+        @csrf
+        
+        <div class="admin-withdrawal-form-group">
+            <label for="payment_method">Payment Method:</label>
+            <select id="payment_method" name="payment_method" class="admin-withdrawal-form-control" required onchange="togglePaymentFields()">
+                <option value="stripe">Stripe Direct (Faster)</option>
+                <option value="bank_transfer">Manual Bank Transfer</option>
+            </select>
+        </div>
+        
+        <div class="admin-withdrawal-form-group">
+            <label for="withdrawal_amount">Amount (Php):</label>
+            <input 
+                type="number" 
+                id="withdrawal_amount" 
+                name="amount" 
+                min="1" 
+                step="0.01" 
+                required 
+                class="admin-withdrawal-form-control"
+                max="{{ $availableRevenue ?? 0 }}"
+            >
+            <small class="admin-withdrawal-balance-info">Available revenue: <span id="available-revenue">Php.{{ number_format($availableRevenue ?? 0, 2) }}</span></small>
+        </div>
+        
+        <div id="manual-transfer-fields">
+            <div class="admin-withdrawal-form-group">
+                <label for="bank_name">Bank/Account Name:</label>
+                <input 
+                    type="text" 
+                    id="bank_name" 
+                    name="bank_name" 
+                    class="admin-withdrawal-form-control"
+                    placeholder="e.g., BDO, BPI, GCash"
+                >
+            </div>
+            
+            <div class="admin-withdrawal-form-group">
+                <label for="account_number">Account Number:</label>
+                <input 
+                    type="text" 
+                    id="account_number" 
+                    name="account_number" 
+                    class="admin-withdrawal-form-control"
+                    placeholder="e.g., 1234-5678-9012-3456"
+                >
+            </div>
+            
+            <div class="admin-withdrawal-form-group">
+                <label for="reference_number">Reference Number (Optional):</label>
+                <input 
+                    type="text" 
+                    id="reference_number" 
+                    name="reference_number" 
+                    class="admin-withdrawal-form-control"
+                    placeholder="Transaction reference if available"
+                >
+            </div>
+        </div>
+        
+        <div class="admin-withdrawal-form-group">
+            <label for="withdrawal_notes">Notes:</label>
+            <textarea 
+                id="withdrawal_notes" 
+                name="notes" 
+                class="admin-withdrawal-form-control" 
+                rows="2"
+                placeholder="Optional notes about this transaction"
+            ></textarea>
+        </div>
+        
+        <div class="admin-withdrawal-form-actions">
+            <button type="button" onclick="closeAdminWithdrawalModal()" class="admin-withdrawal-btn-secondary">Cancel</button>
+            <button type="submit" class="admin-withdrawal-btn-primary">Withdraw Funds</button>
+        </div>
     </form>
   </div>
 </div>
-
 
 <script>
 // Tab Functions
@@ -414,5 +447,84 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
   }
+});
+
+function completePlatformWithdrawal(id) {
+  if (confirm('Are you sure you want to mark this withdrawal as completed?')) {
+    // Show loading state
+    const button = event.target;
+    const originalText = button.innerHTML;
+    button.disabled = true;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+    
+    fetch(`/admin/platform-withdrawals/${id}/complete`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        // Show success message
+        alert('Withdrawal marked as completed successfully!');
+        
+        // Reload the page
+        window.location.reload();
+      } else {
+        // Restore button
+        button.disabled = false;
+        button.innerHTML = originalText;
+        
+        // Show error message
+        alert('Error: ' + data.message);
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      button.disabled = false;
+      button.innerHTML = originalText;
+      alert('An error occurred while processing your request');
+    });
+  }
+}
+
+// Function to toggle payment method fields
+function togglePaymentFields() {
+  const paymentMethod = document.getElementById('payment_method').value;
+  const manualFields = document.getElementById('manual-transfer-fields');
+  
+  // Toggle required attributes
+  const bankNameInput = document.getElementById('bank_name');
+  const accountNumberInput = document.getElementById('account_number');
+  
+  if (paymentMethod === 'stripe') {
+    manualFields.style.display = 'none';
+    // Remove required attribute for manual fields
+    bankNameInput.removeAttribute('required');
+    accountNumberInput.removeAttribute('required');
+  } else {
+    manualFields.style.display = 'block';
+    // Add required attribute for manual fields
+    bankNameInput.setAttribute('required', 'required');
+    accountNumberInput.setAttribute('required', 'required');
+  }
+}
+
+// Call the function when the page loads to set initial visibility
+document.addEventListener('DOMContentLoaded', function() {
+  // Previous code remains
+  
+  // Set initial field visibility when modal opens
+  const openModalButton = document.querySelector('.admin-withdrawal-btn');
+  if (openModalButton) {
+    openModalButton.addEventListener('click', function() {
+      setTimeout(togglePaymentFields, 100); // Small delay to ensure DOM is ready
+    });
+  }
+  
+  // Call toggle function on page load too
+  togglePaymentFields();
 });
 </script>

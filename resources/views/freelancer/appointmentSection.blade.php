@@ -25,18 +25,18 @@
       <i class="fas fa-times"></i>
     </button>
     <h2 class="Apptmodal-title enhanced-title">
-      <i class="fas fa-calendar-check" style="color:#118f39;"></i> Appointment Details
+      <i class="fas fa-calendar-check" style="color:#2563eb;"></i> Appointment Details
     </h2>
     <div class="Apptmodal-body enhanced-body">
-      <p><i class="fas fa-user"></i> <strong>Name:</strong> <span id="appointmentName" class="font-medium"></span></p>
-      <p><i class="fas fa-calendar-day"></i> <strong>Date:</strong> <span id="appointmentDate" class="font-medium"></span></p>
-      <p><i class="fas fa-clock"></i> <strong>Time:</strong> <span id="appointmentTime" class="font-medium"></span></p>
-      <p><i class="fas fa-map-marker-alt"></i> <strong>Address:</strong> <span id="appointmentAddress" class="font-medium"></span></p>
-      <p><i class="fas fa-phone"></i> <strong>Contact:</strong> <span id="appointmentContact" class="font-medium"></span></p>
-      <p><i class="fas fa-info-circle"></i> <strong>Status:</strong> <span id="appointmentStatus" class="font-medium"></span></p>
-       <p><i class="fas fa-money-bill-wave"></i> <strong>Payment Status:</strong> <span id="appointmentPaymentStatus" class="font-medium"></span></p>
-      <p><i class="fas fa-coins"></i> <strong>Payment Amount:</strong> <span id="appointmentPaymentAmount" class="font-medium"></span></p>
-        <p><i class="fas fa-sticky-note"></i> <strong>Notes:</strong> <span id="appointmentNotes" class="font-medium"></span></p>
+      <p><i class="fas fa-user" style = "color:#2563eb;"></i> <strong>Name:</strong> <span id="appointmentName" class="font-medium"></span></p>
+      <p><i class="fas fa-calendar-day" style = "color:#2563eb;"></i> <strong>Date:</strong> <span id="appointmentDate" class="font-medium"></span></p>
+      <p><i class="fas fa-clock" style = "color:#2563eb;"></i> <strong>Time:</strong> <span id="appointmentTime" class="font-medium"></span></p>
+      <p><i class="fas fa-map-marker-alt" style = "color:#2563eb;"></i> <strong>Address:</strong> <span id="appointmentAddress" class="font-medium"></span></p>
+      <p><i class="fas fa-phone" style = "color:#2563eb;"></i> <strong>Contact:</strong> <span id="appointmentContact" class="font-medium"></span></p>
+      <p><i class="fas fa-info-circle" style = "color:#2563eb;"></i> <strong>Status:</strong> <span id="appointmentStatus" class="font-medium"></span></p>
+       <p><i class="fas fa-money-bill-wave" style = "color:#2563eb;"></i> <strong>Payment Status:</strong> <span id="appointmentPaymentStatus" class="font-medium"></span></p>
+      <p><i class="fas fa-coins" style = "color:#2563eb;"></i> <strong>Payment Amount:</strong> <span id="appointmentPaymentAmount" class="font-medium"></span></p>
+        <p><i class="fas fa-sticky-note" style = "color:#2563eb;"></i> <strong>Notes:</strong> <span id="appointmentNotes" class="font-medium"></span></p>
     </div>
     <div class="modal-actions enhanced-actions">
       <button id="acceptAppointmentBtn" class="action-button accept-button enhanced-btn" data-id="">

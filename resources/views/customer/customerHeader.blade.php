@@ -71,15 +71,7 @@
         </div>
       </div>
       
-      <a href=" " class="flex items-center gap-1 sm:gap-2 text-sm font-medium text-gray-700 hover:text-primary !rounded-button">
-        <div class="relative w-6 h-6 flex items-center justify-center">
-          <i class="ri-message-3-line"></i>
-          <span class="absolute -top-1 -right-2 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
-            3
-          </span>
-        </div>
-        <span class="hidden sm:inline">Messages</span>
-      </a>
+     
            
       <div class="relative inline-block text-left">
         <button id="profileBtn" class="w-12 h-12 rounded-full overflow-hidden focus:outline-none">

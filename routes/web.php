@@ -18,6 +18,12 @@ use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\Admin\CategoryRequestController;
 use App\Http\Controllers\Auth\RoleSwitchController;
+use App\Http\Controllers\PlatformWithdrawalController;
+use App\Http\Controllers\AdminPayoutController;
+use App\Http\Controllers\FreelancerPayoutController;
+use App\http\Controllers\StripeConnectController;
+use App\Http\Controllers\Admin\violationController;
+
 
 
 use Illuminate\Support\Facades\Auth;
@@ -227,17 +233,60 @@ Route::post('/freelancer-onboarding', [RoleSwitchController::class, 'completeFre
 Route::get('/customer-onboarding', [RoleSwitchController::class, 'customerOnboarding'])->name('customer.onboarding');
 Route::post('/customer-onboarding', [RoleSwitchController::class, 'completeCustomerOnboarding']);
 
-// Freelancer withdrawal routes
-Route::middleware(['auth', 'role:freelancer'])->prefix('freelancer')->name('freelancer.')->group(function () {
+// Freelancer withdrawal routes - simplified without middleware
+Route::prefix('freelancer')->name('freelancer.')->group(function () {
     Route::post('/withdraw', [FreelancerPayoutController::class, 'store'])->name('withdraw');
     Route::post('/withdrawals/{id}/cancel', [FreelancerPayoutController::class, 'cancel'])->name('withdraw.cancel');
-    Route::get('/withdrawals/{id}', [FreelancerPayoutController::class, 'show'])->name('withdraw.show');
+  
+    Route::get('/withdrawals/{id}/details', [FreelancerPayoutController::class, 'getDetails'])->name('withdraw.details');
+    Route::post('/settings/auto-transfer', [FreelancerController::class, 'updatePaymentSettings'])->name('settings.update-auto-transfer');
 });
 
-// Admin withdrawal management routes
-Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+// Admin withdrawal management routes - simplified without middleware
+Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/withdrawals', [AdminPayoutController::class, 'index'])->name('withdrawals.index');
     Route::get('/withdrawals/{id}', [AdminPayoutController::class, 'show'])->name('withdrawals.show');
     Route::post('/withdrawals/{id}/process', [AdminPayoutController::class, 'process'])->name('withdrawals.process');
     Route::post('/withdrawals/{id}/reject', [AdminPayoutController::class, 'reject'])->name('withdrawals.reject');
+  
 });
+Route::get('admin/withdrawals/{id}/details', [AdminPayoutController::class, 'getDetails']);
+
+Route::post('/admin/withdrawals/{id}/complete', [AdminController::class, 'completeWithdrawal'])
+    ->name('admin.withdrawals.complete')
+    ->middleware('auth');
+
+ Route::post('/admin/platform-withdrawals', [PlatformWithdrawalController::class, 'store'])
+    ->name('admin.platform.withdrawals.store')
+    ->middleware('auth'); 
+
+Route::post('/admin/platform-withdrawals/{id}/complete', [PlatformWithdrawalController::class, 'complete'])
+    ->name('admin.platform.withdrawals.complete')
+    ->middleware('auth'); 
+
+Route::prefix('stripe/connect')->name('stripe.connect.')->group(function() {
+    Route::get('/authorize', [StripeConnectController::class, 'redirectToStripeConnect'])->name('authorize');
+    Route::get('/callback', [StripeConnectController::class, 'handleCallback'])->name('callback');
+    Route::get('/dashboard', [StripeConnectController::class, 'showDashboard'])->name('dashboard');
+     Route::get('/refresh', [StripeConnectController::class, 'refreshAccountLink'])->name('refresh');
+});
+
+
+  Route::get('/stripe/connect', [StripeConnectController::class, 'connectAccount'])
+    ->name('stripe.connect')
+    ->middleware('auth');
+    
+Route::get('/stripe/status', [StripeConnectController::class, 'getStatus'])
+    ->name('stripe.status')
+    ->middleware('auth');
+
+// Admin Violation Routes
+Route::prefix('admin/violations')->middleware('auth')->group(function () {
+    Route::get('get-details/{appointmentId}', [ViolationController::class, 'getDetails']);
+    Route::post('warning', [ViolationController::class, 'sendWarning']);
+    Route::post('suspend', [ViolationController::class, 'toggleSuspension']);
+    Route::post('apply-action', [ViolationController::class, 'applyAction']);
+});
+
+Route::post('admin/violation-settings', [ViolationController::class, 'saveSettings'])
+    ->middleware('auth');

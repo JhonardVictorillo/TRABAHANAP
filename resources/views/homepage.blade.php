@@ -65,8 +65,19 @@
 
   <!-- Post Services Section -->
   <section class="post-services-section" id="post-services">
-  <h2>Explore Services</h2>
-  <div class="post-services-carousel">
+  <div class="section-header">
+    <h2>Explore Services</h2>
+    <div class="carousel-controls">
+      <button class="carousel-control" id="prevService">
+        <i class="fas fa-chevron-left"></i>
+      </button>
+      <button class="carousel-control" id="nextService">
+        <i class="fas fa-chevron-right"></i>
+      </button>
+    </div>
+  </div>
+
+  <div class="post-services-carousel" id="servicesCarousel">
     @foreach ($posts as $post)
       <div class="post-card">
         <div>
@@ -232,7 +243,49 @@
       }
     });
     
-
+    document.addEventListener('DOMContentLoaded', function() {
+  const carousel = document.getElementById('servicesCarousel');
+  const prevBtn = document.getElementById('prevService');
+  const nextBtn = document.getElementById('nextService');
+  
+  if (!carousel || !prevBtn || !nextBtn) return;
+  
+  // Scroll amount (width of one card + gap)
+  const scrollAmount = 320; // Adjust based on your card width + gap
+  
+  // Scroll carousel left
+  prevBtn.addEventListener('click', () => {
+    carousel.scrollBy({
+      left: -scrollAmount,
+      behavior: 'smooth'
+    });
+    
+    // Check if we can scroll further left after scrolling
+    setTimeout(() => {
+      prevBtn.classList.toggle('disabled', carousel.scrollLeft <= 0);
+      nextBtn.classList.toggle('disabled', 
+        carousel.scrollLeft + carousel.clientWidth >= carousel.scrollWidth);
+    }, 500);
+  });
+  
+  // Scroll carousel right
+  nextBtn.addEventListener('click', () => {
+    carousel.scrollBy({
+      left: scrollAmount,
+      behavior: 'smooth'
+    });
+    
+    // Check if we can scroll further right after scrolling
+    setTimeout(() => {
+      prevBtn.classList.toggle('disabled', carousel.scrollLeft <= 0);
+      nextBtn.classList.toggle('disabled', 
+        carousel.scrollLeft + carousel.clientWidth >= carousel.scrollWidth);
+    }, 500);
+  });
+  
+  // Set initial button states
+  prevBtn.classList.add('disabled'); // Start with prev button disabled
+});
 
     
    

@@ -1,18 +1,65 @@
 <section class="post-section" >
       
     <div class="details-section" id="postContainer" style="display: none;">
-        <div class="section-header flex justify-between items-center flex-wrap mb-4">
-            <h2 class="text-lg font-bold text-gray-800 mb-2 sm:mb-0">My Posts</h2>
-            <button id="createPostBtn" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition flex items-center">
-                <i class="fas fa-plus mr-2"></i> Create New Post
-            </button>
+       <div class="section-header flex justify-between items-center flex-wrap mb-4">
+            <h2 class="text-lg font-bold text-blue-600 mb-2 sm:mb-0">My Posts</h2>
+            @if(auth()->user()->is_suspended || auth()->user()->is_banned)
+                <button disabled class="px-4 py-2 bg-gray-400 text-white rounded-lg cursor-not-allowed flex items-center">
+                    <i class="fas fa-ban mr-2"></i>
+                    @if(auth()->user()->is_suspended)
+                        Account Suspended
+                    @else
+                        Account Banned
+                    @endif
+                </button>
+                <p class="text-xs text-red-600 mt-2">
+                    @if(auth()->user()->is_suspended)
+                        Your account is suspended until {{ auth()->user()->suspended_until->format('M d, Y') }}
+                    @else
+                        Your account has been banned. Please contact support.
+                    @endif
+                </p>
+            @elseif(auth()->user()->is_restricted && (!auth()->user()->restriction_end || now()->lessThan(auth()->user()->restriction_end)))
+                <button disabled class="px-4 py-2 bg-yellow-400 text-white rounded-lg cursor-not-allowed flex items-center">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                    Posting Restricted
+                </button>
+                <p class="text-xs text-yellow-600 mt-2">
+                    Your account is restricted from creating new posts.
+                    @if(auth()->user()->restriction_end)
+                        <br>
+                        Restriction ends on {{ auth()->user()->restriction_end->format('M d, Y') }}.
+                        <br>
+                        ({{ \Carbon\Carbon::parse(auth()->user()->restriction_end)->diffForHumans(now()) }})
+                    @endif
+                    Please contact support for more information.
+                </p>
+            @else
+                <button id="createPostBtn" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition flex items-center">
+                    <i class="fas fa-plus mr-2"></i> Create New Post
+                </button>
+            @endif
         </div>
-      
+
       
         <div class="post-grid mt-4">
           <!-- Post Card -->
           @foreach ($posts as $post)
           <div class="post-card">
+                    <span class="absolute top-3 right-3 px-3 py-1 rounded-full text-xs font-semibold
+                @if($post->status == 'approved') bg-green-100 text-green-700
+                @elseif($post->status == 'pending') bg-yellow-100 text-yellow-700
+                @else bg-red-100 text-red-700
+                @endif
+            ">
+                @if($post->status == 'approved')
+                    Approved
+                @elseif($post->status == 'pending')
+                    Pending Review
+                @else
+                    Rejected
+                @endif
+            </span>
             <div class="text-center">
             <img src="{{ asset('storage/' . ($post->freelancer->profile_picture ?? 'defaultprofile.jpg')) }}" class="w-20 h-20 rounded-full mx-auto" />
              
@@ -76,6 +123,13 @@
                 <span class="more-work">+{{ $post->pictures->count() - 3 }} More</span>
             @endif
             </div>
+            <div class="salary-rate text-blue-600 font-semibold mt-2">
+                @if($post->rate && $post->rate_type)
+                    ₱{{ number_format($post->rate, 2) }} / {{ ucfirst($post->rate_type) }}
+                @else
+                    <span class="text-gray-400">No rate specified</span>
+                @endif
+            </div>
       
             <div class="flex justify-center mt-2 space-x-4">
             <button class="edit-btn flex items-center px-4 py-2 bg-blue-500 text-white rounded-lg" data-post-id="{{ $post->id }}">
@@ -135,6 +189,18 @@
                 <input type="file" name="post_picture[]" id="recentWorks" class="form-control-file" accept="image/*" multiple>
                 <div id="imagePreviewContainer" class="image-preview-container"></div> 
             </div>
+            <div class="form-group">
+                <label for="rate">Salary Rate</label>
+                <input type="number" name="rate" id="rate" class="form-control" min="0" step="0.01" placeholder="Enter rate (e.g. 500)">
+            </div>
+            <div class="form-group">
+                <label for="rate_type">Rate Type</label>
+                <select name="rate_type" id="rate_type" class="form-control">
+                    <option value="hourly">Hourly</option>
+                    <option value="daily">Daily</option>
+                    <option value="fixed">Fixed</option>
+                </select>
+            </div>
 
             <div class="modal-footer">
                 <button type="submit" class="btn btn-primary">Create Post</button>
@@ -184,7 +250,20 @@
                     <label for="edit-post-picture">Upload New Images</label>
                     <input type="file" id="edit-post-picture" name="post_picture[]" class="form-control-file" multiple>
                 </div>
+                <div id="newImagePreviewContainer" class="image-preview-container"></div>
 
+                <div class="form-group">
+                    <label for="edit-rate">Salary Rate</label>
+                    <input type="number" name="rate" id="edit-rate" class="form-control" min="0" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label for="edit-rate-type">Rate Type</label>
+                    <select name="rate_type" id="edit-rate-type" class="form-control">
+                        <option value="hourly">Hourly</option>
+                        <option value="daily">Daily</option>
+                        <option value="fixed">Fixed</option>
+                    </select>
+                </div>
                 <div class="modal-footer">
                     <button type="submit" class="btn btn-primary">Save Changes</button>
                     <button type="button" class="btn btn-danger" id="cancelEditBtn">Cancel</button>
@@ -214,6 +293,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Open Create Post Modal
     document.getElementById('createPostBtn')?.addEventListener('click', () => {
+        @if(auth()->user()->is_suspended || auth()->user()->is_banned || 
+        (auth()->user()->is_restricted && (!auth()->user()->restriction_end || now()->lessThan(auth()->user()->restriction_end))))
+        
+        alert(`
+            @if(auth()->user()->is_suspended)
+                Your account is currently suspended until {{ auth()->user()->suspended_until->format('M d, Y') }}.
+            @elseif(auth()->user()->is_banned)
+                Your account has been banned due to policy violations.
+            @else
+                Your account is currently restricted from creating new services due to policy violations.
+                Restrictions will be lifted on {{ auth()->user()->restriction_end->format('M d, Y') }}.
+            @endif
+            Please contact support for assistance.
+        `);
+        return;
+    @endif
         toggleModal('createPostModal');
     });
 
@@ -264,35 +359,31 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             // Fix image display
-            imageWrapper.innerHTML = '';
-           
-            if (Array.isArray(data.post_pictures)) {
-                data.post_pictures.forEach(image => {
-                    const div = document.createElement('div');
-                    div.classList.add('image-preview');
+           imageWrapper.innerHTML = '';
+                if (Array.isArray(data.post_pictures)) {
+                    data.post_pictures.forEach(image => {
+                        const div = document.createElement('div');
+                        div.classList.add('image-preview');
 
-                    const img = document.createElement('img');
-                    img.src = image.startsWith('/storage/') ? image : `/storage/${image}`;
+                        const img = document.createElement('img');
+                        img.src = image.startsWith('/storage/') ? image : `/storage/${image}`;
+                        img.alt = "Post image";
 
-                    // img.classList.add('w-20', 'rounded-none',);
+                        const deleteBtn = document.createElement('button');
+                        deleteBtn.textContent = 'X';
+                        deleteBtn.classList.add('delete-image');
+                        deleteBtn.setAttribute('data-image', image);
+                        deleteBtn.addEventListener('click', function(e) {
+                            e.preventDefault(); // Prevent form submission
+                            div.remove(); // Remove the image preview
+                            handleImageDeletion(image);
+                        });
 
-                    const deleteBtn = document.createElement('button');
-                    deleteBtn.textContent = 'X';
-                    deleteBtn.classList.add('delete-image');
-                    deleteBtn.setAttribute('data-image', image);
-
-                    deleteBtn.addEventListener('click', function () {
-                        div.remove(); // Remove input when X is clicked
-                        handleImageDeletion(image);
+                        div.appendChild(img);
+                        div.appendChild(deleteBtn);
+                        imageWrapper.appendChild(div);
                     });
-        
-
-
-                    div.appendChild(img);
-                    div.appendChild(deleteBtn);
-                    imageWrapper.appendChild(div);
-                })
-            }
+                }
 
                 toggleModal('editPostModal', true); // Fix: use toggleModal instead of openModal
             })
@@ -336,6 +427,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     handleImageDeletion(imageToDelete);
                 }
             });
+
+            
 
         // Close modals when clicking the close button
         document.querySelectorAll('.close-modal').forEach(button => {

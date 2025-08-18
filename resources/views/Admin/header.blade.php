@@ -97,10 +97,7 @@
     @endif
 </div>
         </div>
-      <div class="message">
-        <span class="material-symbols-outlined">email</span>
-        <span class="count">5</span>
-      </div>
+     
       @if(Auth::check())
     <img  src="{{ Auth::user()->profile_picture ? asset('storage/' . Auth::user()->profile_picture) : asset('images/defaultprofile.jpg') }}"  alt="User Avatar" class="avatar" />
     <span class="user-name">{{ Auth::user()->firstname }}</span>

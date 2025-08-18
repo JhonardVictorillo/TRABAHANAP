@@ -52,6 +52,13 @@ class LoginController extends Controller
           ])->withInput();
         }
 
+                if ($user->is_suspended && (!$user->suspended_until || now()->lessThan($user->suspended_until))) {
+            Auth::logout();
+            return redirect()->back()->withErrors([
+                'email' => 'Your account is suspended until ' . $user->suspended_until->format('M d, Y') . '.',
+            ])->withInput();
+        }
+
 
 
       // Check if the user's email is verified

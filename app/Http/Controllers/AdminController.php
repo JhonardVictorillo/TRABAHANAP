@@ -19,6 +19,8 @@ use App\Models\FreelancerEarning;
 use App\Models\PlatformWithdrawal; // Import the PlatformWithdrawal model
 use App\Notifications\WithdrawalProcessedNotification;
 use App\Notifications\WithdrawalRejectedNotification;
+use Illuminate\Support\Facades\Log;
+use App\Notifications\WithdrawalStatusNotification;
 
 
 class AdminController extends Controller
@@ -89,21 +91,32 @@ class AdminController extends Controller
         ->simplePaginate(10);
 
     // Violations Search (example: search by customer or freelancer name)
-    $violations = Appointment::with(['customer', 'freelancer'])
-        ->where(function ($query) use ($section, $search) {
-            if ($section === 'violations' && $search) {
-                $query->whereHas('customer', function ($q) use ($search) {
-                    $q->where('firstname', 'like', "%$search%")
-                      ->orWhere('lastname', 'like', "%$search%");
-                })
-                ->orWhereHas('freelancer', function ($q) use ($search) {
-                    $q->where('firstname', 'like', "%$search%")
-                      ->orWhere('lastname', 'like', "%$search%");
-                });
-            }
-        })
-        ->where('status', 'like', 'no_show%')
-        ->simplePaginate(10);
+    $violations = DB::table('violations as v')
+    ->leftJoin('appointments as a', 'v.appointment_id', '=', 'a.id')
+    ->leftJoin('users as u', 'v.user_id', '=', 'u.id')
+    ->select(
+        'v.id as violation_id',
+        'v.violation_type',
+        'v.user_role',
+        'v.created_at as violation_date',
+        'a.id as appointment_id',
+        'a.date',
+        'a.time',
+        'a.status',
+        'u.id as user_id',
+        'u.firstname',
+        'u.lastname'
+    )
+    ->when(!empty($search), function($query) use ($search) {
+        $query->where('u.firstname', 'like', "%$search%")
+              ->orWhere('u.lastname', 'like', "%$search%");
+    })
+    ->where(function($query) {
+        $query->where('v.violation_type', 'late_cancellation')
+              ->orWhereNotNull('a.id')->where('a.status', 'like', 'no_show%');
+    })
+    ->orderBy('v.created_at', 'desc')
+    ->simplePaginate(10);
 
     // User Stats Search (example: search by user name)
     $userStats = User::when($section === 'userstats' && $search, function ($query) use ($search) {
@@ -114,19 +127,93 @@ class AdminController extends Controller
 
 
 
-      $totalRevenue = \App\Models\PlatformRevenue::sum('amount') ?? 0;
+      $totalRevenue = PlatformRevenue::sum('amount') ?? 0;
     
-    $currentMonthRevenue = \App\Models\PlatformRevenue::whereMonth('date', now()->month)
+    $currentMonthRevenue = PlatformRevenue::whereMonth('date', now()->month)
         ->whereYear('date', now()->year)
         ->sum('amount') ?? 0;
         
-    $revenueFromCompletions = \App\Models\PlatformRevenue::where('source', 'commitment_fee')
+    $revenueFromCompletions = PlatformRevenue::where('source', 'commitment_fee')
         ->sum('amount') ?? 0;
         
     // Get recent transactions
-    $revenueTransactions = \App\Models\PlatformRevenue::with(['appointment.freelancer', 'user'])
+    $revenueTransactions = PlatformRevenue::with(['appointment.freelancer', 'user'])
         ->orderBy('date', 'desc')
         ->paginate(10);
+
+         // Calculate available platform revenue
+       $totalPlatformRevenue = PlatformRevenue::where('amount', '>', 0)->sum('amount'); // Only positive entries
+        $totalWithdrawals = PlatformRevenue::where('source', 'platform_withdrawal')->sum('amount'); // Should be negative
+        $pendingWithdrawals = PlatformWithdrawal::where('status', 'processing')->sum('amount');
+
+        $availableRevenue = $totalPlatformRevenue + $totalWithdrawals - $pendingWithdrawals;
+
+        $platformWithdrawals = PlatformWithdrawal::with('admin')
+            ->when($request->has('withdrawal_search'), function($query) use ($request) {
+                $search = $request->withdrawal_search;
+                return $query->where('bank_name', 'like', "%{$search}%")
+                    ->orWhere('reference_number', 'like', "%{$search}%")
+                    ->orWhere('amount', 'like', "%{$search}%");
+            })
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
+
+    // Add withdrawal statistics
+    $stats = [
+        'pending_count' => Withdrawal::where('status', 'pending')->count(),
+        'processing_count' => Withdrawal::where('status', 'processing')->count(),
+        'completed_count' => Withdrawal::where('status', 'completed')->count(),
+        'rejected_count' => Withdrawal::where('status', 'rejected')->count(),
+        'total_pending_amount' => Withdrawal::where('status', 'pending')->sum('amount'),
+        'total_processing_amount' => Withdrawal::where('status', 'processing')->sum('amount'),
+        'total_completed_amount' => Withdrawal::where('status', 'completed')->sum('amount'),
+    ];
+    
+    // Get status for withdrawal tabs
+    $status = $request->get('status', 'all');
+
+
+   if ($status === 'all') {
+    $withdrawals = Withdrawal::with('freelancer')
+        ->orderByRaw("
+            CASE 
+                WHEN status = 'pending' THEN 1 
+                WHEN status = 'processing' THEN 2
+                WHEN status = 'completed' THEN 3
+                ELSE 4 
+            END
+        ")
+        ->orderBy('created_at', 'desc')
+        ->paginate(10);
+} else {
+    $withdrawals = Withdrawal::with('freelancer')
+        ->where('status', $status)
+        ->orderBy('created_at', 'desc')
+        ->paginate(10);
+}
+
+// For tab content - create new query builders for each status
+$pendingWithdrawals = Withdrawal::with('freelancer')
+    ->where('status', 'pending')
+    ->orderBy('created_at', 'desc')
+    ->paginate(5);
+
+$processingWithdrawals = Withdrawal::with('freelancer')
+    ->where('status', 'processing')
+    ->orderBy('created_at', 'desc')
+    ->paginate(5);
+
+$completedWithdrawals = Withdrawal::with('freelancer')
+    ->where('status', 'completed')
+    ->orderBy('created_at', 'desc')
+    ->paginate(5);
+
+$rejectedWithdrawals = Withdrawal::with('freelancer')
+    ->where('status', 'rejected')
+    ->orderBy('created_at', 'desc')
+    ->paginate(5);
+
+ 
         
     return View('dashboard.admin-dashboard', [
             'totalFreelancers' => $totalFreelancers,
@@ -155,7 +242,15 @@ class AdminController extends Controller
             'declinedCount' => $declinedCount,
              'notifications' => $notifications,
             'unreadCount' => $unreadCount,
-          
+             'stats' => $stats,
+            'status' => $status,
+            'withdrawals' => $withdrawals,
+            'pendingWithdrawals' => $pendingWithdrawals,
+            'processingWithdrawals' => $processingWithdrawals,
+            'completedWithdrawals' => $completedWithdrawals,
+            'rejectedWithdrawals' => $rejectedWithdrawals,
+            'availableRevenue' => $availableRevenue,
+            'platformWithdrawals' => $platformWithdrawals,
         ]);
     
    }
@@ -410,4 +505,61 @@ public function markNotificationsAsRead()
         
         return redirect()->back()->with('success', 'Dispute resolved successfully.');
     }
+
+    public function completeWithdrawal($id)
+{
+    try {
+        $withdrawal = Withdrawal::findOrFail($id);
+        
+        // Only processing withdrawals can be marked as completed
+        if ($withdrawal->status !== 'processing') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Only processing withdrawals can be marked as completed.'
+            ], 400);
+        }
+        
+        // Update withdrawal status
+        $withdrawal->status = 'completed';
+        $withdrawal->processed_at = now();
+        $withdrawal->admin_notes = ($withdrawal->admin_notes ? $withdrawal->admin_notes . "\n" : '') .
+            "Marked as completed by admin on " . now()->format('Y-m-d H:i:s');
+        $withdrawal->save();
+        
+
+         // Get the freelancer
+        $freelancer = User::find($withdrawal->user_id);
+        
+        // Send notification to freelancer
+      if ($freelancer) {
+            $freelancer->notify(new WithdrawalStatusNotification($withdrawal));
+            
+            Log::info('Withdrawal completion notification sent', [
+                'withdrawal_id' => $withdrawal->id,
+                'freelancer_id' => $freelancer->id
+            ]);
+        }
+            
+        // Log the action
+        Log::info('Withdrawal marked as completed by admin', [
+            'withdrawal_id' => $withdrawal->id,
+            'admin_id' => auth()->id()
+        ]);
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Withdrawal #' . $withdrawal->id . ' has been marked as completed!'
+        ]);
+    } catch (\Exception $e) {
+        Log::error('Error completing withdrawal', [
+            'withdrawal_id' => $id,
+            'message' => $e->getMessage()
+        ]);
+        
+        return response()->json([
+            'success' => false,
+            'message' => 'Error: ' . $e->getMessage()
+        ], 500);
+    }
+}
 }

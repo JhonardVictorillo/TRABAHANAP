@@ -15,7 +15,9 @@
     rel="stylesheet"
     href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
   />
-  
+
+  <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet"/>
+
   <link rel="stylesheet" href="{{asset('css/newAdmin.css')}}" />
   <!-- Add this to your layout's <head> section -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -27,20 +29,20 @@
   <aside class="sidebar">
     <div class="sidebar-header">
         <h2 class="logo-header">
-            <span class="text-[#2563eb]">Mingla</span><span class="text-[#3b82f6]">Gawa</span>
+            <span class="mingla">Mingla</span><span class="gawa">Gawa</span>
         </h2>     
     </div>
     <ul class="sidebar-links">
     
       <li>
-        <a href="#" id="homeLink" class="active"><span class="material-symbols-outlined">home</span>Home</a>
+        <a href="#homeSection" id="homeLink" class="active"><span class="material-symbols-outlined">home</span>Home</a>
       </li>
       <li>
-        <a href="#" id="dashboardLink"><span class="material-symbols-outlined">dashboard</span>Dashboard</a>
+        <a href="#dashboardSection" id="dashboardLink"><span class="material-symbols-outlined">dashboard</span>Dashboard</a>
       </li>
        
       <li>
-        <a href="#" id="categoriesLink"><span class="material-symbols-outlined">category</span>Categories</a>
+        <a href="#categoriesSection" id="categoriesLink"><span class="material-symbols-outlined">category</span>Categories</a>
       </li>
    
       <li>
@@ -56,14 +58,14 @@
     <a href="#revenueSection" id="revenueLink"><span class="material-symbols-outlined">payments</span><span>Revenue</span></a>
   </li>
     <li>
-        <a href="#"><span class="material-symbols-outlined">account_circle</span>Profile</a>
+        <a href="#withdrawalsSection" id="withdrawalsLink"><span class="material-symbols-outlined">monetization_on</span>Withdrawals</a>
       </li>
       <li>
       <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
                 @csrf
             </form>
            
-        <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();"><span class="material-symbols-outlined">logout</span>Logout</a>
+        <a href="#" id="logout-button" onclick="event.preventDefault(); document.getElementById('logout-form').submit();"><span class="material-symbols-outlined">logout</span>Logout</a>
       </li>
     </ul>
   </aside>

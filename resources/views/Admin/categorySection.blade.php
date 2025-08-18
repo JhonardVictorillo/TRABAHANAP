@@ -104,9 +104,9 @@
                 </div>
                 
                 <!-- Categories Pagination -->
-                <div class="category-pagination-container">
+               <div class="category-pagination-container">
                     @if($categories->previousPageUrl())
-                        <a href="{{ $categories->previousPageUrl() }}" class="category-pagination-btn">
+                        <a href="{{ $categories->appends(['activeSection' => 'categories', 'categoryPage' => $categories->currentPage()-1])->url($categories->currentPage()-1) }}" class="category-pagination-btn">
                             <i class="fas fa-arrow-left"></i> Previous
                         </a>
                     @else
@@ -116,7 +116,7 @@
                     @endif
                     
                     @if($categories->hasMorePages())
-                        <a href="{{ $categories->nextPageUrl() }}" class="category-pagination-btn">
+                        <a href="{{ $categories->appends(['activeSection' => 'categories', 'categoryPage' => $categories->currentPage()+1])->url($categories->currentPage()+1) }}" class="category-pagination-btn">
                             Next <i class="fas fa-arrow-right"></i>
                         </a>
                     @else
@@ -212,28 +212,28 @@
                     </table>
                 </div>
                 
-                <!-- Requests Pagination -->
-                <div class="category-pagination-container">
-                    @if(method_exists($categoryRequests, 'previousPageUrl') && $categoryRequests->previousPageUrl())
-                        <a href="{{ $categoryRequests->previousPageUrl() }}&tab=requests{{ request('status') ? '&status='.request('status') : '' }}" class="category-pagination-btn">
-                            <i class="fas fa-arrow-left"></i> Previous
-                        </a>
-                    @else
-                        <button class="category-pagination-btn category-btn-disabled" disabled>
-                            <i class="fas fa-arrow-left"></i> Previous
-                        </button>
-                    @endif
-                    
-                    @if(method_exists($categoryRequests, 'hasMorePages') && $categoryRequests->hasMorePages())
-                        <a href="{{ $categoryRequests->nextPageUrl() }}&tab=requests{{ request('status') ? '&status='.request('status') : '' }}" class="category-pagination-btn">
-                            Next <i class="fas fa-arrow-right"></i>
-                        </a>
-                    @else
-                        <button class="category-pagination-btn category-btn-disabled" disabled>
-                            Next <i class="fas fa-arrow-right"></i>
-                        </button>
-                    @endif
-                </div>
+               
+               <!-- Requests Pagination -->
+            <div class="category-pagination-container">
+                @if($categoryRequests->previousPageUrl())
+                    <a href="{{ $categoryRequests->appends(['activeSection' => 'categories', 'tab' => 'requests', 'requestPage' => $categoryRequests->currentPage()-1, 'status' => request('status')])->url($categoryRequests->currentPage()-1) }}" class="category-pagination-btn">
+                        <i class="fas fa-arrow-left"></i> Previous
+                    </a>
+                @else
+                    <button class="category-pagination-btn category-btn-disabled" disabled>
+                        <i class="fas fa-arrow-left"></i> Previous
+                    </button>
+                @endif
+                
+                @if($categoryRequests->hasMorePages())
+                    <a href="{{ $categoryRequests->appends(['activeSection' => 'categories', 'tab' => 'requests', 'requestPage' => $categoryRequests->currentPage()+1, 'status' => request('status')])->url($categoryRequests->currentPage()+1) }}" class="category-pagination-btn">
+                        Next <i class="fas fa-arrow-right"></i>
+                    </a>
+                @else
+                    <button class="category-pagination-btn category-btn-disabled" disabled>
+                        Next <i class="fas fa-arrow-right"></i>
+                    </button>
+                @endif
             </div>
         </div>
     </div>
@@ -242,7 +242,6 @@
 
 
     
-  </main>
 
   
 <!-- Modal Structure -->
