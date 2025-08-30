@@ -16,7 +16,11 @@ class ViolationSetting extends Model
         'rating_penalty',
         'booking_restrictions',
         'auto_suspension',
-        'suspension_days'
+        'suspension_days',
+          'warning_threshold',
+        'restriction_threshold',
+        'suspension_threshold',
+        'ban_threshold'
     ];
     
     protected $casts = [

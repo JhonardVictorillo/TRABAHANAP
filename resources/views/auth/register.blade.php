@@ -90,16 +90,22 @@
                             @enderror
                     </div>
 
-                    <div class="form-group">
-                        <div class="input-field">
-                            <i class='bx bx-id-card' aria-hidden="true"></i>
-                            <input type="tel" name="contact_number" id="contact_number" placeholder="Contact Number" value="{{ old('contact_number') }}" required autocomplete="tel">
+                 <div class="form-group">
+                        <div class="input-field contact-field" style="position: relative;">
+                            <i class='bx bx-id-card' aria-hidden="true" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: #666;"></i>
+                            <span class="contact-prefix" style="position: absolute; left: 2.5rem; top: 50%; transform: translateY(-50%); font-weight: 500; color: #333;">+63</span>
+                            <input type="tel" name="contact_number" id="contact_number"
+                                placeholder="9123456789"
+                                maxlength="10"
+                                pattern="[0-9]{10}"
+                                value="{{ old('contact_number') }}"
+                                required autocomplete="tel"
+                                style="padding-left: 4.5rem;">
                         </div>
-                         @error('contact_number')
+                        @error('contact_number')
                             <div class="error" role="alert">{{ $message }}</div>
-                            @enderror
+                        @enderror
                     </div>
-
                     <div class="form-group">
                         <div class="input-field">
                             <i class='bx bx-lock-alt' aria-hidden="true"></i>
@@ -122,7 +128,12 @@
                     <div class="terms">
                         <label for="terms">
                             <input type="checkbox" id="terms" name="terms" required>
-                            <span>I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a></span>
+                          <span>
+                                I agree to the 
+                                <a href="#" id="showTerms">Terms of Service</a> 
+                                and 
+                                <a href="#" id="showPrivacy">Privacy Policy</a>
+                            </span>
                         </label>
                         @error('terms')
                             <div class="error" role="alert">{{ $message }}</div>
@@ -130,7 +141,10 @@
                     </div>
 
                     <button type="submit" class="signup-btn">
-                        Create Account
+                     <span class="btn-text">Create Account</span>
+                        <span class="btn-spinner" style="display:none;">
+                            <i class='bx bx-loader bx-spin'></i>
+                        </span>
                         <i class='bx bx-right-arrow-alt' aria-hidden="true"></i>
                     </button>
                 </form>
@@ -142,6 +156,53 @@
             </div>
         </div>
     </main>
+
+    <!-- Terms Modal -->
+<div id="termsModal" class="modal" style="display:none;">
+    <div class="modal-content">
+        <span class="close" id="closeTerms">&times;</span>
+       <h2>Terms of Service</h2>
+            <p>
+                Welcome to MinglaGawa! By creating an account and using our platform, you agree to the following terms:
+            </p>
+            <ul>
+                <li><strong>Eligibility:</strong> You must be at least 18 years old to use our services.</li>
+                <li><strong>Account Responsibility:</strong> You are responsible for maintaining the confidentiality of your account and password.</li>
+                <li><strong>Service Use:</strong> You agree to use MinglaGawa only for lawful purposes and not to engage in any fraudulent or harmful activity.</li>
+                <li><strong>Payments:</strong> All payments and transactions must be made through the platform’s approved methods.</li>
+                <li><strong>Platform Commission:</strong> MinglaGawa charges a commission fee on each completed transaction. The commission is automatically deducted from the freelancer’s earnings before payout. The current commission rate is <strong>5%</strong> of the total service amount, but this may change with notice.</li>
+                <li><strong>Content:</strong> You are responsible for any content you post. Do not post anything illegal, offensive, or infringing.</li>
+                <li><strong>Termination:</strong> We reserve the right to suspend or terminate your account for violations of these terms.</li>
+                <li><strong>Changes:</strong> MinglaGawa may update these terms at any time. Continued use of the platform means you accept the new terms.</li>
+            </ul>
+            <p>
+                For questions, contact us at support@minglagawa.com.
+            </p>
+    </div>
+</div>
+
+<!-- Privacy Modal -->
+<div id="privacyModal" class="modal" style="display:none;">
+    <div class="modal-content">
+        <span class="close" id="closePrivacy">&times;</span>
+        <h2>Privacy Policy</h2>
+        <p>
+            MinglaGawa values your privacy. This policy explains how we collect, use, and protect your information:
+        </p>
+        <ul>
+            <li><strong>Information Collection:</strong> We collect personal information such as your name, email, contact number, and payment details when you register or use our services.</li>
+            <li><strong>Use of Information:</strong> Your information is used to provide and improve our services, process payments, and communicate with you.</li>
+            <li><strong>Sharing:</strong> We do not sell your personal information. We may share it with trusted third parties only as necessary to operate the platform (e.g., payment processors).</li>
+            <li><strong>Security:</strong> We implement security measures to protect your data from unauthorized access.</li>
+            <li><strong>Cookies:</strong> MinglaGawa uses cookies to enhance your experience. You can disable cookies in your browser settings.</li>
+            <li><strong>Access & Correction:</strong> You may access and update your personal information in your account settings.</li>
+            <li><strong>Changes:</strong> We may update this policy. We will notify you of significant changes via email or platform notice.</li>
+        </ul>
+        <p>
+            For privacy concerns, contact us at privacy@minglagawa.com.
+        </p>
+    </div>
+</div>
 
 
     @include('homepage.homepageFooter')
@@ -172,6 +233,48 @@
                 this.textContent = type === 'password' ? 'Show' : 'Hide';
             });
         });
-    </script>
+
+        
+document.addEventListener('DOMContentLoaded', function () {
+    document.getElementById('showTerms').onclick = function(e) {
+        e.preventDefault();
+        document.getElementById('termsModal').style.display = 'block';
+    };
+    document.getElementById('showPrivacy').onclick = function(e) {
+        e.preventDefault();
+        document.getElementById('privacyModal').style.display = 'block';
+    };
+    document.getElementById('closeTerms').onclick = function() {
+        document.getElementById('termsModal').style.display = 'none';
+    };
+    document.getElementById('closePrivacy').onclick = function() {
+        document.getElementById('privacyModal').style.display = 'none';
+    };
+    // Optional: close modal when clicking outside content
+    window.onclick = function(event) {
+        if (event.target == document.getElementById('termsModal')) {
+            document.getElementById('termsModal').style.display = 'none';
+        }
+        if (event.target == document.getElementById('privacyModal')) {
+            document.getElementById('privacyModal').style.display = 'none';
+        }
+    };
+});
+
+
+document.addEventListener('DOMContentLoaded', function () {
+    const signupForm = document.getElementById('signupForm');
+    const signupBtn = document.querySelector('.signup-btn');
+    const btnText = signupBtn.querySelector('.btn-text');
+    const btnSpinner = signupBtn.querySelector('.btn-spinner');
+
+    signupForm.addEventListener('submit', function(e) {
+        signupBtn.disabled = true;
+        signupBtn.classList.add('disabled');
+        btnText.style.display = 'none';
+        btnSpinner.style.display = 'inline-block';
+    });
+});
+</script>
 </body>
 </html>

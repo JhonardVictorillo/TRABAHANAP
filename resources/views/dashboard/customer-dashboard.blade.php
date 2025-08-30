@@ -33,6 +33,41 @@
       });
     }
   });
+
+  document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('form').forEach(form => {
+    form.addEventListener('submit', function(e) {
+      const submitBtn = form.querySelector('button[type="submit"]');
+      if (submitBtn) {
+        const btnText = submitBtn.querySelector('.btn-text');
+        const btnSpinner = submitBtn.querySelector('.btn-spinner');
+        submitBtn.disabled = true;
+        submitBtn.classList.add('disabled');
+        if (btnText) btnText.style.display = 'none';
+        if (btnSpinner) btnSpinner.style.display = 'inline-block';
+      }
+    });
+  });
+});
+
+function showSpinnerOnButton(button) {
+  const btnText = button.querySelector('.btn-text');
+  const btnSpinner = button.querySelector('.btn-spinner');
+  button.disabled = true;
+  button.classList.add('disabled');
+  if (btnText) btnText.style.display = 'none';
+  if (btnSpinner) btnSpinner.style.display = 'inline-block';
+}
+
+function restoreButton(button, text) {
+  const btnText = button.querySelector('.btn-text');
+  const btnSpinner = button.querySelector('.btn-spinner');
+  button.disabled = false;
+  button.classList.remove('disabled');
+  if (btnText) btnText.style.display = 'inline-block';
+  if (btnSpinner) btnSpinner.style.display = 'none';
+  if (btnText && text) btnText.textContent = text;
+}
     </script>
   </body>
 </html>

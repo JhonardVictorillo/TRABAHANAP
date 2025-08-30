@@ -89,9 +89,9 @@ class FreelancerController extends Controller
 
     // NEW CODE: Calculate earnings and revenue values
     // Service earnings (payments to freelancer)
-    $serviceEarnings = FreelancerEarning::where('freelancer_id', $user->id)
-            ->whereIn('source', ['service_payment', 'commitment_fee', 'commitment_fee_bonus'])
-            ->sum('amount');
+     $serviceEarnings = FreelancerEarning::where('freelancer_id', $user->id)
+        ->whereIn('source', ['service_payment', 'commitment_fee', 'commitment_fee_bonus'])
+        ->sum('amount');
 
         // Revenue from cancellations and no-shows
         $lateCancellationRevenue = FreelancerEarning::where('freelancer_id', $user->id)
@@ -108,12 +108,13 @@ class FreelancerController extends Controller
         // Calculate current month's earnings
         $currentMonth = date('Y-m');
         $currentMonthEarnings = FreelancerEarning::where('freelancer_id', $user->id)
-            ->whereRaw("DATE_FORMAT(date, '%Y-%m') = ?", [$currentMonth])
-            ->sum('amount');
-
+        ->whereRaw("DATE_FORMAT(date, '%Y-%m') = ?", [$currentMonth])
+        ->whereNotIn('source', ['service_payment_cash'])
+        ->sum('amount');
         // Calculate available balance (total earnings - withdrawals)
-        $totalEarnings = FreelancerEarning::where('freelancer_id', $user->id)
-            ->sum('amount');
+       $totalEarnings = FreelancerEarning::where('freelancer_id', $user->id)
+        ->whereNotIn('source', ['service_payment_cash']) // Exclude cash payments if you want
+        ->sum('amount');
             
         $processedWithdrawals = Withdrawal::where('user_id', $user->id)
             ->whereIn('status', ['completed', 'processing'])
@@ -134,10 +135,11 @@ class FreelancerController extends Controller
 
         // Get monthly earnings for chart
         $monthlyData = FreelancerEarning::select(DB::raw('DATE_FORMAT(date, "%Y-%m") as month'), DB::raw('SUM(amount) as total'))
-            ->where('freelancer_id', $user->id)
-            ->groupBy('month')
-            ->orderBy('month', 'asc')
-            ->get();
+        ->where('freelancer_id', $user->id)
+        ->whereNotIn('source', ['service_payment_cash'])
+        ->groupBy('month')
+        ->orderBy('month', 'asc')
+        ->get();
             
         $monthlyLabels = $monthlyData->pluck('month')->map(function($month) {
             return date('M Y', strtotime($month . '-01'));
@@ -206,11 +208,13 @@ public function acceptAppointment($id)
     if ($customer) {
         $customer->notify(new AppointmentStatusUpdated($appointment, 'accepted'));
     }
-    return response()->json([
-        'success' => true,
-        'message' => 'Appointment accepted.',
-        'status' => 'accepted'
-    ]);
+    
+   return response()->json([
+            'success' => true,
+            'message' => 'Appointment accepted.',
+            'appointment_id' => $appointment->id,
+            'status' => $appointment->status,
+        ]);
 }
 
 public function declineAppointment(Request $request, $id)
@@ -238,11 +242,7 @@ public function declineAppointment(Request $request, $id)
          'decline_reason' => $appointment->decline_reason,
      ]);
 
-     return response()->json([
-        'success' => true,
-        'message' => 'Appointment declined.',
-        'status' => 'declined'
-    ]);
+     return redirect()->back()->with('success', 'Appointment declined.');
 }
 
 public function getAppointments(Request $request)
@@ -280,7 +280,7 @@ private function getStatusColor($status)
 
 public function show($id)
 {
-    $appointment = Appointment::findOrFail($id);
+     $appointment = Appointment::with(['post.subServices', 'customer'])->findOrFail($id);
 
 
     return response()->json([
@@ -295,6 +295,9 @@ public function show($id)
         'total_amount' => $appointment->total_amount,
         'fee_status' => $appointment->fee_status,
         'notes' => $appointment->notes, 
+         'subservices' => $appointment->post && $appointment->post->subServices
+            ? $appointment->post->subServices->pluck('sub_service')->toArray()
+            : [],
     ]);
 }
 
@@ -310,65 +313,9 @@ public function markAsCompleted($appointmentId)
             ], 403);
         }
 
-        // Update the status to "completed"
+        // Only update status and completion time
         $appointment->status = 'completed';
         $appointment->completed_at = now();
-        
-        // Handle the commitment fee - split between platform and freelancer
-        if ($appointment->fee_status === 'paid') {
-                // Check for held commitment fee in escrow
-                $heldFee = PlatformRevenue::where('appointment_id', $appointment->id)
-                            ->where('source', 'commitment_fee_held')
-                            ->where('status', 'held')
-                            ->first();
-                
-                if ($heldFee) {
-                    // Use the escrow system - mark fee as ready for release
-                    $appointment->fee_status = 'ready_for_release';
-                    
-                    \Log::info("Commitment fee ready for release", [
-                        'appointment_id' => $appointment->id,
-                        'amount' => $heldFee->amount,
-                        'held_record_id' => $heldFee->id
-                    ]);
-                } else {
-                    // Legacy code path (for backward compatibility)
-                    $appointment->fee_status = 'commission_collected';
-            
-            // 1. Record platform portion (50%) as platform revenue
-            PlatformRevenue::create([
-                'amount' => $appointment->commitment_fee * 0.05, // 10% platform fee
-                'source' => 'commitment_fee_commission',
-                'appointment_id' => $appointment->id,
-                'user_id' => $appointment->freelancer_id,
-                'date' => now()->format('Y-m-d'),
-                'notes' => 'Platform commission from commitment fee',
-                 'status' => 'collected',
-                'created_at' => now(),
-                'updated_at' => now()
-            ]);
-            
-            // 2. Record freelancer portion (90%) as freelancer earning
-            FreelancerEarning::create([
-                'freelancer_id' => $appointment->freelancer_id,
-                'appointment_id' => $appointment->id,
-                'amount' => $appointment->commitment_fee * 0.95, // 90% to freelancer
-                'source' => 'commitment_fee',
-                'date' => now()->format('Y-m-d'),
-                'notes' => "Commitment fee for appointment #{$appointment->id}",
-                'created_at' => now(),
-                'updated_at' => now()
-            ]);
-            
-            // Log the transaction
-            \Log::info("Commitment fee processed for completed appointment", [
-                'appointment_id' => $appointment->id,
-                'amount' => $appointment->commitment_fee,
-                'platform_portion' => $appointment->commitment_fee * 0.1,
-                'freelancer_portion' => $appointment->commitment_fee * 0.9
-            ]);
-        }
-        
         $appointment->save();
 
         // Notify the customer
@@ -382,10 +329,9 @@ public function markAsCompleted($appointmentId)
             'message' => 'The appointment has been marked as completed.',
             'status' => 'completed'
         ]);
-    }
     } catch (\Exception $e) {
         \Log::error('Error completing appointment: ' . $e->getMessage());
-        
+
         return response()->json([
             'success' => false,
             'message' => 'An error occurred: ' . $e->getMessage()

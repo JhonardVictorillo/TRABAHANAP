@@ -4,6 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MinglaGawa - Discover Freelance Services</title>
+  <!-- Manifest for PWA -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#2563eb">
   <link rel="stylesheet" href="{{asset('css/home.css')}}" />
    <link rel="stylesheet" href="{{asset('css/homeHeader.css')}}" />
   <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet' />
@@ -186,6 +189,17 @@
   </div>
 </div>
 
+
+<!-- Add this modal markup just before </body> -->
+<div id="location-modal" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:99999;background:rgba(0,0,0,0.45);align-items:center;justify-content:center;">
+  <div style="background:#fff;padding:32px 24px;border-radius:16px;max-width:340px;text-align:center;box-shadow:0 8px 32px rgba(37,99,235,0.12); position:relative;">
+    <button id="close-location-modal" style="position:absolute;top:12px;right:12px;color:#000;border:none;border-radius:50%;width:32px;height:32px;font-size:1.2rem;cursor:pointer;">&times;</button>
+    <h2 id="location-modal-title" style="color:#2563eb;font-size:1.5rem;margin-bottom:10px;">Service Unavailable</h2>
+    <p id="location-modal-message" style="font-size:1.1rem;margin-bottom:18px;">You are outside Minglanilla. This service is only available in Minglanilla, Cebu.</p>
+    <button id="retry-location" style="display:none;background:#2563eb;color:#fff;border:none;border-radius:8px;padding:10px 24px;font-size:1rem;cursor:pointer;">Try Again</button>
+  </div>
+</div>
+
   <!-- Scripts -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
   <script>
@@ -288,7 +302,114 @@
 });
 
     
-   
+   if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js');
+}
+
+// Location restriction for user outside minglanilla
+
+document.addEventListener('DOMContentLoaded', function() {
+  // --- CONFIG ---
+  const minglanillaLat = 10.245;
+  const minglanillaLng = 123.796;
+  const allowedRadiusKm = 5;
+  const ipGeoApiKey = "{{ $ipGeoApiKey ?? env('IPGEOLOCATION_API_KEY') }}"; // Blade variable or fallback
+
+  // --- UTILS ---
+  function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
+    const R = 6371;
+    const dLat = (lat2-lat1) * Math.PI/180;
+    const dLon = (lon2-lon1) * Math.PI/180;
+    const a =
+      Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(lat1 * Math.PI/180) * Math.cos(lat2 * Math.PI/180) *
+      Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
+  }
+
+  function showLocationModal(title, message, showRetry = false) {
+    document.getElementById('location-modal-title').textContent = title;
+    document.getElementById('location-modal-message').textContent = message;
+    document.getElementById('location-modal').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+    document.getElementById('retry-location').style.display = showRetry ? 'inline-block' : 'none';
+  }
+
+  document.getElementById('retry-location').onclick = function() {
+  runBrowserGeolocationCheck();
+};
+
+document.getElementById('close-location-modal').onclick = function() {
+  document.getElementById('location-modal').style.display = 'none';
+  document.body.style.overflow = '';
+};
+
+  function hideLocationModal() {
+    document.getElementById('location-modal').style.display = 'none';
+    document.body.style.overflow = '';
+  }
+
+  // --- IP GEOLOCATION CHECK ---
+  function runIpGeolocationCheck() {
+    fetch(`https://api.ipgeolocation.io/ipgeo?apiKey=${ipGeoApiKey}`)
+      .then(response => response.json())
+      .then(data => {
+        const city = (data.city || '').toLowerCase();
+        const district = (data.district || '').toLowerCase();
+        if (city !== 'minglanilla' && district !== 'minglanilla') {
+          showLocationModal(
+            "Service Unavailable",
+            "You are outside Minglanilla (IP-based check). This service is only available in Minglanilla, Cebu."
+          );
+        } else {
+          // If IP check passes, run browser geolocation for more accuracy
+          runBrowserGeolocationCheck();
+        }
+      })
+      .catch(() => {
+        // If IP check fails, fallback to browser geolocation only
+        runBrowserGeolocationCheck();
+      });
+  }
+
+  // --- BROWSER GEOLOCATION CHECK ---
+  function runBrowserGeolocationCheck() {
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(function(position) {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        const distance = getDistanceFromLatLonInKm(lat, lng, minglanillaLat, minglanillaLng);
+
+        if (distance > allowedRadiusKm) {
+          showLocationModal(
+            "Service Unavailable",
+            "You are outside Minglanilla (GPS check). This service is only available in Minglanilla, Cebu."
+          );
+        } else {
+          hideLocationModal();
+        }
+      }, function(error) {
+        showLocationModal(
+          "Location Required",
+          "Please allow location access to use this service.",
+          true
+        );
+      });
+    } else {
+      showLocationModal(
+        "Location Not Supported",
+        "Your browser does not support location access."
+      );
+    }
+  }
+
+  // --- RUN BOTH CHECKS ---
+  runIpGeolocationCheck();
+
+  // Optionally, re-check location every 30 seconds
+  setInterval(runIpGeolocationCheck, 30000);
+});
   </script>
 </body>
 </html>

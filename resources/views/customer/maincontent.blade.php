@@ -16,7 +16,7 @@
                     Filters
                 </button>
                 
-                <div id="filterDropdown" class="hidden absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white z-10">
+                <div id="filterDropdown" class="hidden absolute left-0 mt-2 w-56 rounded-md shadow-lg bg-white z-10">
                     <div class="py-1">
                         <form action="{{ route('customer.dashboard') }}" method="GET">
                             <!-- Preserve sort parameter if it exists -->

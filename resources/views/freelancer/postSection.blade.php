@@ -61,7 +61,11 @@
                 @endif
             </span>
             <div class="text-center">
-            <img src="{{ asset('storage/' . ($post->freelancer->profile_picture ?? 'defaultprofile.jpg')) }}" class="w-20 h-20 rounded-full mx-auto" />
+         <div class="w-20 h-20 rounded-full overflow-hidden mx-auto border-2 border-white shadow">
+                <img src="{{ asset('storage/' . ($post->freelancer->profile_picture ?? 'defaultprofile.jpg')) }}"
+                    class="w-full h-full object-cover"
+                    alt="Profile Picture" />
+                </div>
              
               <h4 class="text-lg font-bold mt-2">{{ $post->freelancer->firstname ?? 'Unknown' }} , {{ $post->freelancer->lastname ?? 'Unknown' }}</h4>
               <p class="text-gray-500">  @if($post->freelancer->categories->isEmpty())
@@ -133,10 +137,14 @@
       
             <div class="flex justify-center mt-2 space-x-4">
             <button class="edit-btn flex items-center px-4 py-2 bg-blue-500 text-white rounded-lg" data-post-id="{{ $post->id }}">
-                <i class="fas fa-edit mr-1"></i> Edit Post
-            </button>
+                <i class="fas fa-edit mr-1"></i>Edit post 
+          </button>
             <button class="delete-btn flex items-center px-4 py-2 bg-red-500 text-white rounded-lg" data-post-id="{{ $post->id }}">
-                <i class="fas fa-trash-alt mr-1"></i> Delete Post
+                <i class="fas fa-trash-alt mr-1"></i> 
+                <span class="btn-text">Delete Post</span>
+                <span class="btn-spinner" style="display:none;">
+                    <i class="fas fa-spinner fa-spin"></i>
+                </span>
             </button>
             </div>
           </div>
@@ -159,6 +167,8 @@
     <section>
       <!-----------------------------------------------Create post----------------------------------------->
      <!-- CREATE POST MODAL -->
+
+     
 <div id="createPostModal" class="con-modal" >
     <div class="postmodal-content">
         <div class="modal-header">
@@ -203,7 +213,12 @@
             </div>
 
             <div class="modal-footer">
-                <button type="submit" class="btn btn-primary">Create Post</button>
+                <button type="submit" class="btn btn-primary">
+                  <span class="btn-text">Create Post</span>
+                    <span class="btn-spinner" style="display:none;">
+                        <i class="fas fa-spinner fa-spin"></i>
+                    </span>
+                </button>
                
             </div>
         </form>
@@ -265,7 +280,12 @@
                     </select>
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                    <button type="submit" class="btn btn-primary">
+                        <span class="btn-text">Save Changes</span>
+                        <span class="btn-spinner" style="display:none;">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </span>
+                    </button>
                     <button type="button" class="btn btn-danger" id="cancelEditBtn">Cancel</button>
                 </div>
             </form>
@@ -343,7 +363,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         // Fill the form with fetched data
                         editPostId.value = postId;
                         editDescription.value = data.post.description;
-
+                        document.getElementById('edit-rate').value = data.post.rate ?? '';
+                        document.getElementById('edit-rate-type').value = data.post.rate_type ?? 'hourly';
                         // Fix potential undefined array issue
                     // Fix sub-services
             subServicesContainer.innerHTML = '';
@@ -478,7 +499,9 @@ document.addEventListener('DOMContentLoaded', () => {
         // Handle Edit Post Form Submission
         document.getElementById('edit-post-form')?.addEventListener('submit', function (e) {
             e.preventDefault();
-
+              if (!validatePostForm(this)) return;
+                  const submitBtn = this.querySelector('button[type="submit"]');
+                  showSpinnerOnButton(submitBtn);
             const formData = new FormData(this);
             formData.append('_method', 'PUT'); 
 
@@ -505,6 +528,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return response.json();
             })
             .then(data => {
+                    restoreButton(this, 'Save Changes');
                 if (data.success) {
                     alert('Post updated successfully!');
                     location.reload();
@@ -520,7 +544,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Handle Create Post Form Submission//////////////////////////
     document.getElementById('create-post-form')?.addEventListener('submit', function (e) {
         e.preventDefault();
-
+        if (!validatePostForm(this)) return;
+         const submitBtn = this.querySelector('button[type="submit"]');
+         showSpinnerOnButton(submitBtn);
         const formData = new FormData(this);
         const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
@@ -531,6 +557,7 @@ document.addEventListener('DOMContentLoaded', () => {
         })
         .then(response => response.json())
         .then(data => {
+                restoreButton(this, 'Create Post');
             if (data.success) {
                 alert('Post created successfully!');
                 location.reload();
@@ -589,6 +616,8 @@ document.querySelectorAll('.delete-btn').forEach(button => {
         }
         
         if (confirm('Are you sure you want to delete this post? This action cannot be undone.')) {
+           showSpinnerOnButton(button);
+           
             const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
             fetch(`/posts/${postId}`, {
                 method: 'DELETE',
@@ -598,6 +627,7 @@ document.querySelectorAll('.delete-btn').forEach(button => {
                 }
             })
             .then(response => {
+                restoreButton(button, 'Delete Post');
                 if (!response.ok) {
                     throw new Error(`Server returned ${response.status}: ${response.statusText}`);
                 }
@@ -658,4 +688,55 @@ document.querySelectorAll('.delete-btn').forEach(button => {
             // Clear image previews
             imagePreviewContainer.innerHTML = '';
         }
+
+
+        function validatePostForm(form) {
+    let valid = true;
+    let errors = [];
+
+    // Category (readonly, so skip)
+    // Subservices
+    const subservices = form.querySelectorAll('input[name="sub_services[]"]');
+    if (subservices.length === 0 || Array.from(subservices).every(input => !input.value.trim())) {
+        valid = false;
+        errors.push('At least one subservice is required.');
+    }
+
+    // Description
+    const description = form.querySelector('textarea[name="description"]');
+    if (!description.value.trim()) {
+        valid = false;
+        errors.push('Description is required.');
+    }
+
+    // Salary Rate
+    const rate = form.querySelector('input[name="rate"]');
+    if (!rate.value.trim() || isNaN(rate.value) || Number(rate.value) <= 0) {
+        valid = false;
+        errors.push('Salary rate must be a positive number.');
+    }
+
+    // Rate Type
+    const rateType = form.querySelector('select[name="rate_type"]');
+    if (!rateType.value) {
+        valid = false;
+        errors.push('Rate type is required.');
+    }
+
+    // Show errors
+    let errorContainer = form.querySelector('.modal-errors');
+    if (!errorContainer) {
+        errorContainer = document.createElement('div');
+        errorContainer.className = 'modal-errors text-red-500 mb-2';
+        form.prepend(errorContainer);
+    }
+    errorContainer.innerHTML = '';
+    errors.forEach(msg => {
+        const p = document.createElement('p');
+        p.textContent = msg;
+        errorContainer.appendChild(p);
+    });
+
+    return valid;
+}
 </script>

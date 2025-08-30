@@ -166,10 +166,11 @@
    #notification-dropdown {
     position: fixed !important;
     top: 60px !important;
-    width: calc(100% - 20px) !important;
-    max-width: 350px !important;
+    width: calc(100% - 30px) !important;
+    max-width: 300px !important;
     right: 10px !important;
     left: auto !important;
+    padding-bottom: 24px !important;
     
     /* Add more specific styles for mobile */
     max-height: 70vh !important;
@@ -178,7 +179,7 @@
   }
   
   #notification-list {
-    max-height: 60vh !important;
+    max-height: 50vh !important;
     background-color: white !important;
   }
   
@@ -194,9 +195,25 @@
   
   /* Better background for mobile */
   #notification-dropdown .p-4,
-  #notification-dropdown .p-3,
   #notification-list li {
     background-color: white !important;
+  }
+
+   #notification-dropdown .p-3 {
+    position: sticky !important;
+    bottom: 0 !important;
+    background: #fff !important;
+    z-index: 10 !important;
+    box-shadow: 0 -2px 8px rgba(37,99,235,0.06);
+    margin-bottom: 0 !important;
+    padding-bottom: 16px !important;
+  }
+  #mark-all-read {
+    margin-bottom: 0 !important;
+    width: 100% !important;
+    font-size: 16px !important;
+    padding: 12px 0 !important;
+    border-radius: 8px !important;
   }
 }
 

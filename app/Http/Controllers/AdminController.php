@@ -54,27 +54,18 @@ class AdminController extends Controller
         $categoryRequests = collect([]); // Use a simple collection for now
 
         // If tab is set to requests, get category requests with simple pagination
-        if ($request->tab == 'requests') {
-            $requestsQuery = CategoryRequest::with('user');
-            
-            if ($request->has('status')) {
-                $requestsQuery->where('status', $request->status);
+                // Category Requests
+            if ($request->tab == 'requests') {
+                $requestsQuery = CategoryRequest::with('user');
+                if ($request->has('status')) {
+                    $requestsQuery->where('status', $request->status);
+                }
+                $categoryRequests = $requestsQuery->orderBy('created_at', 'desc')->paginate(10, ['*'], 'requestPage');
+            } else {
+                $categoryRequests = new \Illuminate\Pagination\Paginator(
+                    collect([]), 10, 1, ['path' => request()->url(), 'pageName' => 'requestPage']
+                );
             }
-            
-            $categoryRequests = $requestsQuery->orderBy('created_at', 'desc')->simplePaginate(10);
-        } else {
-            // Create a simple empty paginator
-            $categoryRequests = new \Illuminate\Pagination\Paginator(
-                collect([]), // Empty collection
-                10,          // Per page
-                1,           // Current page
-                [
-                    'path' => request()->url(),
-                    'pageName' => 'page_req' // Use a different page name to avoid conflicts
-                ]
-            );
-        }
-
 
 
       // Get search input
@@ -85,10 +76,10 @@ class AdminController extends Controller
         ->when($section === 'bookings' && $search, function ($query) use ($search) {
             $query->whereHas('customer', function ($q) use ($search) {
                 $q->where('firstname', 'like', "%$search%")
-                  ->orWhere('lastname', 'like', "%$search%");
+                ->orWhere('lastname', 'like', "%$search%");
             });
         })
-        ->simplePaginate(10);
+        ->simplePaginate(10, ['*'], 'bookingPage');
 
     // Violations Search (example: search by customer or freelancer name)
     $violations = DB::table('violations as v')
@@ -116,14 +107,14 @@ class AdminController extends Controller
               ->orWhereNotNull('a.id')->where('a.status', 'like', 'no_show%');
     })
     ->orderBy('v.created_at', 'desc')
-    ->simplePaginate(10);
+    ->simplePaginate(5, ['*'], 'violationPage');
 
     // User Stats Search (example: search by user name)
     $userStats = User::when($section === 'userstats' && $search, function ($query) use ($search) {
             $query->where('firstname', 'like', "%$search%")
                   ->orWhere('lastname', 'like', "%$search%");
         })
-        ->simplePaginate(10);
+        ->simplePaginate(10, ['*'], 'userStatsPage');
 
 
 
@@ -139,7 +130,7 @@ class AdminController extends Controller
     // Get recent transactions
     $revenueTransactions = PlatformRevenue::with(['appointment.freelancer', 'user'])
         ->orderBy('date', 'desc')
-        ->paginate(10);
+       ->simplePaginate(10, ['*'], 'revenuePage');
 
          // Calculate available platform revenue
        $totalPlatformRevenue = PlatformRevenue::where('amount', '>', 0)->sum('amount'); // Only positive entries
@@ -156,7 +147,7 @@ class AdminController extends Controller
                     ->orWhere('amount', 'like', "%{$search}%");
             })
             ->orderBy('created_at', 'desc')
-            ->paginate(10);
+           ->simplePaginate(10, ['*'], 'platformWithdrawalPage');
 
     // Add withdrawal statistics
     $stats = [
@@ -184,34 +175,34 @@ class AdminController extends Controller
             END
         ")
         ->orderBy('created_at', 'desc')
-        ->paginate(10);
+        ->simplePaginate(10, ['*'], 'allWithdrawalPage');
 } else {
     $withdrawals = Withdrawal::with('freelancer')
         ->where('status', $status)
         ->orderBy('created_at', 'desc')
-        ->paginate(10);
+        ->simplePaginate(10, ['*'], 'allWithdrawalPage');
 }
 
 // For tab content - create new query builders for each status
 $pendingWithdrawals = Withdrawal::with('freelancer')
     ->where('status', 'pending')
     ->orderBy('created_at', 'desc')
-    ->paginate(5);
+    ->simplePaginate(5, ['*'], 'pendingWithdrawalPage');
 
 $processingWithdrawals = Withdrawal::with('freelancer')
     ->where('status', 'processing')
     ->orderBy('created_at', 'desc')
-    ->paginate(5);
+    ->simplePaginate(5, ['*'], 'processingWithdrawalPage');
 
 $completedWithdrawals = Withdrawal::with('freelancer')
     ->where('status', 'completed')
     ->orderBy('created_at', 'desc')
-    ->paginate(5);
+    ->simplePaginate(5, ['*'], 'completedWithdrawalPage');
 
 $rejectedWithdrawals = Withdrawal::with('freelancer')
     ->where('status', 'rejected')
     ->orderBy('created_at', 'desc')
-    ->paginate(5);
+   ->simplePaginate(5, ['*'], 'rejectedWithdrawalPage');
 
  
         

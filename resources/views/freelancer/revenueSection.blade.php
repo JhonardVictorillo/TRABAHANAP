@@ -76,70 +76,59 @@
           </tr>
         </thead>
         <tbody>
-          @php
-          // Process payments to combine commitment fees with service payments
+         @php
           $displayPayments = [];
           $appointmentPayments = [];
-          
-          // First, group all payments by appointment ID
+
+          // Group all payments by appointment ID
           foreach($allPayments ?? [] as $payment) {
-            if ($payment->appointment_id) {
-              if (!isset($appointmentPayments[$payment->appointment_id])) {
-                $appointmentPayments[$payment->appointment_id] = [];
+              if ($payment->appointment_id) {
+                  if (!isset($appointmentPayments[$payment->appointment_id])) {
+                      $appointmentPayments[$payment->appointment_id] = [];
+                  }
+                  $appointmentPayments[$payment->appointment_id][] = $payment;
+              } else {
+                  $displayPayments[] = $payment;
               }
-              $appointmentPayments[$payment->appointment_id][] = $payment;
-            } else {
-              // Payments without appointment IDs go directly to display list
-              $displayPayments[] = $payment;
-            }
           }
-          
+
           // Process each appointment's payments
           foreach($appointmentPayments as $appointmentId => $payments) {
-            $servicePayment = null;
-            $commitmentFees = [];
-            $otherPayments = [];
-            
-            // Categorize the payments
-            foreach($payments as $payment) {
-              if ($payment->source === 'service_payment') {
-                $servicePayment = $payment;
-              } elseif (in_array($payment->source, ['commitment_fee', 'commitment_fee_bonus'])) {
-                $commitmentFees[] = $payment;
-              } else {
-                $otherPayments[] = $payment;
+              $servicePayment = null;
+              $commitmentFees = [];
+              $otherPayments = [];
+
+              foreach($payments as $payment) {
+                  if (in_array($payment->source, ['service_payment', 'service_payment_cash'])) {
+                      $servicePayment = $payment;
+                  } elseif (in_array($payment->source, ['commitment_fee', 'commitment_fee_bonus'])) {
+                      $commitmentFees[] = $payment;
+                  } else {
+                      $otherPayments[] = $payment;
+                  }
               }
-            }
-            
-            // If we have both service payment and commitment fees, combine them
-            if ($servicePayment && count($commitmentFees) > 0) {
-              $combinedPayment = clone $servicePayment;
-              
-              // Add all commitment fee amounts
-              foreach($commitmentFees as $fee) {
-                $combinedPayment->amount += $fee->amount;
+
+              // Combine service payment and all commitment fees
+              if ($servicePayment) {
+                  $combinedPayment = clone $servicePayment;
+                  foreach($commitmentFees as $fee) {
+                      $combinedPayment->amount += $fee->amount;
+                  }
+                  $combinedPayment->is_combined = true;
+                  $displayPayments[] = $combinedPayment;
               }
-              
-              // Mark as combined
-              $combinedPayment->is_combined = true;
-              $displayPayments[] = $combinedPayment;
-            } 
-            // If we only have service payment, add it directly
-            elseif ($servicePayment) {
-              $displayPayments[] = $servicePayment;
-            }
-            
-            // Add all other payment types (except commitment fees)
-            foreach($otherPayments as $payment) {
-              $displayPayments[] = $payment;
-            }
+
+              // Add other payment types (except commitment fees)
+              foreach($otherPayments as $payment) {
+                  $displayPayments[] = $payment;
+              }
           }
-          
+
           // Sort by date (newest first)
           usort($displayPayments, function($a, $b) {
-            return strtotime($b->date) - strtotime($a->date);
+              return strtotime($b->date) - strtotime($a->date);
           });
-        @endphp
+          @endphp
         
         @forelse($displayPayments as $payment)
             <tr @if(!empty($payment->is_combined)) class="combined-row" @endif>
@@ -179,6 +168,8 @@
                 <span class="status" style="background-color: #10B981;">Service Payment</span>
               @elseif($payment->source == 'service_payment')
                 <span class="status" style="background-color: #10B981;">Final Payment</span>
+               @elseif($payment->source == 'service_payment_cash')
+    <span class="status" style="background-color: #3B82F6;">Service Payment (Cash)</span>
               @elseif($payment->source == 'late_cancellation_fee')
                 <span class="status" style="background-color: #F59E0B;">Cancellation Fee</span>
               @elseif($payment->source == 'no_show_fee')
@@ -236,23 +227,48 @@
               <td>{{ \Carbon\Carbon::parse($withdrawal->created_at)->format('M d, Y') }}</td>
               <td>₱{{ number_format($withdrawal->amount, 2) }}</td>
                <td>
-                {{ $withdrawal->reference }}
-                @if($withdrawal->is_automatic ?? false)
-                  <span class="badge badge-info">Automatic</span>
-                @endif
+              @php
+              $details = is_array($withdrawal->payment_details) ? $withdrawal->payment_details : json_decode($withdrawal->payment_details, true);
+            @endphp
+            @if($withdrawal->payment_method == 'stripe')
+              Stripe Connect
+              @if($withdrawal->stripe_transfer_id)
+                <br><small>Transfer ID: {{ $withdrawal->stripe_transfer_id }}</small>
+              @endif
+            @elseif($withdrawal->payment_method == 'bank_transfer' && $details)
+              {{ strtoupper($details['bank_name'] ?? '') }} ****{{ substr($details['account_number'] ?? '', -4) }}
+            @elseif($withdrawal->payment_method == 'gcash' && $details)
+              GCash ****{{ substr($details['gcash_number'] ?? '', -4) }}
+            @elseif($withdrawal->payment_method == 'paymaya' && $details)
+              PayMaya ****{{ substr($details['paymaya_number'] ?? '', -4) }}
+            @elseif($withdrawal->payment_method == 'grab_pay' && $details)
+              GrabPay ****{{ substr($details['grab_pay_number'] ?? '', -4) }}
+            @else
+              N/A
+            @endif
+
               </td>
               <td>{{ ucfirst($withdrawal->payment_method) }}</td>
               <td>
-                @if($withdrawal->payment_details)
-                  @if($withdrawal->payment_method == 'bank_transfer')
-                    {{ strtoupper($withdrawal->payment_details['bank_name'] ?? '') }} ****{{ substr($withdrawal->payment_details['account_number'] ?? '', -4) }}
-                  @elseif($withdrawal->payment_method == 'gcash')
-                    GCash ****{{ substr($withdrawal->payment_details['gcash_number'] ?? '', -4) }}
-                  @elseif($withdrawal->payment_method == 'paymaya')
-                    PayMaya ****{{ substr($withdrawal->payment_details['paymaya_number'] ?? '', -4) }}
-                  @elseif($withdrawal->payment_method == 'grab_pay')
-                    GrabPay ****{{ substr($withdrawal->payment_details['grab_pay_number'] ?? '', -4) }}
+                @php
+                  $details = is_array($withdrawal->payment_details) ? $withdrawal->payment_details : json_decode($withdrawal->payment_details, true);
+                @endphp
+                @if($withdrawal->payment_method == 'stripe')
+                  Stripe Connect
+                  @if(auth()->user()->stripe_connect_id)
+                    <br><small>Account ID: {{ auth()->user()->stripe_connect_id }}</small>
                   @endif
+                  @if($withdrawal->stripe_payout_id)
+                    <br><small>Transfer ID: {{ $withdrawal->stripe_payout_id }}</small>
+                  @endif
+                @elseif($withdrawal->payment_method == 'bank_transfer' && $details)
+                  {{ strtoupper($details['bank_name'] ?? '') }} ****{{ substr($details['account_number'] ?? '', -4) }}
+                @elseif($withdrawal->payment_method == 'gcash' && $details)
+                  GCash ****{{ substr($details['gcash_number'] ?? '', -4) }}
+                @elseif($withdrawal->payment_method == 'paymaya' && $details)
+                  PayMaya ****{{ substr($details['paymaya_number'] ?? '', -4) }}
+                @elseif($withdrawal->payment_method == 'grab_pay' && $details)
+                  GrabPay ****{{ substr($details['grab_pay_number'] ?? '', -4) }}
                 @else
                   N/A
                 @endif
@@ -466,7 +482,13 @@
       </div>
       
       <div class="payment-form-group">
-        <button type="submit" class="payment-submit-btn">Request Withdrawal</button>
+        <button type="submit" class="payment-submit-btn">
+          Request Withdrawal
+          <span class="btn-text">Request Withdrawal</span>
+          <span class="btn-spinner" style="display:none;">
+            <i class="fas fa-spinner fa-spin"></i>
+          </span>
+        </button>
       </div>
     </form>
   </div>
@@ -608,7 +630,7 @@
       .then(response => response.json())
       .then(data => {
         if (data.success) {
-          alert('Withdrawal request cancelled successfully');
+         
           location.reload();
         } else {
           alert(data.message || 'Error cancelling withdrawal request');

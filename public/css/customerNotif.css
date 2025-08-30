@@ -21,7 +21,7 @@
     overflow-x: auto;
     white-space: nowrap;
     scrollbar-width: thin;
-    scrollbar-color: #118f39 #f3f4f6;
+    scrollbar-color: #0f766e #f3f4f6;
 }
   
 #categories-container::-webkit-scrollbar {
@@ -29,12 +29,12 @@
 }
   
 #categories-container::-webkit-scrollbar-thumb {
-    background-color: #118f39;
+    background-color: #0f766e;
     border-radius: 4px;
 }
   
 #categories-container::-webkit-scrollbar-thumb:hover {
-    background-color: #0d6e2a;
+    background-color: #0f766e;
 }
   
 #categories-container::-webkit-scrollbar-track {
@@ -42,20 +42,20 @@
     border-radius: 4px;
 }
   
-b#categories-container button:hover {
+#categories-container button:hover {
     background-color: #e6f4fa;
-    color: #118f39;
+    color: #2563eb;
 }
   
 #categories-container button.active {
     background-color: #e6f4fa;
-    color: #118f39;
-    border: 1px solid #118f39;
+    color: #2563eb;
+    border: 1px solid #1d4ed8;
 }
   
 #categories-container button.active .w-4.h-4 i,
 #categories-container button:hover .w-4.h-4 i {
-    color: #118f39;
+    color: #2563eb;
 }
 
 /* Customer Complete Profile Modal Styles - kept intact */
@@ -310,6 +310,8 @@ b#categories-container button:hover {
     }
 }
 
+
+
 @media (max-width: 640px) {
   /* Filter and sort button styles */
   #filterButton, #sortButton {
@@ -323,7 +325,7 @@ b#categories-container button:hover {
     top: auto !important;
     left: 10px !important;
     right: 10px !important;
-    width: calc(100% - 20px) !important;
+    width: calc(100% - 70px) !important;
     max-width: none !important;
     margin-top: 5px !important;
     z-index: 1050 !important;
@@ -369,4 +371,16 @@ b#categories-container button:hover {
     border-radius: 6px !important;
     font-weight: 600 !important;
   }
+}
+/* spinner styles for buttons with loading state */
+.btn-spinner {
+  margin-left: 8px;
+  font-size: 1.2em;
+  vertical-align: middle;
+}
+button:disabled,
+button.disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  pointer-events: none;
 }

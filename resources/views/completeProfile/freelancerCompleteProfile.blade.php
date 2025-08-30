@@ -136,11 +136,7 @@
                         </div>
                     </div>
                     
-                    <!-- Map Preview -->
-                    <div id="mapPreview" class="fc-map-preview-container" style="display:none">
-                        <h4><i class='bx bx-map-pin'></i> Map Location Preview</h4>
-                        <iframe id="embeddedMap" width="100%" height="250" frameborder="0" style="border:0; border-radius: 8px;" allowfullscreen="" loading="lazy"></iframe>
-                    </div>
+                    
                     
                     <div class="fc-step-buttons">
                         <button type="button" class="fc-prev-btn" onclick="prevStep(2)"><i class='bx bx-left-arrow-alt'></i> Back</button>
@@ -159,7 +155,7 @@
                                 <i class='bx bx-credit-card-front'></i> ID Front
                             </div>
                             <div class="fc-id-preview-image">
-                                <img id="idFrontPreview" src="{{ asset('images/id-front-placeholder.png') }}" alt="ID Front Preview">
+                                <img id="idFrontPreview" src="{{'images/id-front-placeholder.png'}}" alt="ID Front Preview">
                             </div>
                             <div class="fc-id-upload-button">
                                 <label for="id_front" class="fc-upload-label">
@@ -384,60 +380,6 @@
                     });
                 }
                 
-                // Google Maps preview
-                const mapInput = document.querySelector('input[name="google_map_link"]');
-                const mapPreview = document.getElementById('mapPreview');
-                const embeddedMap = document.getElementById('embeddedMap');
-                
-                if (mapInput && mapPreview && embeddedMap) {
-                    mapInput.addEventListener('input', function() {
-                        const url = mapInput.value;
-                        
-                        if (url.includes('maps.app.goo.gl') || url.includes("google.com/maps")) {
-                            try {
-                                const embedUrl = convertToEmbedURL(url);
-                                embeddedMap.src = embedUrl;
-                                mapPreview.style.display = 'block';
-                            } catch (e) {
-                                mapPreview.style.display = 'none';
-                                embeddedMap.src = '';
-                            }
-                        } else {
-                            mapPreview.style.display = 'none';
-                            embeddedMap.src = '';
-                        }
-                    });
-                    
-                    function convertToEmbedURL(url) {
-                        // For development, return a static map of the Philippines
-                        return "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3861.802548850901!2d121.04882897485761!3d14.554743382575185!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397c8efd99aad53%3A0xb64b39847a866fde!2sMakati%20City%2C%20Metro%20Manila!5e0!3m2!1sen!2sph!4v1698123909569!5m2!1sen!2sph";
-                        
-                        // Uncomment and use this when you have a valid API key
-                        /*
-                        if (url.includes("maps.app.goo.gl")) {
-                            const shortUrl = new URL(url);
-                            const placeId = shortUrl.pathname.split('/').pop();
-                            return `https://www.google.com/maps/embed/v1/place?key=YOUR_API_KEY&q=place_id:${placeId}`;
-                        }
-                        
-                        if (url.includes("google.com/maps")) {
-                            const match = url.match(/@(.*),(.*),([\d\.]*)z/);
-                            if (match) {
-                                const lat = match[1];
-                                const lng = match[2];
-                                return `https://www.google.com/maps/embed/v1/view?key=YOUR_API_KEY&center=${lat},${lng}&zoom=14&maptype=roadmap`;
-                            } else if (url.includes("place")) {
-                                return url.replace("/maps/place/", "/maps/embed/v1/place?key=YOUR_API_KEY&q=");
-                            } else if (url.includes("embed")) {
-                                return url;
-                            }
-                        }
-                        */
-                        
-                        // If we reached here, return a default map
-                        return "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3861.802548850901!2d121.04882897485761!3d14.554743382575185!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397c8efd99aad53%3A0xb64b39847a866fde!2sMakati%20City%2C%20Metro%20Manila!5e0!3m2!1sen!2sph!4v1698123909569!5m2!1sen!2sph";
-                    }
-                }
                 
                 // Bio character counter
                 const bioTextarea = document.getElementById('bio');
@@ -479,4 +421,43 @@
             @endif
         }
     });
+
+
+    document.getElementById('profileForm').addEventListener('submit', function(e) {
+    let errors = [];
+    // Step 1
+    if (!document.getElementById('firstname').value.trim()) errors.push('First name is required.');
+    if (!document.getElementById('lastname').value.trim()) errors.push('Last name is required.');
+    if (!document.getElementById('email').value.trim()) errors.push('Email is required.');
+    if (!document.getElementById('contact_number').value.trim()) errors.push('Contact number is required.');
+    if (!document.getElementById('profilePictureInput').files.length) errors.push('Profile picture is required.');
+    // Step 2
+    if (!document.getElementById('province').value.trim()) errors.push('Province is required.');
+    if (!document.getElementById('city').value.trim()) errors.push('City is required.');
+    if (!document.getElementById('zipcode').value.trim()) errors.push('Zipcode is required.');
+    // Step 3
+    if (!document.getElementById('id_front').files.length) errors.push('ID front image is required.');
+    if (!document.getElementById('id_back').files.length) errors.push('ID back image is required.');
+    // Step 4
+    if (!document.querySelector('input[name="category"]:checked')) errors.push('Category selection is required.');
+
+    // Show errors if any
+    let errorBox = document.getElementById('profileFormErrors');
+    if (!errorBox) {
+        errorBox = document.createElement('div');
+        errorBox.id = 'profileFormErrors';
+        errorBox.className = 'fc-error-message mb-2 text-red-500';
+        this.prepend(errorBox);
+    }
+    errorBox.innerHTML = '';
+    if (errors.length) {
+        errors.forEach(msg => {
+            const p = document.createElement('p');
+            p.textContent = msg;
+            errorBox.appendChild(p);
+        });
+        e.preventDefault();
+        window.scrollTo(0, 0);
+    }
+});
 </script>

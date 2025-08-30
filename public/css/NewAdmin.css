@@ -108,7 +108,12 @@ body {
     z-index: 100;
 }
 
-
+.section-title{
+    color: #2563eb;
+    font-weight: 700;
+    font-size: 1.2rem;
+    margin: 0;
+}
 
 .user-area {
     display: flex;
@@ -1092,44 +1097,56 @@ button {
 .booking-table-container {
     overflow-x: auto;
     margin-bottom: 1rem;
-    border: 1px solid #e3e6f0;
+    /* border: 1px solid #e3e6f0; */
     border-radius: 0.25rem;
 }
 .violation-table-container {
       overflow-x: auto;
     margin-bottom: 1rem;
-    border: 1px solid #e3e6f0;
+    /* border: 1px solid #e3e6f0; */
     border-radius: 0.25rem;
 }
 .userstats-table-container {
      overflow-x: auto;
     margin-bottom: 1rem;
-    border: 1px solid #e3e6f0;
+    /* border: 1px solid #e3e6f0; */
     border-radius: 0.25rem;
 }
 
 /* Table Styling */
+.admin-table-container {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(37,99,235,0.08);
+    margin-bottom: 2rem;
+    overflow-x: auto;
+    padding: 0;
+}
+
 .admin-table {
     width: 100%;
     border-collapse: collapse;
+    font-family: "Poppins", sans-serif;
+    background: #fff;
 }
 
 .admin-table th,
 .admin-table td {
-    padding: 0.75rem;
+    padding: 14px 16px;
     text-align: left;
     border-bottom: 1px solid #e3e6f0;
-    font-size: 0.875rem;
+    font-size: 15px;
+    color: #333;
 }
 
 .admin-table th {
     background-color: #f8f9fc;
-    color: #5a5c69;
+    color: #2563eb;
     font-weight: 700;
-    font-size: 0.75rem;
+    font-size: 14px;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    white-space: nowrap;
+    border-bottom: 2px solid #e3e6f0;
 }
 
 .admin-table tr:last-child td {
@@ -1137,7 +1154,67 @@ button {
 }
 
 .admin-table tbody tr:hover {
-    background-color: #f8f9fc;
+    background-color: #f0f6ff;
+    transition: background 0.2s;
+}
+
+.admin-table .status-badge {
+    padding: 5px 12px;
+    border-radius: 12px;
+    font-size: 0.95em;
+    font-weight: 500;
+    color: #fff;
+    background: #2563eb;
+    display: inline-block;
+}
+
+.admin-table .status-badge.completed { background: #10b981; }
+.admin-table .status-badge.processing { background: #3b82f6; }
+.admin-table .status-badge.failed { background: #ef4444; }
+.admin-table .status-badge.canceled { background: #f59e0b; }
+.admin-table .status-badge.pending { background: #f6c23e; color: #333; }
+
+.admin-table .actions-cell {
+    min-width: 160px;
+}
+
+.admin-table .action-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.admin-table .action-btn {
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 14px;
+    border: none;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background 0.2s;
+}
+
+.admin-table .action-btn.warning-btn { background: #f59e0b; color: #fff; }
+.admin-table .action-btn.suspend-btn { background: #ef4444; color: #fff; }
+.admin-table .action-btn.more-btn { background: #e5e7eb; color: #2563eb; }
+
+.admin-table .action-btn:hover { opacity: 0.9; }
+
+.admin-table .profile-pic {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 10px;
+    vertical-align: middle;
+    border: 2px solid #2563eb;
+}
+
+.admin-table .category-empty-state,
+.admin-table .withdrawal-empty-state {
+    text-align: center;
+    color: #858796;
+    padding: 1.5rem;
+    font-size: 16px;
 }
 
 
@@ -4117,4 +4194,45 @@ input:checked + .slider:before {
         width: 100%;
         justify-content: center;
     }
+}
+
+/* Style for simple pagination Previous/Next buttons */
+.category-pagination-container nav ul.pagination li,
+.category-pagination-container nav ul.pagination li a,
+.category-pagination-container nav ul.pagination li span {
+    padding: 8px 20px !important;
+    border-radius: 6px !important;
+    background: #2563eb !important;
+    color: #fff !important;
+    border: none !important;
+    font-size: 16px !important;
+    text-decoration: none !important;
+    font-weight: 500 !important;
+    transition: background 0.2s;
+    box-shadow: 0 2px 8px rgba(37,99,235,0.08);
+}
+
+.category-pagination-container nav ul.pagination li.disabled span {
+    background: #e5e7eb !important;
+    color: #858796 !important;
+    cursor: not-allowed !important;
+}
+
+.category-pagination-container nav ul.pagination li a:hover,
+.category-pagination-container nav ul.pagination li a:focus {
+    background: #1d4ed8 !important;
+    color: #fff !important;
+}
+
+/*********************** spinner loader styles **********************/
+.btn-spinner {
+  margin-left: 8px;
+  font-size: 1.2em;
+  vertical-align: middle;
+}
+button:disabled,
+button.disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  pointer-events: none;
 }

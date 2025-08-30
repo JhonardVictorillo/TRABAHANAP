@@ -1,7 +1,7 @@
 <!-- Bookings Section -->
 <div id="bookingsSection" class="details-section" style="display: none;">
     <h2 class="section-title"><span class="material-symbols-outlined align-middle">event_note</span> All Bookings</h2>
-    <div class="booking-table-container">
+    <div class="admin-table-container">
 
     <!-- Search Bar -->
     <form method="GET" action="{{ route('admin.dashboard') }}" class="table-search-form" style="margin-bottom: 1.2rem; display: flex; align-items: center; gap: 0.5rem;">
@@ -81,29 +81,11 @@
             @endforeach
             </tbody>
         </table>
-        <!-- Pagination Links -->
-       <div class="category-pagination-container">
-            @if($appointments->previousPageUrl())
-            <a href="{{ $appointments->appends(['search' => request('search'), 'activeSection' => 'violations', 'role' => request('role', 'all')])->previousPageUrl() }}" class="category-pagination-btn">
-                <i class="fas fa-arrow-left"></i> Previous
-            </a>
-            @else
-            <button class="category-pagination-btn category-btn-disabled" disabled>
-                <i class="fas fa-arrow-left"></i> Previous
-            </button>
-            @endif
-            
-            @if($appointments->hasMorePages())
-            <a href="{{ $appointments->appends(['search' => request('search'), 'activeSection' => 'violations', 'role' => request('role', 'all')])->nextPageUrl() }}" class="category-pagination-btn">
-                Next <i class="fas fa-arrow-right"></i>
-            </a>
-            @else
-            <button class="category-pagination-btn category-btn-disabled" disabled>
-                Next <i class="fas fa-arrow-right"></i>
-            </button>
-            @endif
-        </div>
     </div>
+     <!-- Pagination Links -->
+       <div class="category-pagination-container">
+            {{ $appointments->appends(request()->except('bookingPage'))->links() }}
+        </div>
 </div>
 
 

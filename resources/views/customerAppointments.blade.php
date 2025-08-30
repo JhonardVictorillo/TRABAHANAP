@@ -65,7 +65,7 @@
         </a>
     </div>
    @include('successMessage')
-
+        <h2 class="text-2xl font-semibold text-primary mb-2 text-center">Appointment Calendar</h2>
         <div id="calendar-container">
           <div id="calendar"></div>
       </div>
@@ -123,6 +123,11 @@
                 <span class="font-medium">Commitment Fee Status:</span>
                 <span id="feeStatus"></span>
             </div>
+            <div class="flex items-center gap-2">
+                <i class="ri-money-dollar-circle-line text-primary"></i>
+                <span class="font-medium">Service Rate:</span>
+                <span id="serviceRate"></span>
+            </div>
             <div class="flex items-center gap-2" id="finalPaymentContainer" style="display: none;">
             <i class="ri-secure-payment-line text-primary"></i>
             <span class="font-medium">Final Payment:</span>
@@ -136,10 +141,18 @@
         </div>
         <div class="flex justify-end gap-2 px-6 py-4 border-t">
             <button id="rescheduleButton" class="btn btn-primary flex items-center gap-1 bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded">
-                <i class="ri-calendar-event-line"></i> Re-schedule
+                <i class="ri-calendar-event-line"></i> 
+                 <span class="btn-text">Reschedule</span>
+                <span class="btn-spinner" style="display:none;">
+                    <i class="ri-loader-4-line animate-spin"></i>
+                </span>
             </button>
            <button id="cancelButton" class="btn btn-danger flex items-center gap-1 bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded">
-                <i class="ri-close-circle-line"></i> Cancel
+                <i class="ri-close-circle-line"></i> 
+                 <span class="btn-text">Cancel</span>
+                <span class="btn-spinner" style="display:none;">
+                    <i class="ri-loader-4-line animate-spin"></i>
+                </span>
             </button>
            <button id="rateButton" class="btn btn-success flex items-center gap-1 bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded" style="display: none;">
                 <i class="ri-star-line"></i> Rate & Review
@@ -147,13 +160,18 @@
             <button id="payButton" class="btn btn-success flex items-center gap-1 bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded" style="display: none;">
                 <i class="ri-bank-card-line"></i> Pay Now
             </button>
+            
            <button type="button" class="btn btn-secondary close-modal flex items-center gap-1 bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded">
                 <i class="ri-arrow-go-back-line"></i> Close
             </button>
             <form id="noShowForm" method="POST" action="{{ route('appointments.no_show', 0) }}" style="display:none;">
                 @csrf
                 <button type="submit" class="btn btn-warning flex items-center gap-1">
-                    <i class="ri-error-warning-line"></i> Mark as No-Show
+                    <i class="ri-error-warning-line"></i>
+                   <span class="btn-text">Mark as No-Show</span>
+                    <span class="btn-spinner" style="display:none;">
+                        <i class="ri-loader-4-line animate-spin"></i>
+                    </span>
                 </button>
             </form>
         </div>
@@ -195,11 +213,21 @@
                 <i class="ri-arrow-go-back-line"></i> Cancel
             </button>
             <button type="submit" class="btn btn-primary flex items-center gap-1" id="saveReschedule">
-                <i class="ri-save-line"></i> Save Changes
+                <i class="ri-save-line"></i> 
+               <span class="btn-text">Save Changes</span>
+                <span class="btn-spinner" style="display:none;">
+                    <i class="ri-loader-4-line animate-spin"></i>
+                </span>
             </button>
         </div>
     </div>
 </div>
+
+<form id="payCashForm" method="POST" action="/customer/appointments/pay-cash" style="display:none;">
+    @csrf
+    <input type="hidden" name="appointment_id" id="payCashAppointmentId">
+    <input type="hidden" name="amount" id="payCashAmount">
+</form>
 
 <!-- Payment Modal -->
 <div id="paymentModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" style="display: none;">
@@ -247,9 +275,20 @@
                     </div>
                     
                     <button type="submit" class="w-full py-2 text-white bg-primary hover:bg-primary/90 rounded-lg flex items-center justify-center gap-2">
-                        <i class="ri-secure-payment-line"></i> Process Payment
+                        <i class="ri-secure-payment-line"></i> 
+                        <span class="btn-text">Process Payment</span>
+                        <span class="btn-spinner" style="display:none;">
+                            <i class="ri-loader-4-line animate-spin"></i>
+                        </span>
                     </button>
                 </form>
+                <button id="payCashButton" class="w-full mt-2 py-2 text-white bg-green-600 hover:bg-green-700 rounded-lg flex items-center justify-center gap-2">
+                    <i class="ri-money-dollar-circle-line"></i> 
+                    <span class="btn-text">Pay Cash</span>
+                    <span class="btn-spinner" style="display:none;">
+                        <i class="ri-loader-4-line animate-spin"></i>
+                    </span>
+                </button>
             </div>
         </div>
     </div>
@@ -286,7 +325,11 @@
                     <textarea id="review" name="review" class="w-full mt-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary" rows="4" placeholder="Write your review here..."></textarea>
                 </div>
                 <button type="button" id="submitReview" class="w-full py-2 text-white bg-primary hover:bg-primary/90 rounded-lg flex items-center justify-center gap-2">
-                    <i class="ri-send-plane-line"></i> Submit Review
+                    <i class="ri-send-plane-line"></i> 
+                   <span class="btn-text">Submit Review</span>
+                    <span class="btn-spinner" style="display:none;">
+                        <i class="ri-loader-4-line animate-spin"></i>
+                    </span>
                 </button>
             </form>
         </div>
@@ -361,8 +404,11 @@ function handleButtonVisibility(status) {
         if (currentAppointmentData && 
             (!currentAppointmentData.final_payment_status || 
              currentAppointmentData.final_payment_status === 'pending')) {
-            payButton.style.display = 'inline-block'; // Show pay button
-        } 
+            payButton.style.display = 'inline-block';
+          document.getElementById('payCashButton').style.display = 'block';
+        } else {
+            document.getElementById('payCashButton').style.display = 'none';
+        }
 
         rescheduleButton.style.display = 'none'; // Hide reschedule button
         cancelButton.style.display = 'none'; // Hide cancel button
@@ -394,7 +440,9 @@ function openAppointmentModal(data) {
     document.getElementById('appointmentStatus').textContent = data.status || 'N/A';
     document.getElementById('appointmentNotes').textContent = data.notes || 'No additional notes';
     document.getElementById('feeStatus').textContent = data.fee_status || 'N/A';
-    
+    document.getElementById('serviceRate').textContent =data.rate_type && data.rate
+        ? `₱${parseFloat(data.rate).toFixed(2)} per ${data.rate_type}`
+        : 'N/A';
     document.getElementById('appointmentId').value = data.id;
     
     currentAppointmentData = data;
@@ -646,7 +694,8 @@ function convertTo12HourFormat(hour) {
 // Handle form submission
     document.getElementById('saveReschedule').onclick = function(e) {
         e.preventDefault();
-        
+          const btn = this;
+        showSpinnerOnButton(btn);
         const newDate = selectedDateInput.value;
         const newTime = selectedTimeInput.value;
         
@@ -665,6 +714,7 @@ function convertTo12HourFormat(hour) {
         })
         .then(response => response.json())
         .then(result => {
+            restoreButton(btn, 'Save Changes');
             alert(result.message);
             document.getElementById('rescheduleModal').style.display = 'none';
             location.reload();
@@ -691,7 +741,9 @@ function convertTo12HourFormat(hour) {
 }
     // Add event listener for the cancel button
     document.getElementById('cancelButton').onclick = function () {
+        const btn = this;
         if (confirm('Are you sure you want to cancel this appointment?')) {
+            showSpinnerOnButton(btn);
             fetch(`/customer/appointments/cancel/${data.id}`, {
                 method: 'POST',
                 headers: {
@@ -700,6 +752,7 @@ function convertTo12HourFormat(hour) {
             })
                 .then(response => response.json())
                 .then(result => {
+                    restoreButton(btn, 'Cancel');
                     alert(result.message || result.error);
                     location.reload(); // Refresh the calendar
                 })
@@ -803,7 +856,8 @@ document.addEventListener('DOMContentLoaded', function () {
             alert('Please select a star rating.');
             return;
         }
-
+             const btn = this;
+             showSpinnerOnButton(btn);
         fetch(`/customer/appointments/review/${appointmentId}`, {
             method: 'POST',
             headers: {
@@ -819,6 +873,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 return response.json();
             })
             .then(result => {
+                restoreButton(btn, 'Submit Review');
                 console.log(result);
                 alert(result.message || 'Review submitted successfully!');
                 reviewModal.style.display = 'none'; // Close the review modal
@@ -878,6 +933,7 @@ document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('paymentAmount').value = '';
             
             // Show duration field for hourly/daily rate
+                
                 const rateType = currentAppointmentData?.rate_type || '';
                 const rate = parseFloat(currentAppointmentData?.rate || '0');
                 const durationField = document.getElementById('durationField');
@@ -902,7 +958,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 function updateAmount() {
                     let duration = parseInt(durationInput.value) || 1;
                     let total = rate * duration;
-                    paymentAmount.value = total.toFixed(2);
+
+                   let finalAmount = total - commitmentFee;
+                    if (finalAmount < 0) finalAmount = 0;
+                    paymentAmount.value = finalAmount.toFixed(2);
                 }
 
                 durationInput.oninput = updateAmount;
@@ -929,6 +988,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // OPTION 1: Let the form submit naturally to the route (recommended)
     if (paymentForm) {
         paymentForm.addEventListener('submit', function(e) {
+          
             // Validate amount before submission
             const amount = document.getElementById('paymentAmount').value;
             if (isNaN(parseFloat(amount)) || parseFloat(amount) <= 0) {
@@ -946,6 +1006,15 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 })  
+
+    payCashButton.onclick = function() {
+    if (confirm('Confirm you have paid the freelancer in cash for this service?')) {
+        document.getElementById('payCashAppointmentId').value = currentAppointmentData.id;
+        document.getElementById('payCashAmount').value = document.getElementById('paymentAmount').value;
+        document.getElementById('payCashForm').submit();
+    }
+};
+
 
 // Improve mobile modal handling
 function adjustModalForMobile() {
@@ -978,6 +1047,25 @@ window.addEventListener('resize', adjustModalForMobile);
 document.addEventListener('DOMContentLoaded', function() {
     adjustModalForMobile();
 });
+
+function showSpinnerOnButton(button) {
+    const btnText = button.querySelector('.btn-text');
+    const btnSpinner = button.querySelector('.btn-spinner');
+    button.disabled = true;
+    button.classList.add('disabled');
+    if (btnText) btnText.style.display = 'none';
+    if (btnSpinner) btnSpinner.style.display = 'inline-block';
+}
+function restoreButton(button, text) {
+    const btnText = button.querySelector('.btn-text');
+    const btnSpinner = button.querySelector('.btn-spinner');
+    button.disabled = false;
+    button.classList.remove('disabled');
+    if (btnText) btnText.style.display = 'inline-block';
+    if (btnSpinner) btnSpinner.style.display = 'none';
+    if (btnText && text) btnText.textContent = text;
+}
+
 
    
 

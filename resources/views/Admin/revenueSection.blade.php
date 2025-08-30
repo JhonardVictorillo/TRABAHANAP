@@ -1,6 +1,6 @@
 <div id="revenueSection" class="section" style="display: none;">
   <div class="section-header">
-    <h1>Platform Revenue</h1>
+    <h2 class="section-title">Platform Revenue</h2>
     <p>Overall platform earning overview</p>
   </div>
 
@@ -144,29 +144,9 @@
       </div>
       
       <!-- Pagination for Revenue -->
-      @if(isset($revenueTransactions) && method_exists($revenueTransactions, 'links'))
-          <div class="category-pagination-container">
-            @if($revenueTransactions->previousPageUrl())
-             <a href="{{ $revenueTransactions->appends(['activeSection' => 'revenue', 'tab' => 'revenue', 'revenue_search' => request('revenue_search')])->previousPageUrl() }}" class="category-pagination-btn">
-                <i class="fas fa-arrow-left"></i> Previous
-              </a>
-            @else
-              <button class="category-pagination-btn category-btn-disabled" disabled>
-                <i class="fas fa-arrow-left"></i> Previous
-              </button>
-            @endif
-            
-            @if($revenueTransactions->hasMorePages())
-             <a href="{{ $revenueTransactions->appends(['activeSection' => 'revenue', 'tab' => 'revenue', 'revenue_search' => request('revenue_search')])->nextPageUrl() }}" class="category-pagination-btn">
-                Next <i class="fas fa-arrow-right"></i>
-              </a>
-            @else
-              <button class="category-pagination-btn category-btn-disabled" disabled>
-                Next <i class="fas fa-arrow-right"></i>
-              </button>
-            @endif
-          </div>
-        @endif
+     <div class="category-pagination-container">
+        {{ $revenueTransactions->appends(request()->except('revenuePage'))->links() }}
+    </div>
     </div>
   </div>
 
@@ -251,29 +231,9 @@
       </div>
       
       <!-- Pagination for Withdrawals -->
-       @if(isset($platformWithdrawals) && method_exists($platformWithdrawals, 'links'))
-          <div class="category-pagination-container">
-            @if($platformWithdrawals->previousPageUrl())
-                <a href="{{ $platformWithdrawals->appends(['activeSection' => 'revenue', 'tab' => 'withdrawals', 'withdrawal_search' => request('withdrawal_search')])->previousPageUrl() }}" class="category-pagination-btn">
-                <i class="fas fa-arrow-left"></i> Previous
-              </a>
-            @else
-              <button class="category-pagination-btn category-btn-disabled" disabled>
-                <i class="fas fa-arrow-left"></i> Previous
-              </button>
-            @endif
-            
-            @if($platformWithdrawals->hasMorePages())
-               <a href="{{ $platformWithdrawals->appends(['activeSection' => 'revenue', 'tab' => 'withdrawals', 'withdrawal_search' => request('withdrawal_search')])->nextPageUrl() }}" class="category-pagination-btn">
-                Next <i class="fas fa-arrow-right"></i>
-              </a>
-            @else
-              <button class="category-pagination-btn category-btn-disabled" disabled>
-                Next <i class="fas fa-arrow-right"></i>
-              </button>
-            @endif
-          </div>
-        @endif
+      <div class="category-pagination-container">
+          {{ $platformWithdrawals->appends(request()->except('platformWithdrawalPage'))->links() }}
+      </div>
     </div>
   </div>
 </div>
@@ -358,7 +318,12 @@
         
         <div class="admin-withdrawal-form-actions">
             <button type="button" onclick="closeAdminWithdrawalModal()" class="admin-withdrawal-btn-secondary">Cancel</button>
-            <button type="submit" class="admin-withdrawal-btn-primary">Withdraw Funds</button>
+            <button type="submit" class="admin-withdrawal-btn-primary">
+              <span class="btn-text">Withdraw Funds</span>
+              <span class="btn-spinner" style="display:none;">
+                <i class="fas fa-spinner fa-spin"></i>
+              </span>
+            </button>
         </div>
     </form>
   </div>

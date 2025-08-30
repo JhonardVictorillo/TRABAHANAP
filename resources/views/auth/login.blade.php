@@ -72,8 +72,11 @@
 
 
           <button type="submit" class="signin-btn">
-            Login
-            <i class='bx bx-right-arrow-alt'></i>
+              <span class="btn-text">Login</span>
+              <span class="btn-spinner" style="display:none;">
+                  <i class='bx bx-loader bx-spin'></i>
+              </span>
+              <i class='bx bx-right-arrow-alt'></i>
           </button>
         </form>
         
@@ -180,6 +183,20 @@
             this.textContent = type === 'password' ? 'Show' : 'Hide';
         });
     });
+
+    document.addEventListener('DOMContentLoaded', function () {
+    const signinForm = document.getElementById('signinForm');
+    const signinBtn = document.querySelector('.signin-btn');
+    const btnText = signinBtn.querySelector('.btn-text');
+    const btnSpinner = signinBtn.querySelector('.btn-spinner');
+
+    signinForm.addEventListener('submit', function(e) {
+        signinBtn.disabled = true;
+        signinBtn.classList.add('disabled');
+        btnText.style.display = 'none';
+        btnSpinner.style.display = 'inline-block';
+    });
+});
   </script>
 </body>
 </html>

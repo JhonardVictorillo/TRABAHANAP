@@ -105,25 +105,7 @@
                 
                 <!-- Categories Pagination -->
                <div class="category-pagination-container">
-                    @if($categories->previousPageUrl())
-                        <a href="{{ $categories->appends(['activeSection' => 'categories', 'categoryPage' => $categories->currentPage()-1])->url($categories->currentPage()-1) }}" class="category-pagination-btn">
-                            <i class="fas fa-arrow-left"></i> Previous
-                        </a>
-                    @else
-                        <button class="category-pagination-btn category-btn-disabled" disabled>
-                            <i class="fas fa-arrow-left"></i> Previous
-                        </button>
-                    @endif
-                    
-                    @if($categories->hasMorePages())
-                        <a href="{{ $categories->appends(['activeSection' => 'categories', 'categoryPage' => $categories->currentPage()+1])->url($categories->currentPage()+1) }}" class="category-pagination-btn">
-                            Next <i class="fas fa-arrow-right"></i>
-                        </a>
-                    @else
-                        <button class="category-pagination-btn category-btn-disabled" disabled>
-                            Next <i class="fas fa-arrow-right"></i>
-                        </button>
-                    @endif
+                   {{ $categories->appends(request()->except('categoryPage'))->links() }}
                 </div>
             </div>
             
@@ -215,25 +197,7 @@
                
                <!-- Requests Pagination -->
             <div class="category-pagination-container">
-                @if($categoryRequests->previousPageUrl())
-                    <a href="{{ $categoryRequests->appends(['activeSection' => 'categories', 'tab' => 'requests', 'requestPage' => $categoryRequests->currentPage()-1, 'status' => request('status')])->url($categoryRequests->currentPage()-1) }}" class="category-pagination-btn">
-                        <i class="fas fa-arrow-left"></i> Previous
-                    </a>
-                @else
-                    <button class="category-pagination-btn category-btn-disabled" disabled>
-                        <i class="fas fa-arrow-left"></i> Previous
-                    </button>
-                @endif
-                
-                @if($categoryRequests->hasMorePages())
-                    <a href="{{ $categoryRequests->appends(['activeSection' => 'categories', 'tab' => 'requests', 'requestPage' => $categoryRequests->currentPage()+1, 'status' => request('status')])->url($categoryRequests->currentPage()+1) }}" class="category-pagination-btn">
-                        Next <i class="fas fa-arrow-right"></i>
-                    </a>
-                @else
-                    <button class="category-pagination-btn category-btn-disabled" disabled>
-                        Next <i class="fas fa-arrow-right"></i>
-                    </button>
-                @endif
+               {{ $categoryRequests->appends(request()->except('requestPage'))->links() }}
             </div>
         </div>
     </div>
@@ -279,7 +243,12 @@
               </div>
           </div>
           
-          <button id="saveCategory" style="background-color: #2563eb; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; margin-top: 10px;">Add Category</button>
+          <button id="saveCategory" style="background-color: #2563eb; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; margin-top: 10px;">
+            <span class="btn-text">Add Category</span>
+            <span class="btn-spinner" style="display:none;">
+                <i class="fas fa-spinner fa-spin"></i>
+            </span>
+        </button>
       </form>
   </div>
 </div>
@@ -318,7 +287,12 @@
           </div>
           
           <div class="modal-buttons">
-              <button type="button" id="updateCategory" style="background-color: #2563eb; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; margin-top: 10px; margin-right: 10px;">Update</button>
+              <button type="button" id="updateCategory" style="background-color: #2563eb; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; margin-top: 10px; margin-right: 10px;">
+                <span class="btn-text">Update</span>
+                <span class="btn-spinner" style="display:none;">
+                    <i class="fas fa-spinner fa-spin"></i>
+                </span>
+              </button>
               <button type="button" id="cancelEditCategory" class="cancel-btn" style="background-color: #f3f4f6; color: #4b5563; border: 1px solid #d1d5db; padding: 10px 15px; border-radius: 5px; cursor: pointer; margin-top: 10px;">Cancel</button>
           </div>
       </form>
@@ -371,7 +345,12 @@
                 
                 <div class="category-modal-footer">
                     <button type="button" class="category-btn category-btn-secondary" id="approveModalCancel">Cancel</button>
-                    <button type="button" class="category-btn category-btn-success" id="approveModalSubmit">Approve Request</button>
+                    <button type="button" class="category-btn category-btn-success" id="approveModalSubmit">
+                        <span class="btn-text">Approve Request</span>
+                        <span class="btn-spinner" style="display:none;">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </span>
+                    </button>
                 </div>
             </form>
         </div>
@@ -397,7 +376,12 @@
                 
                 <div class="category-modal-footer">
                     <button type="button" class="category-btn category-btn-secondary" id="declineModalCancel">Cancel</button>
-                    <button type="button" class="category-btn category-btn-danger" id="declineModalSubmit">Decline Request</button>
+                    <button type="button" class="category-btn category-btn-danger" id="declineModalSubmit">
+                        <span class="btn-text">Decline Request</span>
+                        <span class="btn-spinner" style="display:none;">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </span>
+                    </button>
                 </div>
             </form>
         </div>
@@ -529,7 +513,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!confirm("Are you sure you want to delete this category?")) {
                 return;
             }
-            
+            ShowSpinnerOnButton(button);
             console.log("Deleting category:", categoryId);
             
             const csrfToken = document.querySelector('input[name="_token"]').value;
@@ -543,6 +527,7 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .then(response => response.json())
             .then(data => {
+                RestoreButton(button);
                 if (data.success) {
                     alert(data.message);
                     
@@ -702,7 +687,7 @@ updateCategoryBtn.addEventListener("click", function (e) {
             const categoryId = this.getAttribute("data-id");
             if (confirm("Are you sure you want to delete this category?")) {
                 const csrfToken = document.querySelector('input[name="_token"]').value;
-                
+                showSpinnerOnButton(Button);
                 fetch(`/categories/${categoryId}`, {
                     method: "DELETE",
                     headers: {
@@ -712,6 +697,7 @@ updateCategoryBtn.addEventListener("click", function (e) {
                 })
                 .then(response => response.json())
                 .then(data => {
+                    restoreButton(Button, 'Delete');
                     if (data.success) {
                         alert(data.message);
                         this.closest("tr").remove();

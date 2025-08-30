@@ -2,8 +2,8 @@
 <div id="withdrawalsSection" class="withdrawal-section" style="display: none;">
     <div class="withdrawal-container">
         <div class="withdrawal-header">
-            <h1 class="withdrawal-title">Manage Withdrawal Requests</h1>
-           
+            <h2 class="section-title">Manage Withdrawal Requests</h2>
+
         </div>
         
         <!-- Stats Cards -->
@@ -115,8 +115,8 @@
                     </form>
                 </div>
                 
-                <div class="withdrawal-table-container">
-                    <table class="withdrawal-table">
+               <div class="admin-table-container">
+                        <table class="admin-table">
                         <thead>
                             <tr>
                                 <th>ID</th>
@@ -197,11 +197,11 @@
                 </div>
                 
                 <!-- Pagination -->
-                @if(isset($allWithdrawals) && method_exists($allWithdrawals, 'links') || isset($withdrawals) && method_exists($withdrawals, 'links'))
-                    <div class="withdrawal-pagination-container">
-                        {{ (isset($allWithdrawals) ? $allWithdrawals : $withdrawals)->appends(['status' => $status])->links() }}
-                    </div>
-                @endif
+               @if(isset($allWithdrawals) && method_exists($allWithdrawals, 'links'))
+                <div class="withdrawal-pagination-container">
+                    {{ $allWithdrawals->appends(['status' => $status])->links() }}
+                </div>
+            @endif
             </div>
         </div>
         
@@ -212,8 +212,8 @@
                     <h2>Pending Withdrawal Requests</h2>
                 </div>
                 
-                <div class="withdrawal-table-container">
-                    <table class="withdrawal-table">
+               <div class="admin-table-container">
+                     <table class="admin-table">
                         <thead>
                             <tr>
                                 <th>ID</th>
@@ -303,8 +303,8 @@
                     <h2>Processing Withdrawal Requests</h2>
                 </div>
                 
-                <div class="withdrawal-table-container">
-                    <table class="withdrawal-table">
+               <div class="admin-table-container">
+                     <table class="admin-table">
                         <thead>
                             <tr>
                                 <th>ID</th>
@@ -379,6 +379,7 @@
                 </div>
                 
                 <!-- Pagination for processing -->
+                <!-- Processing Withdrawals Tab -->
                 @if(isset($processingWithdrawals) && method_exists($processingWithdrawals, 'links'))
                     <div class="withdrawal-pagination-container">
                         {{ $processingWithdrawals->appends(['status' => 'processing'])->links() }}
@@ -393,9 +394,9 @@
                 <div class="withdrawal-table-header">
                     <h2>Completed Withdrawals</h2>
                 </div>
-                
-                <div class="withdrawal-table-container">
-                    <table class="withdrawal-table">
+
+               <div class="admin-table-container">
+                    <table class="admin-table">
                         <thead>
                             <tr>
                                 <th>ID</th>
@@ -485,9 +486,9 @@
                 <div class="withdrawal-table-header">
                     <h2>Rejected Withdrawals</h2>
                 </div>
-                
-                <div class="withdrawal-table-container">
-                    <table class="withdrawal-table">
+
+               <div class="admin-table-container">
+                    <table class="admin-table">
                         <thead>
                             <tr>
                                 <th>ID</th>

@@ -62,7 +62,7 @@
   </head>
   <body class="bg-[#F8F9FA] font-inter">
    @include('customer.customerHeader')
-
+      @include('successMessage')
    <main class="max-w-7xl mx-auto px-4 md:px-8 py-6 md:py-8">
   <div class="mb-4">
     <a href="{{ route('customer.dashboard') }}">
@@ -342,7 +342,10 @@
       <!-- Sticky Submit Button -->
       <div class="pt-4 bg-white sticky bottom-0 left-0 right-0">
         <button type="submit" class="w-full py-3 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded">
-        Proceed to Payment
+       <span class="btn-text">Proceed to Payment</span>
+        <span class="btn-spinner" style="display:none;">
+            <i class="ri-loader-4-line animate-spin"></i>
+        </span>
         </button>
       </div>
     </form>
@@ -643,6 +646,10 @@ function convertTo12HourFormat(hour) {
 
         document.getElementById('bookingForm').addEventListener('submit', function(e) {
     document.getElementById('notesInput').value = document.getElementById('notes').value;
+   
+   const submitBtn = this.querySelector('button[type="submit"]');
+   showSpinnerOnButton(submitBtn);
+
    // Validation for date and time
    const date = document.getElementById('selectedDate').value;
     const time = document.getElementById('selectedTime').value;

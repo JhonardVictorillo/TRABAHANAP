@@ -6,6 +6,7 @@
     <title>Customer Dashboard</title>
     <meta name="csrf-token" content="{{ csrf_token() }}" />
     <link rel ="stylesheet" href="{{asset ('css/customerNotif.css')}}" />
+     <link rel ="stylesheet" href="{{asset ('css/customerHeader.css')}}" />
     <script src="https://cdn.tailwindcss.com/3.4.16"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"rel="stylesheet"/>

@@ -75,7 +75,8 @@
                      class="w-32 h-32 md:w-40 md:h-40 rounded-full mx-auto border-4 border-white shadow object-cover">
                 <h2 class="mt-4 text-xl font-semibold"><span class="text-primary">Hi,</span> {{ $user->firstname }} {{ $user->lastname }}</h2>
                 <button id="editProfileBtn" class="mt-4 flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 w-full">
-                    <i class='bx bx-edit'></i>Edit Profile
+                    <i class='bx bx-edit'></i>
+                    Edit Profile
                 </button>
             </div>
 
@@ -305,7 +306,11 @@
 
                         <!-- Save Button -->
                       <button type="submit" class="w-full mt-4 flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium">
-                        <i class="fas fa-save"></i> Save Changes
+                        <i class="fas fa-save"></i>
+                       <span class="btn-text">Save Changes</span>
+                        <span class="btn-spinner" style="display:none;">
+                            <i class="ri-loader-4-line animate-spin"></i>
+                        </span>
                     </button>
                     </form>
                 </div>
@@ -428,6 +433,24 @@
             // Initialize
             adjustModalForMobile();
         });
+
+function showSpinnerOnButton(button) {
+const btnText = button.querySelector('.btn-text');
+const btnSpinner = button.querySelector('.btn-spinner');
+button.disabled = true;
+button.classList.add('disabled');
+if (btnText) btnText.style.display = 'none';
+if (btnSpinner) btnSpinner.style.display = 'inline-block';
+}
+function restoreButton(button, text) {
+    const btnText = button.querySelector('.btn-text');
+    const btnSpinner = button.querySelector('.btn-spinner');
+    button.disabled = false;
+    button.classList.remove('disabled');
+    if (btnText) btnText.style.display = 'inline-block';
+    if (btnSpinner) btnSpinner.style.display = 'none';
+    if (btnText && text) btnText.textContent = text;
+}
     </script>
   
 </body>

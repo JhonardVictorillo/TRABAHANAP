@@ -223,10 +223,7 @@ class PlatformWithdrawalController extends Controller
             'amount_deducted' => $withdrawal->amount
         ]);
         
-        return response()->json([
-            'success' => true,
-            'message' => 'Platform withdrawal #' . $withdrawal->id . ' has been marked as completed!'
-        ]);
+        return redirect()->back()->with('success', 'Platform withdrawal #' . $withdrawal->id . ' has been marked as completed!');
         
     } catch (\Exception $e) {
         DB::rollBack();
@@ -237,10 +234,7 @@ class PlatformWithdrawalController extends Controller
             'trace' => $e->getTraceAsString()
         ]);
         
-        return response()->json([
-            'success' => false,
-            'message' => 'Error: ' . $e->getMessage()
-        ], 500);
+       return redirect()->back()->with('error', 'Error: ' . $e->getMessage());
     }
 }
     

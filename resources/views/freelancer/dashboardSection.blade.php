@@ -513,7 +513,11 @@
           <i class='bx bx-x'></i> Cancel
         </button>
         <button type="submit" class="p-btn-save">
-          <i class='bx bx-save'></i> Save Changes
+          <i class='bx bx-save'></i>
+          <span class="btn-text">Save Changes</span>
+          <span class="btn-spinner" style="display:none;">
+            <i class="fas fa-spinner fa-spin"></i>
+          </span>
         </button>
       </div>
     </form>

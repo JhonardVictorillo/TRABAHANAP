@@ -238,43 +238,51 @@ class ViolationController extends Controller
     }
     
     public function saveSettings(Request $request)
-    {
-        // Validate input
-        $request->validate([
-            'freelancer' => 'required|array',
-            'customer' => 'required|array',
-        ]);
-        
-        // Update freelancer settings
-        $freelancerSettings = ViolationSetting::where('user_role', 'freelancer')->first();
-        if (!$freelancerSettings) {
-            $freelancerSettings = new ViolationSetting();
-            $freelancerSettings->user_role = 'freelancer';
-        }
-        
-        $freelancerSettings->no_show_penalties = $request->freelancer['no_show_penalties'] ?? false;
-        $freelancerSettings->auto_warning = $request->freelancer['auto_warning'] ?? false;
-        $freelancerSettings->rating_penalty = $request->freelancer['rating_penalty'] ?? false;
-        $freelancerSettings->booking_restrictions = false; // Not applicable for freelancers
-        $freelancerSettings->auto_suspension = $request->freelancer['auto_suspension'] ?? false;
-        $freelancerSettings->suspension_days = $request->freelancer['suspension_days'] ?? 7;
-        $freelancerSettings->save();
-        
-        // Update customer settings
-        $customerSettings = ViolationSetting::where('user_role', 'customer')->first();
-        if (!$customerSettings) {
-            $customerSettings = new ViolationSetting();
-            $customerSettings->user_role = 'customer';
-        }
-        
-        $customerSettings->no_show_penalties = $request->customer['no_show_penalties'] ?? false;
-        $customerSettings->auto_warning = $request->customer['auto_warning'] ?? false;
-        $customerSettings->rating_penalty = false; // Not applicable for customers
-        $customerSettings->booking_restrictions = $request->customer['booking_restrictions'] ?? false;
-        $customerSettings->auto_suspension = $request->customer['auto_suspension'] ?? false;
-        $customerSettings->suspension_days = $request->customer['suspension_days'] ?? 7;
-        $customerSettings->save();
-        
-        return response()->json(['success' => true]);
+{
+    // Validate input
+    $request->validate([
+        'freelancer' => 'required|array',
+        'customer' => 'required|array',
+    ]);
+    
+    // Update freelancer settings
+    $freelancerSettings = ViolationSetting::where('user_role', 'freelancer')->first();
+    if (!$freelancerSettings) {
+        $freelancerSettings = new ViolationSetting();
+        $freelancerSettings->user_role = 'freelancer';
     }
+    
+    $freelancerSettings->no_show_penalties = $request->freelancer['no_show_penalties'] ?? false;
+    $freelancerSettings->auto_warning = $request->freelancer['auto_warning'] ?? false;
+    $freelancerSettings->rating_penalty = $request->freelancer['rating_penalty'] ?? false;
+    $freelancerSettings->booking_restrictions = false; // Not applicable for freelancers
+    $freelancerSettings->auto_suspension = $request->freelancer['auto_suspension'] ?? false;
+    $freelancerSettings->suspension_days = $request->freelancer['suspension_days'] ?? 7;
+    $freelancerSettings->warning_threshold = $request->freelancer['warning_threshold'] ?? 2;
+    $freelancerSettings->restriction_threshold = $request->freelancer['restriction_threshold'] ?? 3;
+    $freelancerSettings->suspension_threshold = $request->freelancer['suspension_threshold'] ?? 5;
+    $freelancerSettings->ban_threshold = $request->freelancer['ban_threshold'] ?? 7;
+    $freelancerSettings->save();
+    
+    // Update customer settings
+    $customerSettings = ViolationSetting::where('user_role', 'customer')->first();
+    if (!$customerSettings) {
+        $customerSettings = new ViolationSetting();
+        $customerSettings->user_role = 'customer';
+    }
+    
+    $customerSettings->no_show_penalties = $request->customer['no_show_penalties'] ?? false;
+    $customerSettings->auto_warning = $request->customer['auto_warning'] ?? false;
+    $customerSettings->rating_penalty = false; // Not applicable for customers
+    $customerSettings->booking_restrictions = $request->customer['booking_restrictions'] ?? false;
+    $customerSettings->auto_suspension = $request->customer['auto_suspension'] ?? false;
+    $customerSettings->suspension_days = $request->customer['suspension_days'] ?? 7;
+    $customerSettings->warning_threshold = $request->customer['warning_threshold'] ?? 2;
+    $customerSettings->restriction_threshold = $request->customer['restriction_threshold'] ?? 3;
+    $customerSettings->suspension_threshold = $request->customer['suspension_threshold'] ?? 5;
+    $customerSettings->ban_threshold = $request->customer['ban_threshold'] ?? 7;
+    $customerSettings->save();
+    
+    return response()->json(['success' => true]);
+}
 };

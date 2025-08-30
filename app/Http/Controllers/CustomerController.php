@@ -14,6 +14,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\PlatformRevenue;
 use App\Models\FreelancerEarning;
+use App\Models\Violation;
+use App\Models\ViolationAction;
 
 
 
@@ -193,9 +195,8 @@ public function showFreelancerProfile($id)
     ->get();
     $totalStars = $reviews->sum('rating'); // Sum of all ratings
     $totalReviews = $reviews->count();
-   
-      $commitmentFee = 15; // Fixed ₱15
-    
+
+      $commitmentFee = 30; // Fixed ₱30
 
     return view('PostSeeProfile', compact('freelancer', 'user','reviews', 'notifications','totalStars', 'totalReviews', 'commitmentFee'));
 }

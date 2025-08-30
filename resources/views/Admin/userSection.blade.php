@@ -1,6 +1,7 @@
 <div id="users" class="section" style="display: none;"> <!-- Initially hidden -->
-        <h2>All Users</h2>
-        <table>
+        <h2 class="section-title">All Users</h2>
+        <div class="admin-table-container">
+         <table class="admin-table">
             <thead>
                 <tr>
                     <th>Name</th>
@@ -30,3 +31,4 @@
             </tbody>
         </table>
     </div>
+</div>

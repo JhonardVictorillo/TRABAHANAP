@@ -19,53 +19,109 @@
       </div>
     </section>
     
-    <div id="appointmentModal" class="Apptmodal hidden">
-  <div class="Apptmodal-content enhanced-modal">
+   <div id="appointmentModal" class="Apptmodal hidden">
+  <div class="Apptmodal-content enhanced-modal" style="max-width:430px; padding:2.5rem 2rem 2rem 2rem;">
     <button id="closeAppointmentModal" class="close-button enhanced-close" title="Close">
       <i class="fas fa-times"></i>
     </button>
-    <h2 class="Apptmodal-title enhanced-title">
-      <i class="fas fa-calendar-check" style="color:#2563eb;"></i> Appointment Details
-    </h2>
-    <div class="Apptmodal-body enhanced-body">
-      <p><i class="fas fa-user" style = "color:#2563eb;"></i> <strong>Name:</strong> <span id="appointmentName" class="font-medium"></span></p>
-      <p><i class="fas fa-calendar-day" style = "color:#2563eb;"></i> <strong>Date:</strong> <span id="appointmentDate" class="font-medium"></span></p>
-      <p><i class="fas fa-clock" style = "color:#2563eb;"></i> <strong>Time:</strong> <span id="appointmentTime" class="font-medium"></span></p>
-      <p><i class="fas fa-map-marker-alt" style = "color:#2563eb;"></i> <strong>Address:</strong> <span id="appointmentAddress" class="font-medium"></span></p>
-      <p><i class="fas fa-phone" style = "color:#2563eb;"></i> <strong>Contact:</strong> <span id="appointmentContact" class="font-medium"></span></p>
-      <p><i class="fas fa-info-circle" style = "color:#2563eb;"></i> <strong>Status:</strong> <span id="appointmentStatus" class="font-medium"></span></p>
-       <p><i class="fas fa-money-bill-wave" style = "color:#2563eb;"></i> <strong>Payment Status:</strong> <span id="appointmentPaymentStatus" class="font-medium"></span></p>
-      <p><i class="fas fa-coins" style = "color:#2563eb;"></i> <strong>Payment Amount:</strong> <span id="appointmentPaymentAmount" class="font-medium"></span></p>
-        <p><i class="fas fa-sticky-note" style = "color:#2563eb;"></i> <strong>Notes:</strong> <span id="appointmentNotes" class="font-medium"></span></p>
+    <div class="enhanced-title" style="margin-bottom:1.2rem;">
+      <i class="fas fa-calendar-check" style="color:#2563eb; margin-right:8px;"></i>
+      Appointment Details
     </div>
-    <div class="modal-actions enhanced-actions">
+    <div class="enhanced-body" style="margin-bottom:1.2rem;">
+      <div class="appt-details-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px 18px;">
+        <div class="appt-detail">
+        <span class="appt-label"><i class="fas fa-briefcase" style="color:#2563eb;"></i> Service(s):</span>
+        <span id="appointmentSubservices" class="appt-value"></span>
+      </div>
+      <div class="appt-detail">
+          <span class="appt-label"><i class="fas fa-user" style="color:#2563eb;"></i> Name:</span>
+          <span id="appointmentName" class="appt-value"></span>
+        </div>
+        <div class="appt-detail">
+          <span class="appt-label"><i class="fas fa-calendar-day" style="color:#2563eb;"></i> Date:</span>
+          <span id="appointmentDate" class="appt-value"></span>
+        </div>
+        <div class="appt-detail">
+          <span class="appt-label"><i class="fas fa-clock" style="color:#2563eb;"></i> Time:</span>
+          <span id="appointmentTime" class="appt-value"></span>
+        </div>
+        <div class="appt-detail">
+          <span class="appt-label"><i class="fas fa-map-marker-alt" style="color:#2563eb;"></i> Address:</span>
+          <span id="appointmentAddress" class="appt-value"></span>
+        </div>
+        <div class="appt-detail">
+          <span class="appt-label"><i class="fas fa-phone" style="color:#2563eb;"></i> Contact:</span>
+          <span id="appointmentContact" class="appt-value"></span>
+        </div>
+        <div class="appt-detail">
+          <span class="appt-label"><i class="fas fa-info-circle" style="color:#2563eb;"></i> Status:</span>
+          <span id="appointmentStatus" class="appt-value"></span>
+        </div>
+        <div class="appt-detail">
+          <span class="appt-label"><i class="fas fa-money-bill-wave" style="color:#2563eb;"></i> Payment Status:</span>
+          <span id="appointmentPaymentStatus" class="appt-value"></span>
+        </div>
+        <div class="appt-detail">
+          <span class="appt-label"><i class="fas fa-coins" style="color:#2563eb;"></i> Payment Amount:</span>
+          <span id="appointmentPaymentAmount" class="appt-value"></span>
+        </div>
+      </div>
+      <div class="appt-notes" style="margin-top:1.2rem;">
+        <span class="appt-label"><i class="fas fa-sticky-note" style="color:#2563eb;"></i> Notes:</span>
+        <span id="appointmentNotes" class="appt-value"></span>
+      </div>
+    </div>
+    <div class="enhanced-actions" style="margin-top:1.5rem;gap:0.7rem;justify-content:center;">
       <button id="acceptAppointmentBtn" class="action-button accept-button enhanced-btn" data-id="">
-        <i class="fas fa-check-circle"></i> Accept
+        <i class="fas fa-check-circle"></i> 
+        <span class="btn-text">Accept</span>
+        <span class="btn-spinner" style="display:none;">
+          <i class="fas fa-spinner fa-spin"></i>
+        </span>
       </button>
       <button id="declineAppointmentBtn" class="action-button decline-button enhanced-btn" data-id="">
-        <i class="fas fa-times-circle"></i> Decline
+        <i class="fas fa-times-circle"></i> 
+        <span class="btn-text">Decline</span>
+        <span class="btn-spinner" style="display:none;">
+          <i class="fas fa-spinner fa-spin"></i>
+        </span>
       </button>
       <button id="completeAppointmentBtn" class="action-button complete-button enhanced-btn" data-id="">
-        <i class="fas fa-flag-checkered"></i> Complete
+        <i class="fas fa-flag-checkered"></i> 
+        <span class="btn-text">Complete</span>
+        <span class="btn-spinner" style="display:none;">
+          <i class="fas fa-spinner fa-spin"></i>
+        </span>
       </button>
-      <div id="declineReasonContainer" style="display: none; margin-top: 1rem;">
-        <label for="declineReason" class="enhanced-label">
-          <i class="fas fa-comment-dots"></i> Reason for Declining:
-        </label>
-        <textarea id="declineReason" placeholder="Enter reason..." rows="3" class="enhanced-textarea"></textarea>
+    </div>
+    <div id="declineReasonContainer" style="display:none;margin-top:1.2rem;">
+      <label for="declineReason" class="enhanced-label" style="margin-bottom:0.4rem;">
+        <i class="fas fa-comment-dots"></i> Reason for Declining:
+      </label>
+      <textarea id="declineReason" placeholder="Enter reason..." rows="3" class="enhanced-textarea"></textarea>
+      <div style="display:flex;gap:0.7rem;justify-content:center;">
         <button id="confirmDeclineBtn" class="action-button decline-button enhanced-btn">
-          <i class="fas fa-check"></i> Confirm Decline
+          <i class="fas fa-check"></i> 
+         <span class="btn-text">Confirm Decline</span>
+        <span class="btn-spinner" style="display:none;">
+          <i class="fas fa-spinner fa-spin"></i>
+        </span>
         </button>
         <button id="cancelDeclineBtn" class="action-button cancel-button enhanced-btn">
           <i class="fas fa-undo"></i> Cancel
         </button>
-        <form id="noShowForm" method="POST" action="{{ route('appointments.no_show', 0) }}" style="display:none; margin-left: 10px;">
-          @csrf
-          <button type="submit" class="action-button warning-button enhanced-btn">
-              <i class="fas fa-user-slash"></i> Mark Customer as No-Show
-          </button>
-      </form>
       </div>
+      <form id="noShowForm" method="POST" action="{{ route('appointments.no_show', 0) }}" style="display:none;margin-top:1rem;">
+        @csrf
+        <button type="submit" class="action-button warning-button enhanced-btn">
+          <i class="fas fa-user-slash"></i> 
+          <span class="btn-text">Mark Customer as No-Show</span>
+          <span class="btn-spinner" style="display:none;">
+            <i class="fas fa-spinner fa-spin"></i>
+          </span>
+        </button>
+      </form>
     </div>
   </div>
 </div>
@@ -97,11 +153,17 @@
     document.getElementById('appointmentContact').textContent = data.contact || 'N/A';
     document.getElementById('appointmentStatus').textContent = data.status || 'N/A';
     document.getElementById('appointmentNotes').textContent = data.notes || 'None';
-
+    document.getElementById('appointmentSubservices').textContent =
+     Array.isArray(data.subservices) && data.subservices.length
+    ? data.subservices.join(', ')
+    : 'N/A';
     const paymentStatusElement = document.getElementById('appointmentPaymentStatus');
     if (data.status.toLowerCase() === 'completed') {
         if (data.final_payment_status === 'paid') {
             paymentStatusElement.textContent = 'Paid';
+            paymentStatusElement.className = 'font-medium text-green-600';
+         } else if (data.final_payment_status === 'paid_cash') {
+            paymentStatusElement.textContent = 'Paid (Cash)';
             paymentStatusElement.className = 'font-medium text-green-600';
         } else if (parseFloat(data.commitment_fee || 0) > 0) {
             paymentStatusElement.textContent = 'Partial (Commitment Fee Only)';
@@ -117,8 +179,8 @@
     
     // Payment amount
     const paymentAmountElement = document.getElementById('appointmentPaymentAmount');
-    if (data.final_payment_status === 'paid' && data.total_amount) {
-        paymentAmountElement.textContent = `₱${parseFloat(data.total_amount).toFixed(2)}`;
+   if ((data.final_payment_status === 'paid' || data.final_payment_status === 'paid_cash') && data.total_amount) {
+    paymentAmountElement.textContent = `₱${parseFloat(data.total_amount).toFixed(2)}`;
     } else if (parseFloat(data.commitment_fee || 0) > 0) {
         paymentAmountElement.textContent = `₱${parseFloat(data.commitment_fee).toFixed(2)} (Commitment Fee)`;
     } else {
@@ -203,6 +265,7 @@ if (noShowForm) {
 
   // Accept Appointment
   acceptBtn.addEventListener('click', function () {
+     showSpinnerOnButton(this);
     const appointmentId = this.dataset.id;
     if (!appointmentId) return alert('No appointment selected.');
 
@@ -218,7 +281,8 @@ if (noShowForm) {
       return response.json();
     })
     .then(data => {
-      alert('Appointment accepted!');
+        restoreButton(this, 'Accept');
+      
       appointmentModal.style.display = 'none';
       window.location.reload(); // Reload appointments list/table
     })
@@ -240,15 +304,16 @@ if (noShowForm) {
 
   // Confirm Decline Button
   confirmDeclineBtn.addEventListener('click', function () {
+   
     const appointmentId = declineBtn.dataset.id;
     const declineReason = document.getElementById('declineReason').value.trim();
-
+     
     
 
     if (!confirm('Are you sure you want to decline this appointment?')) {
       return;
     }
-
+       showSpinnerOnButton(this);
     fetch(`/appointments/decline/${appointmentId}`, {
       method: 'POST',
       headers: {
@@ -262,7 +327,8 @@ if (noShowForm) {
       return response.json();
     })
     .then(data => {
-      alert(data.message || 'Appointment declined!');
+      restoreButton(this, 'Confirm Decline');
+      
       appointmentModal.style.display = 'none';
       resetModalState();
       window.location.reload(); // Refresh your data
@@ -289,7 +355,7 @@ completeBtn.addEventListener('click', function () {
     if (!appointmentId) return alert('No appointment selected.');
 
     if (!confirm('Are you sure you want to mark this appointment as completed?')) return;
-
+    showSpinnerOnButton(this);
     fetch(`/appointments/${appointmentId}/complete`, {
         method: 'POST',
         headers: {
@@ -305,7 +371,8 @@ completeBtn.addEventListener('click', function () {
         return response.json();
     })
     .then(data => {
-        alert(data.message || 'Appointment marked as completed!');
+       restoreButton(this, 'Complete');
+      
         appointmentModal.style.display = 'none';
        window.location.reload(); // Refresh your events if using fullCalendar
     })
@@ -316,5 +383,4 @@ completeBtn.addEventListener('click', function () {
 });
 
 
- 
 </script>

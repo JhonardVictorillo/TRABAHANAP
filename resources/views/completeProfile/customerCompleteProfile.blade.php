@@ -111,20 +111,16 @@
                             @enderror
                         </div>
                         
-                        <div class="cc-input-group">
-                            <label for="google_map_link">Google Maps Link (Optional)</label>
-                            <input type="url" name="google_map_link" id="google_map_link" placeholder="Paste your Google Maps link" value="{{ old('google_map_link', $user->google_map_link ?? '') }}">
-                            @error('google_map_link')
+                       <div class="cc-input-group">
+                            <label for="barangay">Barangay</label>
+                            <input type="text" name="barangay" id="barangay" placeholder="Your barangay" value="{{ old('barangay', $user->barangay ?? '') }}">
+                            @error('barangay')
                                 <div class="cc-error-message">{{ $message }}</div>
                             @enderror
                         </div>
                     </div>
                     
-                    <!-- Map Preview -->
-                    <div id="mapPreview" class="cc-map-preview" style="display:none">
-                        <h4><i class='bx bx-map-pin'></i> Map Location Preview</h4>
-                        <iframe id="embeddedMap" width="100%" height="250" frameborder="0" style="border:0; border-radius: 8px;" allowfullscreen="" loading="lazy"></iframe>
-                    </div>
+                    
                 </div>
                 
                 <button type="submit" class="cc-submit-btn"><i class='bx bx-check'></i> Complete Profile</button>
@@ -167,52 +163,40 @@
                 });
             }
             
-            // Google Maps preview
-            const mapInput = document.getElementById('google_map_link');
-            const mapPreview = document.getElementById('mapPreview');
-            const embeddedMap = document.getElementById('embeddedMap');
-            
-            if (mapInput && mapPreview && embeddedMap) {
-                mapInput.addEventListener('input', function() {
-                    const url = mapInput.value;
-                    
-                    if (url.includes('maps.app.goo.gl') || url.includes("google.com/maps")) {
-                        try {
-                            const embedUrl = convertToEmbedURL(url);
-                            embeddedMap.src = embedUrl;
-                            mapPreview.style.display = 'block';
-                        } catch (e) {
-                            mapPreview.style.display = 'none';
-                            embeddedMap.src = '';
-                        }
-                    } else {
-                        mapPreview.style.display = 'none';
-                        embeddedMap.src = '';
-                    }
-                });
-                
-                function convertToEmbedURL(url) {
-                    if (url.includes("maps.app.goo.gl")) {
-                        // Short URL handling
-                        return `https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3861.802548850901!2d121.04882897485761!3d14.554743382575185!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397c8efd99aad53%3A0xb64b39847a866fde!2sMakati%20City%2C%20Metro%20Manila!5e0!3m2!1sen!2sph!4v1698123909569!5m2!1sen!2sph`;
-                    }
-                    
-                    if (url.includes("google.com/maps")) {
-                        const match = url.match(/@(.*),(.*),([\d\.]*)z/);
-                        if (match) {
-                            const lat = match[1];
-                            const lng = match[2];
-                            return `https://www.google.com/maps/embed/v1/view?key=YOUR_API_KEY&center=${lat},${lng}&zoom=14&maptype=roadmap`;
-                        } else if (url.includes("place")) {
-                            return url.replace("/maps/place/", "/maps/embed/v1/place?key=YOUR_API_KEY&q=");
-                        } else if (url.includes("embed")) {
-                            return url;
-                        }
-                    }
-                    
-                    throw new Error("Invalid map URL");
-                }
-            }
-        @endif
+        @endif   
     });
+
+
+    document.getElementById('customerProfileForm').addEventListener('submit', function(e) {
+    let errors = [];
+    // Personal Details
+    if (!document.getElementById('firstname').value.trim()) errors.push('First name is required.');
+    if (!document.getElementById('lastname').value.trim()) errors.push('Last name is required.');
+    if (!document.getElementById('email').value.trim()) errors.push('Email is required.');
+    if (!document.getElementById('contact_number').value.trim()) errors.push('Contact number is required.');
+    if (!document.getElementById('profilePictureInput').files.length) errors.push('Profile picture is required.');
+    // Address
+    if (!document.getElementById('province').value.trim()) errors.push('Province is required.');
+    if (!document.getElementById('city').value.trim()) errors.push('City is required.');
+    if (!document.getElementById('zipcode').value.trim()) errors.push('Zipcode is required.');
+
+    // Show errors if any
+    let errorBox = document.getElementById('customerProfileFormErrors');
+    if (!errorBox) {
+        errorBox = document.createElement('div');
+        errorBox.id = 'customerProfileFormErrors';
+        errorBox.className = 'cc-error-message mb-2 text-red-500';
+        this.prepend(errorBox);
+    }
+    errorBox.innerHTML = '';
+    if (errors.length) {
+        errors.forEach(msg => {
+            const p = document.createElement('p');
+            p.textContent = msg;
+            errorBox.appendChild(p);
+        });
+        e.preventDefault();
+        window.scrollTo(0, 0);
+    }
+});
 </script>

@@ -26,7 +26,8 @@ class HomepageController extends Controller
         ->get();
 
          $categories =Category::all();
+           $ipGeoApiKey = env('IPGEOLOCATION_API_KEY');
 
-    return view('homepage', compact('posts', 'categories'));
+    return view('homepage', compact('posts', 'categories', 'ipGeoApiKey'));
     }
 }

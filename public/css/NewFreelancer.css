@@ -110,7 +110,7 @@
     align-items: center;
     justify-content: space-between;
     padding: 0 20px;
-    z-index: 100;
+    z-index: 10;
   }
   
   .search-area {
@@ -815,7 +815,7 @@
   }
 }
 
-@media (max-width: a768px) {
+@media (max-width: 768px) {
   .works-grid {
     grid-template-columns: 1fr;
   }
@@ -1505,6 +1505,148 @@ input:invalid {
   color: #2563eb;
   margin-bottom: 1.2rem;
   text-align: center;
+}
+
+/* Appointment Modal Grid Layout */
+.appt-details-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 18px;
+}
+
+.appt-detail {
+  display: flex;
+  flex-direction: column;
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 1rem;
+  color: #333;
+}
+
+.appt-label {
+  font-size: 13px;
+  color: #2563eb;
+  font-weight: 500;
+  margin-bottom: 2px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.appt-value {
+  font-size: 15px;
+  font-weight: 500;
+  color: #333;
+  word-break: break-word;
+}
+
+.appt-notes {
+  background: #eef2ff;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 1rem;
+  color: #333;
+  margin-top: 1.2rem;
+}
+
+@media (max-width: 600px) {
+  .appt-details-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  .appt-detail, .appt-notes {
+    font-size: 0.98rem;
+    padding: 8px 8px;
+  }
+  .enhanced-modal {
+    padding: 1.2rem 0.5rem 1.2rem 0.5rem !important;
+    max-width: 98vw !important;
+  }
+}
+
+/* Button spacing and alignment */
+.enhanced-actions {
+  gap: 0.7rem;
+  justify-content: center;
+  margin-top: 1.5rem;
+  flex-wrap: wrap;
+}
+
+/* Decline reason area */
+#declineReasonContainer {
+  margin-top: 1.2rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.enhanced-label {
+  color: #d32f2f;
+  font-weight: 500;
+  margin-bottom: 0.4rem;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.enhanced-textarea {
+  width: 100%;
+  border-radius: 0.7rem;
+  border: 1.5px solid #ddd;
+  padding: 0.7rem;
+  margin-bottom: 0.7rem;
+  font-size: 1rem;
+  resize: vertical;
+  background: #fafafa;
+  transition: border 0.18s;
+}
+
+.enhanced-textarea:focus {
+  border: 1.5px solid #2563eb;
+  outline: none;
+}
+
+/* No-Show Button */
+#noShowForm {
+  margin-top: 1rem;
+  text-align: center;
+}
+
+/* Modal Title */
+.enhanced-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #2563eb;
+  margin-bottom: 1.2rem;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+/* Close Button */
+.enhanced-close {
+  position: absolute;
+  top: 1.1rem;
+  right: 1.1rem;
+  background: #f3f3f3;
+  color: #888;
+  border: none;
+  border-radius: 50%;
+  width: 2.2rem;
+  height: 2.2rem;
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: background 0.18s, color 0.18s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.enhanced-close:hover {
+  background: #e0e0e0;
+  color: #222;
 }
 /* Improved Profile Header Layout */
 .profile-header-layout {
@@ -2475,6 +2617,8 @@ label {
    background-color: #2563eb !important; /* Changed from #007bff */
   border-color: #2563eb !important;
   border: none;
+  color: white;
+  margin: 5px;
 }
 
 .btn-primary:hover {
@@ -3179,7 +3323,7 @@ label {
 
 .fc-welcome-icon {
     font-size: 60px;
-    color: #118f39;
+    color:#2563eb;
     margin-bottom: 20px;
 }
 
@@ -3202,7 +3346,7 @@ label {
     max-width: 300px;
     margin: 20px auto 40px;
     padding: 15px;
-    background-color: #118f39;
+    background-color: #2563eb;
     color: white;
     border: none;
     border-radius: 6px;
@@ -3213,7 +3357,7 @@ label {
 }
 
 .fc-complete-btn:hover {
-    background-color: #0e7a30;
+    background-color: #1d4ed8;
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(17, 143, 57, 0.2);
 }
@@ -3227,7 +3371,7 @@ label {
 
 .fc-progress-bar {
     height: 100%;
-    background-color: #118f39;
+    background-color: #2563eb;
     width: 0%;
     transition: width 0.5s ease;
 }
@@ -3274,7 +3418,7 @@ label {
 }
 
 .fc-form-step h3 i {
-    color: #118f39;
+    color: #2563eb;
     font-size: 20px;
 }
 
@@ -3369,7 +3513,7 @@ label {
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(17, 143, 57, 0.7);
+    background-color: #2563eb;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -3426,7 +3570,7 @@ label {
 }
 
 .fc-id-preview-header i {
-    color: #118f39;
+    color: #2563eb;
 }
 
 .fc-id-preview-image {
@@ -3453,7 +3597,7 @@ label {
 .fc-upload-label {
     display: inline-block;
     padding: 8px 16px;
-    background-color: #118f39;
+    background-color: #2563eb;
     color: white;
     border-radius: 4px;
     cursor: pointer;
@@ -3507,7 +3651,7 @@ label {
 
 .fc-category-icon {
     font-size: 24px;
-    color: #118f39;
+    color: #2563eb;
 }
 
 .fc-card-content p {
@@ -3519,7 +3663,7 @@ label {
     position: absolute;
     top: -10px;
     right: -10px;
-    background-color: #118f39;
+    background-color: #2563eb;
     color: white;
     border-radius: 50%;
     font-size: 20px;
@@ -3649,7 +3793,7 @@ label {
     margin-right: 12px;
     width: 18px;
     height: 18px;
-    accent-color: #118f39;
+    accent-color: #2563eb;
 }
 
 .fc-category-label {
@@ -3661,11 +3805,11 @@ label {
 /* Selected state */
 .fc-category-radio:checked + .fc-category-label {
     font-weight: 600;
-    color: #118f39;
+    color: #2563eb;
 }
 
 .fc-category-radio:checked ~ .fc-category-radio-container {
-    border-color: #118f39;
+    border-color: #2563eb;
     box-shadow: 0 2px 8px rgba(17, 143, 57, 0.1);
 }
 
@@ -3819,7 +3963,7 @@ label {
 
 .leaflet-control-geocoder-form input:focus {
     outline: none;
-    border-color: #118f39;
+    border-color: #1d4ed8 !important;
 }
 
 .leaflet-touch .leaflet-control-layers, 
@@ -4628,6 +4772,46 @@ body.sidebar-active .sidebar-overlay {
   }
 }
 
+
+/* Make info-grid stack items vertically on mobile */
+@media (max-width: 600px) {
+  .info-grid {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+  }
+  .info-item {
+    flex-direction: row !important;
+    align-items: center !important;
+    padding: 10px !important;
+    background: #eef2ff !important;
+    border-radius: 10px !important;
+    margin-bottom: 0 !important;
+    box-shadow: none !important;
+  }
+  .info-icon {
+    min-width: 36px !important;
+    height: 36px !important;
+    font-size: 20px !important;
+    margin-right: 10px !important;
+  }
+  .info-content {
+    flex: 1 !important;
+    min-width: 0 !important;
+  }
+  .info-label {
+    font-size: 13px !important;
+    color: #666 !important;
+    margin-bottom: 2px !important;
+  }
+  .info-value {
+    font-size: 15px !important;
+    font-weight: 500 !important;
+    color: #2563eb !important;
+    word-break: break-word !important;
+  }
+}
+
  .notification-container {
     position: absolute !important;
     top: 60px !important;
@@ -4904,4 +5088,84 @@ body.sidebar-active .sidebar-overlay {
     margin-left: 6px;
   }
 
+
+  /* Responsive styles for appointment section using existing classnames */
+@media (max-width: 600px) {
+  .appointment-calendar {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(37,99,235,0.08);
+    padding: 16px 8px;
+    margin: 0 auto 24px auto;
+    max-width: 400px;
+  }
+  .appointment-calendar .text-center {
+    font-size: 1.3rem;
+    color: #2563eb;
+    margin-bottom: 10px;
+    font-weight: 600;
+  }
+  #calendar-container {
+    padding: 0;
+    margin: 0;
+  }
+  #calendar {
+    border-radius: 12px;
+    background: #f8f9fc;
+    box-shadow: none;
+    font-size: 15px;
+  }
+  .fc-toolbar.fc-header-toolbar {
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 8px !important;
+  }
+  .fc-toolbar-title {
+    font-size: 1.1rem !important;
+    color: #2563eb !important;
+    font-weight: 600 !important;
+  }
+  .fc-button, .fc-button-primary {
+    background: #2563eb !important;
+    color: #fff !important;
+    border-radius: 8px !important;
+    border: none !important;
+    padding: 6px 12px !important;
+    font-size: 14px !important;
+  }
+  .fc-list-table, .fc-list-day {
+    background: #fff !important;
+    border-radius: 8px !important;
+    box-shadow: 0 1px 4px rgba(37,99,235,0.06) !important;
+    margin-bottom: 8px !important;
+  }
+  .fc-list-event {
+    border-left: 4px solid #2563eb !important;
+    background: #eef2ff !important;
+    border-radius: 6px !important;
+    margin-bottom: 6px !important;
+    padding: 8px !important;
+  }
+  .fc-list-event-dot {
+    background: #10b981 !important;
+  }
+}
+
   
+#editAvailabilityFormContainer {
+    z-index: 9999 !important;
+}
+
+/* Spinner styles for loading states */ 
+.btn-spinner, .payment-submit-btn .btn-spinner, .p-btn-save .btn-spinner {
+  margin-left: 8px;
+  font-size: 1.2em;
+  vertical-align: middle;
+}
+.btn-primary.disabled,
+.payment-submit-btn.disabled,
+.p-btn-save.disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  pointer-events: none;
+}

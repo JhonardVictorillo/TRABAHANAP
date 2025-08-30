@@ -115,15 +115,18 @@ class FreelancerPayoutController extends Controller
     
 
             // Deduct amount from available balance
-            DB::table('freelancer_earnings')->insert([
-                'amount' => -$request->amount,
-                'source' => 'withdrawal_request',
-                'freelancer_id' => $user->id,
-                'date' => now()->format('Y-m-d'),
-                'notes' => 'Withdrawal request #' . $withdrawal->id,
-                'created_at' => now(),
-                'updated_at' => now()
-            ]);
+              
+              if ($withdrawal->status === 'pending') {
+                DB::table('freelancer_earnings')->insert([
+                    'amount' => -$request->amount,
+                    'source' => 'withdrawal_request',
+                    'freelancer_id' => $user->id,
+                    'date' => now()->format('Y-m-d'),
+                    'notes' => 'Withdrawal request #' . $withdrawal->id,
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ]);
+            }
 
             DB::commit();
 

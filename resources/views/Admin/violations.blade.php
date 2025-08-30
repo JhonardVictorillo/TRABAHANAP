@@ -28,7 +28,10 @@
                 >
             </div>
             <button type="submit" style="padding: 8px 18px; border-radius: 20px; background: #2563eb; color: #fff; border: none; font-size: 15px; cursor: pointer;">
-                Search
+                 <span class="btn-text">Search</span>
+                    <span class="btn-spinner" style="display:none;">
+                        <i class="fas fa-spinner fa-spin"></i>
+                    </span>
             </button>
         </form>
 
@@ -93,13 +96,13 @@
                             </td>
                             <td class="actions-cell">
                                 <div class="action-buttons">
-                                    <button class="action-btn warning-btn" onclick="sendWarning({{ $violation->violation_id }}, '{{ $role }}')">
+                                    <button class="action-btn warning-btn" onclick="sendWarning({{ $violation->violation_id }}, '{{ $role }}', this)">
                                         Warning
                                     </button>
-                                    <button class="action-btn suspend-btn" onclick="toggleSuspension({{ $violation->violation_id }}, '{{ $role }}')">
+                                    <button class="action-btn suspend-btn" onclick="toggleSuspension({{ $violation->violation_id }}, '{{ $role }}', this)">
                                         Suspend
                                     </button>
-                                    <button class="action-btn more-btn" onclick="showMoreOptions({{ $violation->violation_id }}, '{{ $role }}')">
+                                    <button class="action-btn more-btn" onclick="showMoreOptions({{ $violation->violation_id }}, '{{ $role }}', this)">
                                         <i class="fas fa-ellipsis-v"></i>
                                     </button>
                                 </div>
@@ -112,25 +115,7 @@
         
         <!-- Pagination -->
         <div class="category-pagination-container">
-            @if($violations->previousPageUrl())
-            <a href="{{ $violations->appends(['search' => request('search'), 'section' => 'violations', 'role' => request('role', 'all')])->previousPageUrl() }}" class="category-pagination-btn">
-                <i class="fas fa-arrow-left"></i> Previous
-            </a>
-            @else
-            <button class="category-pagination-btn category-btn-disabled" disabled>
-                <i class="fas fa-arrow-left"></i> Previous
-            </button>
-            @endif
-            
-            @if($violations->hasMorePages())
-            <a href="{{ $violations->appends(['search' => request('search'), 'section' => 'violations', 'role' => request('role', 'all')])->nextPageUrl() }}" class="category-pagination-btn">
-                Next <i class="fas fa-arrow-right"></i>
-            </a>
-            @else
-            <button class="category-pagination-btn category-btn-disabled" disabled>
-                Next <i class="fas fa-arrow-right"></i>
-            </button>
-            @endif
+          {{ $violations->appends(request()->except('violationPage'))->links() }}
         </div>
     </div>
 
@@ -268,8 +253,18 @@
         </div>
         
         <div class="settings-actions">
-            <button class="save-settings-btn">Save Settings</button>
-            <button class="reset-settings-btn">Reset to Default</button>
+            <button class="save-settings-btn">
+                <span class="btn-text">Save Settings</span>
+                <span class="btn-spinner" style="display:none;">
+                    <i class="fas fa-spinner fa-spin"></i>
+                </span>
+             </button>
+            <button class="reset-settings-btn">
+                <span class="btn-text">Reset to Default</span>
+                <span class="btn-spinner" style="display:none;">
+                    <i class="fas fa-spinner fa-spin"></i>
+                </span>
+            </button>
         </div>
     </div>
 </div>
@@ -484,8 +479,9 @@ document.addEventListener('DOMContentLoaded', function() {
     });
    
     // Action button handlers
-   window.sendWarning = function(violationId, role) {
+   window.sendWarning = function(violationId, role, button) {
     if (confirm('Send a warning to this ' + role + '?')) {
+       showSpinnerOnButton(button);
         // AJAX request to send warning
         fetch('/admin/violations/warning', {
             method: 'POST',
@@ -501,6 +497,7 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
+                restoreButton(Button, 'Warning');
                 alert('Warning sent successfully!');
                 location.reload();
             } else {
@@ -510,9 +507,10 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 };
 
-window.toggleSuspension = function(violationId, role) {
+window.toggleSuspension = function(violationId, role, button) {
     if (confirm('Toggle suspension for this ' + role + '?')) {
         // AJAX request to toggle suspension
+        showSpinnerOnButton(button);
         fetch('/admin/violations/suspend', {
             method: 'POST',
             headers: {
@@ -526,6 +524,7 @@ window.toggleSuspension = function(violationId, role) {
         })
         .then(response => response.json())
         .then(data => {
+            restoreButton(button, 'Suspend');
             if (data.success) {
                 alert(data.message);
                 // Refresh the page to update UI
@@ -581,7 +580,8 @@ window.toggleSuspension = function(violationId, role) {
     const role = this.dataset.role;
     const action = document.querySelector('input[name="action"]:checked')?.value;
     const notes = document.getElementById('action-notes').value;
-    
+     const button = this;
+    showSpinnerOnButton(button);
     if (!action) {
         alert('Please select an action');
         return;
@@ -612,6 +612,7 @@ window.toggleSuspension = function(violationId, role) {
     })
     .then(response => response.json())
     .then(data => {
+        restoreButton(button, 'Apply Action');
         if (data.success) {
             alert('Action applied successfully!');
             modal.style.display = 'none';

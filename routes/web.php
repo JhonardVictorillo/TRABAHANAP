@@ -204,7 +204,7 @@ Route::get('/payment/cancel', [PaymentController::class, 'cancel'])->name('payme
 Route::post('/appointment/{id}/complete-payment', [PaymentController::class, 'createFinalPaymentSession'])->name('payment.final');
 Route::get('/payment/final-success', [PaymentController::class, 'finalPaymentSuccess'])->name('payment.final.success');
 Route::get('/payment/final-cancel', [PaymentController::class, 'finalPaymentCancel'])->name('payment.final.cancel');
-
+Route::post('/customer/appointments/pay-cash', [PaymentController::class, 'payCash'])->name('payment.payCash');
 
 //banned & unbanned freelancer
 Route::post('/admin/user/{id}/ban', [AdminController::class, 'banUser'])->name('admin.user.ban');

@@ -6,7 +6,7 @@
 <div class="dashboard-section" id="dashboardSection" style="display: none;">
     
     <div class="content-header">
-      <h2>Dashboard</h2>
+      <h2 class ="section-title">Dashboard</h2>
     </div>
 
     
@@ -45,7 +45,7 @@
     <!-- Total Freelancers Section -->
     <div class="details-section" id="totalFreelancersSection" style="display: none;">
       <h2>Total Freelancers</h2>
-      <div class="table-container">
+      <div class="admin-table-container">
       <table class="admin-table">
         <thead>
           <tr>
@@ -109,7 +109,7 @@
     <!-- Total Clients Section -->
     <div class="details-section" id="totalClientsSection" style="display: none;">
       <h2>Total Clients</h2>
-      <div class="table-container">
+      <div class="admin-table-container">
       <table class="admin-table">
         <thead>
           <tr>
@@ -155,7 +155,7 @@
     <!-- Pending Accounts Section -->
     <div class="details-section" id="pendingAccountsSection" style="display: none;">
       <h2>Pending Accounts</h2>
-      <div class="table-container">
+      <div class="admin-table-container">
       <table class="admin-table">
         <thead>
           <tr>
@@ -187,13 +187,23 @@
                     <!-- Accept Button -->
                     <form action="{{ route('admin.verifyFreelancer', $freelancer->id) }}" method="POST" style="display:inline;">
                         @csrf
-                        <button type="submit" class="accept-btn">Accept</button>
+                        <button type="submit" class="accept-btn">
+                        <span class="btn-text">Accept</span>
+                        <span class="btn-spinner" style="display:none;">
+                          <i class="fas fa-spinner fa-spin"></i>
+                        </span>
+                        </button>
                     </form>
 
                     <!-- Decline Button -->
                     <form action="{{ route('admin.rejectFreelancer', $freelancer->id) }}" method="POST" style="display:inline;">
                         @csrf
-                        <button type="submit" class="decline-btn">Decline</button>
+                        <button type="submit" class="decline-btn">
+                          <span class="btn-text">Decline</span>
+                          <span class="btn-spinner" style="display:none;">
+                            <i class="fas fa-spinner fa-spin"></i>
+                          </span>
+                        </button>
                     </form>
                     @else
                 <!-- Optional: Display additional action for verified users if needed -->
@@ -211,7 +221,7 @@
     <!-- Pending Posts Section -->
     <div class="details-section" id="pendingPostsSection" style="display: none;">
     <h2>Pending Posts</h2>
-    <div class="table-container">
+    <div class="admin-table-container">
         <table class="admin-table">
           <thead>
             <tr>
@@ -260,8 +270,18 @@
                 </td>
               <td>
                @if(!$post->approved)
-                  <button class="approve-btn" data-id="{{ $post->id }}">Approve</button>
-                  <button class="reject-btn" data-id="{{ $post->id }}">Reject</button>
+                  <button class="approve-btn" data-id="{{ $post->id }}">
+                    <span class="btn-text">Approve</span>
+                    <span class="btn-spinner" style="display:none;">
+                      <i class="fas fa-spinner fa-spin"></i>
+                    </span>
+                  </button>
+                  <button class="reject-btn" data-id="{{ $post->id }}">
+                    <span class="btn-text">Reject</span>
+                    <span class="btn-spinner" style="display:none;">
+                      <i class="fas fa-spinner fa-spin"></i>
+                    </span>
+                  </button>
               @else
                   <span>Approved</span>
               @endif
@@ -296,7 +316,7 @@
 
     function approvePost(postId, button) {
         if (!confirm("Are you sure you want to approve this post?")) return;
-
+         showSpinnerOnButton(button);
         fetch(`/admin/posts/${postId}/approve`, {
             method: 'PUT',
             headers: {
@@ -306,6 +326,7 @@
         })
         .then(response => response.json())
         .then(data => {
+           restoreButton(button, 'Approve');
             if (data.success) {
                 alert(data.message);
                 updatePostRow(button.closest('tr'), 'approved');
@@ -318,7 +339,7 @@
 
     function rejectPost(postId, button) {
         if (!confirm("Are you sure you want to reject this post?")) return;
-
+        showSpinnerOnButton(button);
         fetch(`/admin/posts/${postId}/reject`, {
             method: 'PUT',
             headers: {
@@ -328,6 +349,7 @@
         })
         .then(response => response.json())
         .then(data => {
+            restoreButton(button, 'Reject');
             if (data.success) {
                 alert(data.message);
                 updatePostRow(button.closest('tr'), 'rejected');

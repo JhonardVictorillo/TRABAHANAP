@@ -73,7 +73,10 @@
                         <input type="time" name="end_time" id="end_time" class="w-full mt-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary" required>
                     </div>
                     <button type="submit" class="w-full px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">
-                        Save Availability
+                     <span class="btn-text">Save Availability</span>
+                    <span class="btn-spinner" style="display:none;">
+                        <i class="fas fa-spinner fa-spin"></i>
+                    </span>
                     </button>
                 </form>
             </div>
@@ -99,14 +102,20 @@
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                     </svg>
-                                    Edit
+                                  <span class="btn-text">Edit</span>
+                                    <span class="btn-spinner" style="display:none;">
+                                        <i class="fas fa-spinner fa-spin"></i>
+                                    </span>
                                 </button>
                                 <button class="delete-availability-btn flex items-center px-3 py-1 bg-red-500 text-white rounded-lg hover:bg-red-600 transition"
                                     data-availability-id="{{ $availability->id }}">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                     </svg>
-                                    Delete
+                                   <span class="btn-text">Delete</span>
+                                    <span class="btn-spinner" style="display:none;">
+                                        <i class="fas fa-spinner fa-spin"></i>
+                                    </span>
                                 </button>
                             </div>
                         </div>
@@ -125,7 +134,7 @@
     </div>
 
     <!-- Edit Availability Modal -->
-    <div id="editAvailabilityFormContainer" class="hidden fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center z-50">
+    <div id="editAvailabilityFormContainer" class="hidden fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center z-500">
         <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
             <div class="flex justify-between items-center mb-4">
                 <h4 class="text-md font-semibold">Edit Availability</h4>
@@ -153,10 +162,16 @@
                 </div>
                 <div class="flex justify-end space-x-4">
                     <button type="button" id="closeEditModalBtn" class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition">
-                        Cancel
+                      <span class="btn-text">Cancel</span>
+                        <span class="btn-spinner" style="display:none;">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </span>
                     </button>
                     <button type="submit" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition">
-                        Update Availability
+                      <span class="btn-text">Save Availability</span>
+                        <span class="btn-spinner" style="display:none;">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </span>
                     </button>
                 </div>
             </form>
@@ -207,6 +222,8 @@
         const editForm = document.getElementById('editAvailabilityForm');
         editForm.addEventListener('submit', function (event) {
             event.preventDefault(); // Prevent default form submission
+            const submitBtn = editForm.querySelector('button[type="submit"]');
+            showSpinnerOnButton(submitBtn);
 
             const availabilityId = document.getElementById('editAvailabilityId').value;
             const date = document.getElementById('edit_date').value;
@@ -234,6 +251,7 @@
                 .then(data => {
                     console.log('Response Data:', data); // Debugging
                     if (data.success) {
+                        restoreButton(submitBtn, 'Save Availability');
                         alert(data.message); // Show success message
                         location.reload(); // Reload the page to update the availability list
                     } else {
@@ -252,6 +270,7 @@
                     
                 const availabilityId = button.getAttribute('data-availability-id');
                 if (confirm('Are you sure you want to delete this availability?')) {
+                     showSpinnerOnButton(button);
                     fetch(`/freelancer/availabilities/${availabilityId}`, {
                         method: 'DELETE',
                         headers: {
@@ -260,6 +279,7 @@
                     })
                         .then(response => response.json())
                         .then(data => {
+                                restoreButton(button, 'Delete');
                             if (data.success) {
                                 alert('Availability deleted successfully!');
                                 location.reload(); // Reload the page to update the availability list
