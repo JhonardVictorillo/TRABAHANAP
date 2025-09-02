@@ -59,7 +59,13 @@ class LoginController extends Controller
             ])->withInput();
         }
 
-
+         // Check for active restriction
+    if ($user->hasRestrictions()) {
+        Auth::logout();
+        return redirect()->back()->withErrors([
+            'email' => 'Your account is restricted until ' . optional($user->restriction_end)->format('M d, Y') . '.',
+        ])->withInput();
+    }
 
       // Check if the user's email is verified
       if (is_null($user->email_verified_at)) {
@@ -69,6 +75,12 @@ class LoginController extends Controller
           ])->withInput();
       }
 
+    // Automatically lift suspension if the period has ended
+       $user->isSuspended();
+
+          if ($user->is_restricted && $user->restriction_end && now()->greaterThanOrEqualTo($user->restriction_end)) {
+        $user->removeRestrictions();
+    }
           
       // Redirect to the dashboard based on the user's role
         if (Auth::user()->role === 'freelancer') {

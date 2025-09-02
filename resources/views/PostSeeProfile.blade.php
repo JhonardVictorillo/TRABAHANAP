@@ -117,7 +117,7 @@
                                 <div class="w-4 h-4 flex items-center justify-center">
                                     <i class="ri-map-pin-line"></i>
                                 </div>
-                                <span>{{ $freelancer->province }}, {{ $freelancer->city }}, {{ $freelancer->zipcode }}</span>
+                                <span>{{ $freelancer->province }}, {{ $freelancer->city }}, {{$freelancer->barangay}}, {{ $freelancer->zipcode }}</span>
                             </div>
                         </div>
                         <div class="flex items-center gap-4">
@@ -133,37 +133,40 @@
                 <!-- Stats Section -->
                  <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 bg-gray-50 rounded-lg mb-6">
                     <div class="text-center">
-                        <div class="text-2xl font-semibold mb-1">98%</div>
+                           <div class="text-2xl font-semibold mb-1">
+                                {{ $freelancer->jobSuccessRate() }}%
+                            </div>
                         <p class="text-sm text-gray-600">Job Success</p>
                     </div>
                     <div class="text-center">
-                        <div class="text-2xl font-semibold mb-1">156</div>
+                         <div class="text-2xl font-semibold mb-1">
+                                {{ $freelancer->posts->count() }}
+                            </div>
                         <p class="text-sm text-gray-600">Projects</p>
                     </div>
                     <div class="text-center">
-                        <div class="text-2xl font-semibold mb-1">2 hrs</div>
-                        <p class="text-sm text-gray-600">Avg. Response</p>
+                       <div class="text-2xl font-semibold mb-1">
+                            {{ $freelancer->appointments->count() }}
+                        </div>
+                        <p class="text-sm text-gray-600">Total Appointments</p>
                     </div>
-                    <div class="text-center">
-                        <div class="text-2xl font-semibold mb-1">5+ yrs</div>
-                        <p class="text-sm text-gray-600">Experience</p>
+                  <div class="text-center">
+                    <div class="text-2xl font-semibold mb-1">
+                        {{ $freelancer->experience_years ?? 'N/A' }} yrs
                     </div>
+                    <p class="text-sm text-gray-600">Experience</p>
+                </div>
                 </div>
                
             <p class="text-gray-600 leading-relaxed mb-8">
-              I'm a results-driven digital marketing specialist with over 5
-              years of experience helping businesses grow their online presence.
-              My expertise spans across SEO, social media marketing, content
-              strategy, and paid advertising. I take a data-driven approach to
-              create comprehensive marketing strategies that deliver measurable
-              results.
+                {{ $freelancer->bio ?? 'No bio provided.' }}
             </p>
                 <!-- Portfolio Section -->
                 <div class="border-t pt-8">
                     <h3 class="text-lg font-semibold mb-6">Recent works</h3>
                     <div class="grid grid-cols-2 gap-6">
-                        @forelse ($freelancer->posts as $post)
-                            @forelse ($post->pictures as $picture)
+                        @forelse ($freelancer->posts as $portfolioPost)
+                            @forelse ($portfolioPost->pictures as $picture)
                                 <div class="bg-white rounded-lg overflow-hidden shadow-sm">
                                     <img
                                         src="{{ asset('storage/' . $picture->image_path) }}"
@@ -278,6 +281,8 @@
     </div>
     <form id="bookingForm" method="POST" action="{{ route('pay.commitment') }}" class="flex flex-col h-full">
       @csrf
+     
+     <input type="hidden" id="locationRestriction" value="{{ $post->location_restriction ?? 'open' }}">
       <input type="hidden" name="freelancer_id" value="{{ $freelancer->id }}">
       <input type="hidden" name="post_id" value="{{ $post->id }}">
       <input type="hidden" id="selectedDate" name="date" required>
@@ -624,12 +629,71 @@ function convertTo12HourFormat(hour) {
         updateCalendar();
     });
 
+
+    // Location-based restriction logic
+
+    bookButton.addEventListener("click", function (e) {
+        e.preventDefault(); // Prevent default modal opening
+        const locationRestriction = document.getElementById("locationRestriction").value;
+        console.log("Location restriction:", locationRestriction); // Add this debugging line
+        
+        // Only check location if restriction is 'minglanilla_only'
+        if (locationRestriction === "minglanilla_only") {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function (position) {
+                    // Location check for minglanilla_only services
+                    const minglanillaLat = 10.2451;
+                    const minglanillaLng = 123.7857;
+                    const userLat = position.coords.latitude;
+                    const userLng = position.coords.longitude;
+
+                    function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
+                        const R = 6371;
+                        const dLat = (lat2 - lat1) * Math.PI / 180;
+                        const dLon = (lon2 - lon1) * Math.PI / 180;
+                        const a =
+                            Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+                        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+                        return R * c;
+                    }
+                    function isInMinglanilla(lat, lng) {
+                        return getDistanceFromLatLonInKm(lat, lng, minglanillaLat, minglanillaLng) <= 5;
+                    }
+
+                    if (!isInMinglanilla(userLat, userLng)) {
+                        showLocationRestrictionModal();
+                        return;
+                    } else {
+                        // Only show booking modal if location is valid
+                        bookingModal.classList.remove("hidden");
+                        currentDate = new Date();
+                        updateCalendar();
+                    }
+                }, function (error) {
+                    // Error handling for geolocation permission denied
+                    showLocationPermissionModal();
+                });
+            } else {
+                // Browser doesn't support geolocation
+                showBrowserNotSupportedModal();
+            }
+        } else {
+            // For "open" services, show booking modal without location check
+            bookingModal.classList.remove("hidden");
+            currentDate = new Date();
+            updateCalendar();
+        }
+    });
+
+
     // Open and close modal
-    bookButton.addEventListener("click", () => {
-        bookingModal.classList.remove("hidden");
-        currentDate = new Date(); // Reset to current month/year
-        updateCalendar(); // Initialize calendar when modal opens
-});
+//     bookButton.addEventListener("click", () => {
+//         bookingModal.classList.remove("hidden");
+//         currentDate = new Date(); 
+//         updateCalendar(); 
+// });
     closeModal.addEventListener("click", () => {
         bookingModal.classList.add("hidden");
     });
@@ -639,6 +703,46 @@ function convertTo12HourFormat(hour) {
             bookingModal.classList.add("hidden");
         }
     });
+     // Separate modals for different error scenarios
+    window.showLocationRestrictionModal = function () {
+        const modal = document.createElement("div");
+        modal.className = "fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50";
+        modal.innerHTML = `
+            <div class="bg-white rounded-xl shadow-lg p-8 max-w-sm mx-auto text-center">
+                <h3 class="text-lg font-semibold mb-4 text-red-600">Service Unavailable</h3>
+                <p class="mb-6 text-gray-700">This service is only available in Minglanilla, Cebu.<br>You are currently outside the service area.</p>
+                <button class="px-4 py-2 bg-primary text-white rounded" onclick="this.closest('.fixed').remove()">Close</button>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    };
+    
+    window.showLocationPermissionModal = function () {
+        const modal = document.createElement("div");
+        modal.className = "fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50";
+        modal.innerHTML = `
+            <div class="bg-white rounded-xl shadow-lg p-8 max-w-sm mx-auto text-center">
+                <h3 class="text-lg font-semibold mb-4 text-yellow-600">Location Access Required</h3>
+                <p class="mb-6 text-gray-700">Please enable location access to book this service.<br>Location is needed to verify you are in the service area.</p>
+                <button class="px-4 py-2 bg-primary text-white rounded" onclick="this.closest('.fixed').remove()">Close</button>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    };
+    
+    window.showBrowserNotSupportedModal = function () {
+        const modal = document.createElement("div");
+        modal.className = "fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50";
+        modal.innerHTML = `
+            <div class="bg-white rounded-xl shadow-lg p-8 max-w-sm mx-auto text-center">
+                <h3 class="text-lg font-semibold mb-4 text-red-600">Browser Not Supported</h3>
+                <p class="mb-6 text-gray-700">Your browser doesn't support location services.<br>Please use a different browser or device.</p>
+                <button class="px-4 py-2 bg-primary text-white rounded" onclick="this.closest('.fixed').remove()">Close</button>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    };
+
 });
 
 
@@ -660,7 +764,93 @@ function convertTo12HourFormat(hour) {
     }
   
   });
-      
+
+
+  function showSpinnerOnButton(button) {
+const btnText = button.querySelector('.btn-text');
+const btnSpinner = button.querySelector('.btn-spinner');
+button.disabled = true;
+button.classList.add('disabled');
+if (btnText) btnText.style.display = 'none';
+if (btnSpinner) btnSpinner.style.display = 'inline-block';
+}
+function restoreButton(button, text) {
+    const btnText = button.querySelector('.btn-text');
+    const btnSpinner = button.querySelector('.btn-spinner');
+    button.disabled = false;
+    button.classList.remove('disabled');
+    if (btnText) btnText.style.display = 'inline-block';
+    if (btnSpinner) btnSpinner.style.display = 'none';
+    if (btnText && text) btnText.textContent = text;
+}
+
+
+document.addEventListener("DOMContentLoaded", function() {
+    // Get the submit button reference
+    const submitButton = document.querySelector('#bookingForm button[type="submit"]');
+    
+    // Initially disable the submit button
+    submitButton.disabled = true;
+    submitButton.classList.add('opacity-50', 'cursor-not-allowed');
+    
+    // Create a validation message element
+    const validationMsg = document.createElement('p');
+    validationMsg.className = 'text-red-500 text-sm mt-2 text-center';
+    validationMsg.innerText = 'Please select both a date and time to proceed';
+    
+    // Insert the validation message before the submit button
+    submitButton.parentNode.insertBefore(validationMsg, submitButton);
+    
+    // Function to check if both date and time are selected
+    function checkFormValidity() {
+        const dateSelected = document.getElementById('selectedDate').value;
+        const timeSelected = document.getElementById('selectedTime').value;
+        
+        if (dateSelected && timeSelected) {
+            submitButton.disabled = false;
+            submitButton.classList.remove('opacity-50', 'cursor-not-allowed');
+            validationMsg.style.display = 'none';
+        } else {
+            submitButton.disabled = true;
+            submitButton.classList.add('opacity-50', 'cursor-not-allowed');
+            validationMsg.style.display = 'block';
+        }
+    }
+    
+    // Monitor date selection
+    const calendarGrid = document.getElementById('calendarGrid');
+    calendarGrid.addEventListener('click', function(e) {
+        // Add a slight delay to ensure the selectedDate is updated
+        setTimeout(checkFormValidity, 100);
+    });
+    
+    // Monitor time selection
+    const timeContainer = document.querySelector("#bookingModal .grid-cols-3");
+    timeContainer.addEventListener('click', function(e) {
+        if (e.target.classList.contains('time-btn')) {
+            // Add a slight delay to ensure the selectedTime is updated
+            setTimeout(checkFormValidity, 100);
+        }
+    });
+    
+    // Add form validation on submit as a backup
+    document.getElementById('bookingForm').addEventListener('submit', function(e) {
+        document.getElementById('notesInput').value = document.getElementById('notes').value;
+        
+        // Double-check validation
+        const date = document.getElementById('selectedDate').value;
+        const time = document.getElementById('selectedTime').value;
+        
+        if (!date || !time) {
+            e.preventDefault();
+            alert('Please select both a date and a time before proceeding to payment.');
+            return false;
+        }
+        
+        const submitBtn = this.querySelector('button[type="submit"]');
+        showSpinnerOnButton(submitBtn);
+    });
+});
 
       </script>
   </body>

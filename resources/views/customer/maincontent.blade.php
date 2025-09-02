@@ -207,7 +207,7 @@
             </div>
 
             <!-- See Profile Button -->
-            <a href="{{ route('freelancer.profile', $post->freelancer->id) }}" class="block">
+            <a href="{{ route('freelancer.profile', ['id' => $post->freelancer_id, 'postId' => $post->id]) }}" class="block">
                <button class="w-full py-2 text-sm font-medium text-white bg-[#2563eb] hover:bg-[#1d4ed8] rounded-lg">
                     See Profile
                 </button>

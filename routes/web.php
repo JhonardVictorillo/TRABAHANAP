@@ -135,7 +135,7 @@ Route::post('/posts', [PostController::class, 'store'])->name('posts.store');
 Route::get('/posts', [PostController::class, 'index'])->name('posts.index');
 
     // post see profile and add appointments in customer view
-Route::get('/freelancer/{id}/profile', [CustomerController::class, 'showFreelancerProfile'])->name('freelancer.profile');
+Route::get('/freelancer/{id}/profile/{postId?}', [CustomerController::class, 'showFreelancerProfile'])->name('freelancer.profile');
 Route::post('/book-appointment', [CustomerController::class, 'bookAppointment'])->name('book.appointment');
 
 

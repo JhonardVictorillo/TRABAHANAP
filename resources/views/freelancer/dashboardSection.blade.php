@@ -107,7 +107,7 @@
               <div class="info-icon"><i class='bx bx-briefcase'></i></div>
               <div class="info-content">
                 <span class="info-label">Experience</span>
-                <span class="info-value">{{ $user->experience_level ?? 'Not specified' }}</span>
+                <span class="info-value">  {{ $user->experience_years ? $user->experience_years . ' yrs' : 'Not specified' }}</span>
               </div>
             </div>
           </div>
@@ -250,9 +250,7 @@
         <button type="button" class="p-tab-btn" data-tab="services">
           <i class='bx bx-category'></i> Services & Skills
         </button>
-        <button type="button" class="p-tab-btn" data-tab="rates">
-          <i class='bx bx-money'></i> Rate Options
-        </button>
+      
         <button type="button" class="p-tab-btn" data-tab="bio">
           <i class='bx bx-message-square-detail'></i> Bio
         </button>
@@ -285,15 +283,11 @@
         </div>
         
         <div class="p-form-group">
-          <label for="experience_level" class="p-label">Experience Level</label>
+          <label for="experience_years" class="p-label">Years of Experience</label>
           <div class="p-input-icon">
             <i class='bx bx-medal'></i>
-            <select id="experience_level" name="experience_level" class="p-select" required>
-              <option value="">Select level</option>
-              <option value="Beginner" {{ $user->experience_level === 'Beginner' ? 'selected' : '' }}>Beginner</option>
-              <option value="Intermediate" {{ $user->experience_level === 'Intermediate' ? 'selected' : '' }}>Intermediate</option>
-              <option value="Expert" {{ $user->experience_level === 'Expert' ? 'selected' : '' }}>Expert</option>
-            </select>
+            <input type="number" id="experience_years" name="experience_years" class="p-input" min="0" max="100"
+              value="{{ $user->experience_years ?? '' }}" placeholder="Enter number of years" required>
           </div>
         </div>
       </div>
@@ -333,10 +327,10 @@
         </div>
         
         <div class="p-form-group">
-          <label for="google_map_link" class="p-label">Google Map Link (Optional)</label>
+          <label for="barangay" class="p-label">Barangay</label>
           <div class="p-input-icon">
             <i class='bx bx-map-alt'></i>
-            <input type="text" id="google_map_link" name="google_map_link" value="{{ $user->google_map_link ?? '' }}" class="p-input" placeholder="https://maps.google.com/...">
+            <input type="text" id="barangay" name="barangay" value="{{ $user->barangay ?? '' }}" class="p-input" required>
           </div>
         </div>
       </div>
@@ -427,66 +421,7 @@
         </div>
       </div>
       
-      <!-- Rate Options Tab (New Separate Tab) -->
-      <div class="p-tab-content" id="rates-tab">
-        <div class="p-section-header">
-          <h4><i class='bx bx-money'></i> Set Your Service Rates</h4>
-          <p class="p-section-desc">Enable at least one rate option to let clients know your pricing</p>
-        </div>
-
-        <div class="p-rate-options">
-          <div class="p-rate-option">
-            <div class="p-rate-header">
-              <label for="hourly_rate" class="p-label">Hourly Rate (₱)</label>
-              <div class="p-rate-toggle">
-                <input type="checkbox" id="enable_hourly" class="p-rate-checkbox" 
-                      {{ $user->hourly_rate ? 'checked' : '' }}>
-                <label for="enable_hourly" class="p-toggle-label"></label>
-              </div>
-            </div>
-            <div class="p-input-icon {{ $user->hourly_rate ? '' : 'p-disabled' }}">
-              <i class='bx bx-time'></i>
-              <input type="number" id="hourly_rate" name="hourly_rate" min="0" step="10"
-                    value="{{ $user->hourly_rate ?? '' }}" class="p-input"
-                    placeholder="Rate per hour" {{ $user->hourly_rate ? '' : 'disabled' }}>
-            </div>
-          </div>
-          
-          <div class="p-rate-option">
-            <div class="p-rate-header">
-              <label for="daily_rate" class="p-label">Daily Rate (₱)</label>
-              <div class="p-rate-toggle">
-                <input type="checkbox" id="enable_daily" class="p-rate-checkbox" 
-                      {{ $user->daily_rate ? 'checked' : '' }}>
-                <label for="enable_daily" class="p-toggle-label"></label>
-              </div>
-            </div>
-            <div class="p-input-icon {{ $user->daily_rate ? '' : 'p-disabled' }}">
-              <i class='bx bx-calendar-day'></i>
-              <input type="number" id="daily_rate" name="daily_rate" min="0" step="100"
-                    value="{{ $user->daily_rate ?? '' }}" class="p-input"
-                    placeholder="Rate per day" {{ $user->daily_rate ? '' : 'disabled' }}>
-            </div>
-          </div>
-          
-          <div class="p-rate-option">
-            <div class="p-rate-header">
-              <label for="weekly_rate" class="p-label">Weekly Rate (₱)</label>
-              <div class="p-rate-toggle">
-                <input type="checkbox" id="enable_weekly" class="p-rate-checkbox" 
-                      {{ $user->weekly_rate ? 'checked' : '' }}>
-                <label for="enable_weekly" class="p-toggle-label"></label>
-              </div>
-            </div>
-            <div class="p-input-icon {{ $user->weekly_rate ? '' : 'p-disabled' }}">
-              <i class='bx bx-calendar-week'></i>
-              <input type="number" id="weekly_rate" name="weekly_rate" min="0" step="500"
-                    value="{{ $user->weekly_rate ?? '' }}" class="p-input"
-                    placeholder="Rate per week" {{ $user->weekly_rate ? '' : 'disabled' }}>
-            </div>
-          </div>
-        </div>
-      </div>
+    
 
       <!-- Bio Tab -->
       <div class="p-tab-content" id="bio-tab">
@@ -1056,6 +991,63 @@ function pPreviewImage(event) {
     reader.readAsDataURL(file);
   }
 }
+
+// dynamic validation for update profile
+document.addEventListener('DOMContentLoaded', function () {
+  const editProfileForm = document.getElementById('editProfileForm');
+  if (editProfileForm) {
+    editProfileForm.addEventListener('submit', function(e) {
+      let valid = true;
+      let firstInvalid = null;
+
+      // Required fields
+      const requiredFields = [
+        { id: 'firstname', name: 'First Name' },
+        { id: 'lastname', name: 'Last Name' },
+        { id: 'email', name: 'Email' },
+        { id: 'experience_years', name: 'Years of Experience' },
+        { id: 'contact_number', name: 'Contact Number' },
+        { id: 'province', name: 'Province' },
+        { id: 'city', name: 'City' },
+        { id: 'zipcode', name: 'Zipcode' }
+      ];
+
+      requiredFields.forEach(field => {
+        const input = document.getElementById(field.id);
+        if (input && !input.value.trim()) {
+          valid = false;
+          input.classList.add('border-red-500');
+          if (!firstInvalid) firstInvalid = input;
+        } else if (input) {
+          input.classList.remove('border-red-500');
+        }
+      });
+
+      // Years of experience must be a positive number
+      const expInput = document.getElementById('experience_years');
+      if (expInput && (isNaN(expInput.value) || expInput.value < 0)) {
+        valid = false;
+        expInput.classList.add('border-red-500');
+        if (!firstInvalid) firstInvalid = expInput;
+      }
+
+      // Bio max length
+      const bioInput = document.getElementById('bio');
+      if (bioInput && bioInput.value.length > 300) {
+        valid = false;
+        bioInput.classList.add('border-red-500');
+        if (!firstInvalid) firstInvalid = bioInput;
+      }
+
+      if (!valid) {
+        e.preventDefault();
+        alert('Please fill out all required fields correctly.');
+        if (firstInvalid) firstInvalid.focus();
+        return false;
+      }
+    });
+  }
+});
 
 // Update modal open function
 function openUpdateProfileModal() {

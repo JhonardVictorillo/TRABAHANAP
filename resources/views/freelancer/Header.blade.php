@@ -48,7 +48,7 @@
         <a href="#appointmentCalendar" id="appointmentLink"><span class="material-symbols-outlined">calendar_today</span>Appointment</a>
       </li>
       <li>
-        <a href="#postContainer" id="postLink"><span class="material-symbols-outlined">person</span>Post</a>
+        <a href="#postContainer" id="postLink"><span class="material-symbols-outlined">post</span>Post</a>
       
         </li>
         <li>

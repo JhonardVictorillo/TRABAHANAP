@@ -89,6 +89,11 @@
                 <span id="freelancerName"></span>
             </div>
             <div class="flex items-center gap-2">
+                <i class="ri-briefcase-line text-primary"></i>
+                <span class="font-medium">Booked Services:</span>
+                <span id="appointmentSubservices"></span>
+            </div>
+            <div class="flex items-center gap-2">
                 <i class="ri-calendar-line text-primary"></i>
                 <span class="font-medium">Date:</span>
                 <span id="appointmentDate"></span>
@@ -426,6 +431,15 @@ function handleButtonVisibility(status) {
     }
 }
 
+function formatTo12Hour(timeStr) {
+    // Handles "HH:mm" or "HH:mm:ss" formats
+    let [hour, minute] = timeStr.split(':');
+    hour = parseInt(hour, 10);
+    const period = hour >= 12 ? 'PM' : 'AM';
+    const hour12 = hour % 12 || 12;
+    return `${hour12}:${minute} ${period}`;
+}
+
 // Add a variable to store current appointment data
 let currentAppointmentData = null;
 
@@ -434,8 +448,11 @@ function openAppointmentModal(data) {
     console.log('Full appointment data:', data);
     console.log('Decline Reason:', data.decline_reason); // Debugging
     document.getElementById('freelancerName').textContent = data.freelancer_name || 'N/A';
+    document.getElementById('appointmentSubservices').textContent =
+    data.services_list || 'N/A';
     document.getElementById('appointmentDate').textContent = data.date || 'N/A';
-    document.getElementById('appointmentTime').textContent = data.time || 'N/A';
+    document.getElementById('appointmentTime').textContent = 
+    data.time ? formatTo12Hour(data.time) : 'N/A';
     document.getElementById('appointmentAddress').textContent = data.address || 'N/A';
     document.getElementById('appointmentStatus').textContent = data.status || 'N/A';
     document.getElementById('appointmentNotes').textContent = data.notes || 'No additional notes';
@@ -532,7 +549,18 @@ document.getElementById('rescheduleButton').onclick = function () {
             console.log('Received availabilities:', availabilities);
             
             // Get unique dates
-            const uniqueDates = [...new Set(availabilities.map(a => a.date))];
+           const today = new Date();
+                const appointmentDate = new Date(currentAppointmentData.date); // Use the appointment date from modal data
+
+                const uniqueDates = [...new Set(
+                    availabilities
+                        .map(a => a.date)
+                        .filter(dateStr => {
+                            const d = new Date(dateStr);
+                            // Show if date is today or in the future, OR if it's the appointment date and not in the past
+                            return d >= today || d.getTime() === appointmentDate.getTime();
+                        })
+                )];
             datesContainer.innerHTML = '';
             
             if (uniqueDates.length === 0) {
@@ -661,6 +689,10 @@ document.getElementById('rescheduleButton').onclick = function () {
         btn.dataset.time = timeStr;
         btn.disabled = isBooked;
         
+         if (isBooked) {
+        btn.title = "This time slot is already booked";
+    }
+
         if (!isBooked) {
             hasAvailableTimes = true;
             btn.addEventListener('click', function() {
@@ -691,6 +723,8 @@ function convertTo12HourFormat(hour) {
     const hour12 = hour % 12 || 12; // Convert 0 to 12 for midnight
     return `${hour12}:00 ${period}`;
 }
+
+
 // Handle form submission
     document.getElementById('saveReschedule').onclick = function(e) {
         e.preventDefault();

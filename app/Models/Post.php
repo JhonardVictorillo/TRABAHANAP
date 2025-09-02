@@ -14,6 +14,7 @@ class Post extends Model
          'status',
          'rate',
          'rate_type',
+         'location_restriction',
 
     ];
 

@@ -451,6 +451,48 @@ function restoreButton(button, text) {
     if (btnSpinner) btnSpinner.style.display = 'none';
     if (btnText && text) btnText.textContent = text;
 }
+
+
+// Dynamic validation for update profile
+document.addEventListener('DOMContentLoaded', function () {
+  const modalForm = document.querySelector('#editProfileModal form');
+  if (modalForm) {
+    modalForm.addEventListener('submit', function(e) {
+      let valid = true;
+      let firstInvalid = null;
+
+      // Required fields
+      const requiredFields = [
+        { id: 'firstname', name: 'First Name' },
+        { id: 'lastname', name: 'Last Name' },
+        { id: 'email', name: 'Email' },
+        { id: 'contact_number', name: 'Contact Number' },
+        { id: 'province', name: 'Province' },
+        { id: 'city', name: 'City' },
+        { id: 'zipcode', name: 'Zipcode' }
+      ];
+
+      requiredFields.forEach(field => {
+        const input = document.getElementById(field.id);
+        if (input && !input.value.trim()) {
+          valid = false;
+          input.classList.add('border-red-500');
+          if (!firstInvalid) firstInvalid = input;
+        } else if (input) {
+          input.classList.remove('border-red-500');
+        }
+      });
+
+      if (!valid) {
+        e.preventDefault();
+        alert('Please fill out all required fields.');
+        if (firstInvalid) firstInvalid.focus();
+        return false;
+      }
+    });
+  }
+});
+
     </script>
   
 </body>

@@ -34,7 +34,7 @@ class User extends Authenticatable
          'barangay', 
          'id_front', 
          'id_back', 
-         'experience_level',
+         'experience_years',
          'profile_completed',
          'profile_picture',
          'email_verification_token',
@@ -159,74 +159,12 @@ public function categoryRequests()
            $this->categories()->exists();
 }
 
-    // Add helper methods to work with your existing role column
-public function isFreelancer()
+ public function jobSuccessRate()
 {
-    // Assuming your role values are 'freelancer', 'customer', or 'both'
-    return $this->role === 'freelancer' || $this->role === 'both';
-}
-
-public function isCustomer()
-{
-    return $this->role === 'customer' || $this->role === 'both';
-}
-
-public function isInFreelancerMode()
-{
-    return $this->current_mode === 'freelancer';
-}
-
-public function isInCustomerMode()
-{
-    return $this->current_mode === 'customer';
-}
-
-public function switchToFreelancerMode()
-{
-    if (!$this->isFreelancer()) {
-        return false;
-    }
-    
-    $this->current_mode = 'freelancer';
-    $this->save();
-    return true;
-}
-
-public function switchToCustomerMode()
-{
-    if (!$this->isCustomer()) {
-        return false;
-    }
-    
-    $this->current_mode = 'customer';
-    $this->save();
-    return true;
-}
-
-public function becomeFreelancer()
-{
-    if ($this->role === 'customer') {
-        $this->role = 'both';
-        $this->role_updated_at = now();
-        $this->save();
-    } else if ($this->role === null) {
-        $this->role = 'freelancer';
-        $this->role_updated_at = now();
-        $this->save();
-    }
-}
-
-public function becomeCustomer()
-{
-    if ($this->role === 'freelancer') {
-        $this->role = 'both';
-        $this->role_updated_at = now();
-        $this->save();
-    } else if ($this->role === null) {
-        $this->role = 'customer';
-        $this->role_updated_at = now();
-        $this->save();
-    }
+    // Make sure you have an appointments relationship
+    $totalJobs = $this->appointments()->count();
+    $successfulJobs = $this->appointments()->where('status', 'completed')->count();
+    return $totalJobs > 0 ? round(($successfulJobs / $totalJobs) * 100) : 0;
 }
 
 

@@ -45,6 +45,7 @@ class PostController extends Controller
             'post_picture.*' => 'required|image|mimes:jpg,jpeg,png|max:2048',
              'rate' => 'required|numeric|min:0',
              'rate_type' => 'required|in:hourly,daily,fixed',
+              'location_restriction' => 'required|in:minglanilla_only,open',
         ]);
 
         if ($validator->fails()) {
@@ -64,6 +65,7 @@ class PostController extends Controller
                 'status' => 'pending',
                 'rate' => $request->rate,
                 'rate_type' => $request->rate_type,
+                 'location_restriction' => $request->location_restriction, 
             ]);
 
             // Store SubServices
@@ -146,6 +148,7 @@ class PostController extends Controller
             'post_picture.*' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
             'rate' => 'required|numeric|min:0',
              'rate_type' => 'required|in:hourly,daily,fixed',
+             'location_restriction' => 'required|in:minglanilla_only,open',
         ]);
 
         if ($validator->fails()) {
@@ -161,6 +164,7 @@ class PostController extends Controller
             $post->description = $request->description;
             $post->rate = $request->rate;           // <-- Add this
             $post->rate_type = $request->rate_type;
+            $post->location_restriction = $request->location_restriction; 
             $post->save();
 
             // Update SubServices

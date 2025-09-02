@@ -179,12 +179,29 @@ $popularCategories = collect($mostBookedCategories)->map(function($category) {
     return view('customerProfile', compact('user','recentFreelancers', 'notifications'));
 }
 
-public function showFreelancerProfile($id)
+public function showFreelancerProfile($id, $postId = null)
 {
+    \Log::debug("showFreelancerProfile called with ID: $id, postId: $postId");
      $freelancer = User::where('id', $id)
         ->where('is_verified', true)  // Only allow verified freelancers
         ->with(['posts.pictures'])
         ->firstOrFail();
+
+    $post = null;
+    if ($postId) {
+        $post = Post::findOrFail($postId);
+        \Log::debug("Post found by ID", [
+            'post_id' => $post->id,
+            'freelancer_id' => $post->freelancer_id,
+            'location_restriction' => $post->location_restriction
+        ]);
+    } elseif ($freelancer->posts->isNotEmpty()) {
+        $post = $freelancer->posts->first();
+        \Log::debug("Using first post from freelancer", [
+            'post_id' => $post->id,
+            'location_restriction' => $post->location_restriction
+        ]);
+    }
 
     $user = Auth::user(); 
     $notifications = $user->notifications;
@@ -198,7 +215,7 @@ public function showFreelancerProfile($id)
 
       $commitmentFee = 30; // Fixed ₱30
 
-    return view('PostSeeProfile', compact('freelancer', 'user','reviews', 'notifications','totalStars', 'totalReviews', 'commitmentFee'));
+    return view('PostSeeProfile', compact('freelancer', 'post', 'user','reviews', 'notifications','totalStars', 'totalReviews', 'commitmentFee'));
 }
 
 
@@ -649,17 +666,32 @@ public function getAvailability(Request $request, $freelancerId)
     try {
         // Get current appointment ID for rescheduling
         $currentAppointmentId = $request->input('current_appointment_id');
-        
+          $today = now()->toDateString();
+        $currentMonth = now()->month;
+        $currentYear = now()->year;
+
         // Log parameters for debugging
         \Log::info("Fetching availability", [
             'freelancer_id' => $freelancerId,
             'current_appointment_id' => $currentAppointmentId
         ]);
         
-        // Fetch ALL availability for the given freelancer (no date filtering)
-        $availabilities = FreelancerAvailability::where('freelancer_id', $freelancerId)
-            ->orderBy('date')
-            ->get();
+        $appointmentDate = null;
+        if ($currentAppointmentId) {
+            $currentAppointment = Appointment::find($currentAppointmentId);
+            $appointmentDate = $currentAppointment ? $currentAppointment->date : null;
+        }
+
+       $availabilities = FreelancerAvailability::where('freelancer_id', $freelancerId)
+        ->where(function ($query) use ($today, $appointmentDate) {
+            $query->whereDate('date', '>=', $today);
+            // Always include the appointment date if it is today or in the future
+            if ($appointmentDate && $appointmentDate >= $today) {
+                $query->orWhereDate('date', $appointmentDate);
+            }
+        })
+        ->orderBy('date')
+        ->get();
             
         // Log what was found
         \Log::info("Availability records found", [
@@ -673,9 +705,9 @@ public function getAvailability(Request $request, $freelancerId)
         }
 
         // Build query for booked appointments
-        $appointmentsQuery = Appointment::where('freelancer_id', $freelancerId)
-            ->whereIn('date', $availabilities->pluck('date'))
-            ->whereNotIn('status', ['canceled', 'declined']);
+       $appointmentsQuery = Appointment::where('freelancer_id', $freelancerId)
+        ->whereIn('date', $availabilities->pluck('date'))
+        ->whereNotIn('status', ['canceled', 'declined']);
         
         // If rescheduling, exclude the current appointment
         if ($currentAppointmentId) {
@@ -713,7 +745,6 @@ public function getAvailability(Request $request, $freelancerId)
         return response()->json(['error' => 'Failed to fetch availability'], 500);
     }
 }
-
 
     
 }

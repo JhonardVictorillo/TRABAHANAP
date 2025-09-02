@@ -85,16 +85,16 @@
                     @endphp
 
                     @for ($i = 0; $i < $starCount; $i++)
-                        <i class="fas fa-star"></i>
+                         <i class="fas fa-star text-yellow-400"></i>
                     @endfor
 
                 
                     @if ($halfStar)
-                        <i class="fas fa-star-half-alt"></i>
+                         <i class="fas fa-star-half-alt text-yellow-400"></i>
                     @endif
 
                     @for ($i = $starCount + ($halfStar ? 1 : 0); $i < 5; $i++)
-                        <i class="far fa-star"></i>
+                       <i class="far fa-star text-yellow-400"></i>
                     @endfor
               <p class="text-yellow-500 text-sm">{{ number_format($averageRating, 1) }} / 5 • {{ $totalReviews }} reviews</p>
               </div>
@@ -211,6 +211,13 @@
                     <option value="fixed">Fixed</option>
                 </select>
             </div>
+            <div class="form-group">
+                <label for="location_restriction">Location Restriction</label>
+                <select name="location_restriction" id="location_restriction" class="form-control">
+                    <option value="minglanilla_only">Only available in Minglanilla</option>
+                    <option value="open">Available outside Minglanilla</option>
+                </select>
+                </div>
 
             <div class="modal-footer">
                 <button type="submit" class="btn btn-primary">
@@ -277,6 +284,13 @@
                         <option value="hourly">Hourly</option>
                         <option value="daily">Daily</option>
                         <option value="fixed">Fixed</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="edit-location-restriction">Location Restriction</label>
+                    <select name="location_restriction" id="edit-location-restriction" class="form-control">
+                        <option value="minglanilla_only">Only available in Minglanilla</option>
+                        <option value="open">Available outside Minglanilla</option>
                     </select>
                 </div>
                 <div class="modal-footer">
@@ -365,6 +379,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         editDescription.value = data.post.description;
                         document.getElementById('edit-rate').value = data.post.rate ?? '';
                         document.getElementById('edit-rate-type').value = data.post.rate_type ?? 'hourly';
+                        document.getElementById('edit-location-restriction').value = data.post.location_restriction ?? 'minglanilla_only';
                         // Fix potential undefined array issue
                     // Fix sub-services
             subServicesContainer.innerHTML = '';
