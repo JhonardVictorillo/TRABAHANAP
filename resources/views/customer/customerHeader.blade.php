@@ -1,7 +1,7 @@
 <header class="sticky top-0 z-50 bg-white shadow-sm">
   <div class="flex items-center justify-between px-4 sm:px-8 h-16">
-    <a href="/" class="font-poppins text-xl sm:text-2xl font-extrabold">
-      <a href="/" class="font-poppins text-xl sm:text-2xl font-extrabold">
+    <a href="" class="font-poppins text-xl sm:text-2xl font-extrabold">
+      <a href="" class="font-poppins text-xl sm:text-2xl font-extrabold">
   <span class="text-[#2563eb]">Mingla</span><span class="text-[#3b82f6]">Gawa</span> 
 </a>
     </a>
@@ -281,12 +281,18 @@ const profileBtn = document.getElementById('profileBtn');
                             markAsReadButton.remove();
                         }
                     });
-                    updateNotificationCount();
+                  const countElement = notificationIcon.querySelector('span');
+                if (countElement) {
+                    countElement.remove();
+                }
                     
                     // Hide mark all read button after using it
-                    this.closest('.p-3').classList.add('hidden');
+                    const buttonParent = this.closest('.p-4');
+                if (buttonParent) {
+                    buttonParent.classList.add('hidden');
                 }
-            })
+            }
+        })
             .catch(error => {
                 console.error('Error marking all notifications as read:', error);
             });
