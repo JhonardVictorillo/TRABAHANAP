@@ -221,6 +221,39 @@
         <div class="col-span-1 order-first lg:order-none mb-6 lg:mb-0">
           <div class="bg-white rounded-lg p-6 shadow-lg sticky top-20">
                 <h3 class="text-lg font-semibold mb-6">Book Appointment Here</h3>
+                <!-- Add this below "Book Appointment Here" heading in the right column -->
+                <div class="mb-4 p-3 bg-gray-50 rounded-lg">
+                <div class="flex flex-row items-center justify-between gap-3">
+                    <!-- Service Duration -->
+                    <div class="flex items-center gap-2 flex-1">
+                        <div class="w-8 h-8 flex-shrink-0 flex items-center justify-center bg-primary/10 rounded-full">
+                            <i class="ri-time-line text-primary"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-medium">Duration</h4>
+                            <p class="text-xs text-gray-600">
+                                @if(floor($post->getDefaultDuration() / 60) > 0)
+                                    {{ floor($post->getDefaultDuration() / 60) }} hour(s)
+                                @endif
+                                @if($post->getDefaultDuration() % 60 > 0)
+                                    {{ $post->getDefaultDuration() % 60 }} minutes
+                                @endif
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <!-- Service Rate -->
+                    <div class="flex items-center gap-2 flex-1">
+                        <div class="w-8 h-8 flex-shrink-0 flex items-center justify-center bg-blue-50 rounded-full">
+                            <i class="ri-money-dollar-circle-line text-blue-500"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-medium">Rate</h4>
+                            <p class="text-xs text-gray-600">₱{{ $post->rate }} / {{ $post->rate_type }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
                 <p class="text-sm text-gray-600 mb-6">
                     Book a consultation to discuss your digital marketing needs and goals.
                 </p>
@@ -264,14 +297,14 @@
                 @endif
                 
             </div>
-        </div>
+           
     </div>
     
    <!-- Booking Modal -->
 <div id="bookingModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50 px-4">
-  <div class="bg-white rounded-lg p-4 sm:p-6 w-full max-w-lg mx-auto relative" style="max-height:90vh;">
-    <!-- Modal content remains the same but with adjusted padding -->
-    <div class="flex justify-between items-center mb-6">
+  <div class="bg-white rounded-lg w-full max-w-lg mx-auto relative flex flex-col" style="max-height:90vh;">
+    <!-- Modal Header -->
+    <div class="p-4 sm:p-6 border-b border-gray-200 flex justify-between items-center">
       <h3 class="text-xl font-semibold">Book an Appointment</h3>
       <button id="closeModal" class="text-gray-400 hover:text-gray-600">
         <div class="w-6 h-6 flex items-center justify-center">
@@ -279,20 +312,50 @@
         </div>
       </button>
     </div>
-    <form id="bookingForm" method="POST" action="{{ route('pay.commitment') }}" class="flex flex-col h-full">
-      @csrf
-     
-     <input type="hidden" id="locationRestriction" value="{{ $post->location_restriction ?? 'open' }}">
-      <input type="hidden" name="freelancer_id" value="{{ $freelancer->id }}">
-      <input type="hidden" name="post_id" value="{{ $post->id }}">
-      <input type="hidden" id="selectedDate" name="date" required>
-      <input type="hidden" id="selectedTime" name="time" required>
-      <input type="hidden" name="notes" id="notesInput">
-      <input type="hidden" name="commitment_fee" value="{{ $commitment_fee ?? 100 }}">
-      <!-- Scrollable Content -->
-      <div class="flex-1 overflow-y-auto pr-2" style="max-height:60vh;">
+    
+    <!-- Service Info -->
+    <div class="px-4 sm:px-6 pt-4 bg-gray-50">
+      <div class="flex items-center gap-2 mb-1">
+        <i class="ri-time-line text-gray-500"></i>
+        <span class="text-sm text-gray-700">
+          Service Duration: 
+          <span class="font-medium">
+            @if(floor($post->getDefaultDuration() / 60) > 0)
+              {{ floor($post->getDefaultDuration() / 60) }} hour(s)
+            @endif
+            @if($post->getDefaultDuration() % 60 > 0)
+              {{ $post->getDefaultDuration() % 60 }} minutes
+            @endif
+          </span>
+        </span>
+      </div>
+      @if($post->getBufferTime() > 0)
+      <div class="flex items-center gap-2 pb-4">
+        <i class="ri-timer-line text-gray-500"></i>
+        <span class="text-sm text-gray-700">
+          Buffer Time: <span class="font-medium">{{ $post->getBufferTime() }} minutes</span>
+        </span>
+      </div>
+      @endif
+    </div>
+    
+    <!-- Modal Body (Scrollable) -->
+    <div class="flex-1 overflow-y-auto p-4 sm:p-6 pt-4">
+      <form id="bookingForm" method="POST" action="{{ route('pay.commitment') }}" class="flex flex-col h-full">
+        @csrf
+        <input type="hidden" id="locationRestriction" value="{{ $post->location_restriction ?? 'open' }}">
+        <input type="hidden" name="freelancer_id" value="{{ $freelancer->id }}">
+        <input type="hidden" name="post_id" value="{{ $post->id }}">
+        <input type="hidden" id="selectedDate" name="date" required>
+        <input type="hidden" id="selectedTime" name="time" required>
+        <input type="hidden" name="notes" id="notesInput">
+        <input type="hidden" name="commitment_fee" value="{{ $commitment_fee ?? 100 }}">
+        <input type="hidden" id="serviceDuration" value="{{ $post->getDefaultDuration() }}">
+        <input type="hidden" id="bufferTime" value="{{ $post->getBufferTime() }}">
+        <input type="hidden" id="selectedDuration" name="duration" value="">
+        
         <!-- Calendar Section -->
-        <div class="mb-4">
+        <div class="mb-6">
           <div class="flex items-center justify-between mb-4">
             <button type="button" id="prevMonthButton" class="text-gray-400 hover:text-gray-600">
               <div class="w-6 h-6 flex items-center justify-center">
@@ -321,13 +384,13 @@
         <!-- Time Slots Section -->
         <div class="mb-6">
           <h5 class="text-sm font-medium mb-4">Available Time Slots</h5>
-          <div class="grid grid-cols-3 gap-3"></div>
+          <div id="timeSlots" class="grid grid-cols-2 gap-2"></div>
         </div>
 
         <!-- Notes Section -->
         <div class="mb-6">
           <label for="notes" class="block text-sm font-medium text-gray-700">Notes (Optional)</label>
-          <textarea id="notes" name="notes" rows="3" class="w-full mt-1 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" placeholder="Add any additional details or instructions for the freelancer..."></textarea>
+          <textarea id="notes" rows="2" class="w-full mt-1 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" placeholder="Add any additional details or instructions for the freelancer..."></textarea>
         </div>
 
         <!-- Commitment Fee Section -->
@@ -338,19 +401,22 @@
           </div>
           <p class="text-sm text-yellow-700">
             To book this appointment, a non-refundable commitment fee of 
-             <span class="font-bold text-yellow-900">₱{{ number_format($commitmentFee, 2) }}</span>
+            <span class="font-bold text-yellow-900">₱{{ number_format($commitmentFee, 2) }}</span>
             is required. This fee will not be refunded if you cancel after the freelancer accepts your booking.
           </p>
         </div>
       </div>
 
-      <!-- Sticky Submit Button -->
-      <div class="pt-4 bg-white sticky bottom-0 left-0 right-0">
-        <button type="submit" class="w-full py-3 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded">
-       <span class="btn-text">Proceed to Payment</span>
-        <span class="btn-spinner" style="display:none;">
+      <!-- Sticky Submit Button (Fixed Footer) -->
+      <div class="p-4 sm:p-6 border-t border-gray-200 bg-white">
+        <p id="validationMsg" class="text-red-500 text-sm mb-3 text-center">
+          Please select both a date and time to proceed
+        </p>
+        <button type="submit" id="submitButton" class="w-full py-3 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded opacity-50 cursor-not-allowed">
+          <span class="btn-text">Proceed to Payment</span>
+          <span class="btn-spinner" style="display:none;">
             <i class="ri-loader-4-line animate-spin"></i>
-        </span>
+          </span>
         </button>
       </div>
     </form>
@@ -367,8 +433,8 @@
 
     <script>
 
-
     document.addEventListener("DOMContentLoaded", function () {
+    // Existing variables
     const bookButton = document.getElementById("bookButton");
     const bookingModal = document.getElementById("bookingModal");
     const closeModal = document.getElementById("closeModal");
@@ -378,21 +444,15 @@
     const prevMonthButton = document.getElementById("prevMonthButton");
     const selectedDateInput = document.getElementById("selectedDate");
     const selectedTimeInput = document.getElementById("selectedTime");
-    const timeButtonsContainer = document.querySelector(".grid-cols-3");
+    const validationMsg = document.getElementById("validationMsg");
+    const submitButton = document.getElementById("submitButton");
+    
+    // FIX: Use ID selector for time slots container instead of class selector
+    const timeButtonsContainer = document.getElementById("timeSlots");
 
     const months = [
-        "January",
-        "February",
-        "March",
-        "April",
-        "May",
-        "June",
-        "July",
-        "August",
-        "September",
-        "October",
-        "November",
-        "December",
+        "January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December",
     ];
 
     let currentDate = new Date();
@@ -400,142 +460,147 @@
 
     // Function to fetch availability
     function fetchAvailability(year, month) {
-    return fetch(`/freelancer/${freelancerId}/availability?year=${year}&month=${month + 1}`)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log("Fetched availability data:", data); // Debugging
-            return data;
-        })
-        .catch(error => {
-            console.error("Error fetching availability:", error);
-            alert("Could not load freelancer's availability. Please try again later.");
-            return [];
-        });
-}
+        const serviceDuration = document.getElementById('serviceDuration').value;
+        const bufferTime = document.getElementById('bufferTime').value;
+    
+        console.log(`Fetching availability for year=${year}, month=${month+1}, duration=${serviceDuration}, buffer=${bufferTime}`);
+        return fetch(`/freelancer/${freelancerId}/availability?year=${year}&month=${month + 1}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log("Fetched availability data:", data);
+                return data;
+            })
+            .catch(error => {
+                console.error("Error fetching availability:", error);
+                alert("Could not load freelancer's availability. Please try again later.");
+                return [];
+            });
+    }
 
     // Function to update the calendar
     async function updateCalendar() {
-    const year = currentDate.getFullYear();
-    const month = currentDate.getMonth();
-    const firstDay = new Date(year, month, 1).getDay();
-    const lastDate = new Date(year, month + 1, 0).getDate();
-     const today = new Date();
+        const year = currentDate.getFullYear();
+        const month = currentDate.getMonth();
+        const firstDay = new Date(year, month, 1).getDay();
+        const lastDate = new Date(year, month + 1, 0).getDate();
+        const today = new Date();
 
-     // Check if current month is in the past
-    const isPastMonth = (year < today.getFullYear()) || 
-                      (year === today.getFullYear() && month < today.getMonth());
-                      
-    // Disable previous month button if we're at current month
-    prevMonthButton.disabled = (year === today.getFullYear() && month === today.getMonth());
-    prevMonthButton.classList.toggle("opacity-50", prevMonthButton.disabled);
-    
-    monthTitle.textContent = `${months[month]} ${year}`;
-    calendarGrid.innerHTML = "";
+        // Check if current month is in the past
+        const isPastMonth = (year < today.getFullYear()) || 
+                          (year === today.getFullYear() && month < today.getMonth());
+                          
+        // Disable previous month button if we're at current month
+        prevMonthButton.disabled = (year === today.getFullYear() && month === today.getMonth());
+        prevMonthButton.classList.toggle("opacity-50", prevMonthButton.disabled);
+        
+        monthTitle.textContent = `${months[month]} ${year}`;
+        calendarGrid.innerHTML = "";
 
-    // Fetch availability for the current month
-    const availability = await fetchAvailability(year, month);
+        // Fetch availability for the current month
+        const availability = await fetchAvailability(year, month);
 
-    // Clear time slots for a new month selection
-    const timeButtonsContainer = document.querySelector("#bookingModal .grid-cols-3");
-    timeButtonsContainer.innerHTML = `
-        <p class="col-span-3 text-sm text-gray-600 py-4 text-center">
-            Please select a date to view available time slots.
-        </p>`;
-    // If this is a past month, disable all dates
-    if (isPastMonth) {
+        // Clear time slots for a new month selection
+        // FIX: Use ID selector instead of class selector
+        document.getElementById("timeSlots").innerHTML = `
+            <p class="col-span-3 text-sm text-gray-600 py-4 text-center">
+                Please select a date to view available time slots.
+            </p>`;
+
+        // If this is a past month, disable all dates
+        if (isPastMonth) {
+            // Add empty cells for days before the first day of the month
+            for (let i = 0; i < firstDay; i++) {
+                calendarGrid.innerHTML += `<div class="text-sm text-gray-300"></div>`;
+            }
+            
+            // Add cells for each day of the month (all disabled)
+            for (let day = 1; day <= lastDate; day++) {
+                const date = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+                
+                calendarGrid.innerHTML += `
+                    <div class="text-sm py-2 bg-gray-200 text-gray-400 cursor-not-allowed opacity-70" 
+                        data-date="${date}" disabled>
+                        ${day}
+                    </div>`;
+            }
+            
+            // Clear time slots
+            document.getElementById("timeSlots").innerHTML = `
+                <p class="col-span-3 text-sm text-gray-600 py-4 text-center">
+                    Appointments cannot be scheduled for past months.
+                    Please select a date in the current or future months.
+                </p>`;
+            
+            return;
+        }
+
         // Add empty cells for days before the first day of the month
         for (let i = 0; i < firstDay; i++) {
             calendarGrid.innerHTML += `<div class="text-sm text-gray-300"></div>`;
         }
-        
-        // Add cells for each day of the month (all disabled)
+
+        // Add cells for each day of the month
         for (let day = 1; day <= lastDate; day++) {
             const date = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+            const isAvailable = availability.some(avail => avail.date === date);
             
+            // Check if this date is in the past (for current month)
+            const isPastDate = (year === today.getFullYear() && 
+                            month === today.getMonth() && 
+                            day < today.getDate());
+            
+            // Disable past dates even if they're available
+            const isSelectable = isAvailable && !isPastDate;
+
             calendarGrid.innerHTML += `
-                <div class="text-sm py-2 bg-gray-200 text-gray-400 cursor-not-allowed opacity-70" 
-                    data-date="${date}" disabled>
+                <div class="text-sm py-2 ${
+                    isSelectable
+                        ? "bg-blue-600 text-white rounded-full cursor-pointer"
+                        : "bg-gray-200 text-gray-400 cursor-not-allowed"
+                }" data-date="${date}" ${isSelectable ? "" : "disabled"}>
                     ${day}
                 </div>`;
         }
-        
-        // Clear time slots
-        const timeButtonsContainer = document.querySelector("#bookingModal .grid-cols-3");
-        timeButtonsContainer.innerHTML = `
-            <p class="col-span-3 text-sm text-gray-600 py-4 text-center">
-                Appointments cannot be scheduled for past months.
-                Please select a date in the current or future months.
-            </p>`;
-        
-        return;
-    }
 
-    // Add empty cells for days before the first day of the month
-    for (let i = 0; i < firstDay; i++) {
-        calendarGrid.innerHTML += `<div class="text-sm text-gray-300"></div>`;
-    }
+        // Add click event to available days only
+        document.querySelectorAll("#calendarGrid div[data-date]:not([disabled])").forEach((day) => {
+            day.addEventListener("click", function () {
+                document
+                    .querySelectorAll("#calendarGrid div")
+                    .forEach((d) => d.classList.remove("bg-blue-600", "text-white"));
+                this.classList.add("bg-blue-600", "text-white");
+                selectedDateInput.value = this.getAttribute("data-date");
 
-    // Add cells for each day of the month
-    for (let day = 1; day <= lastDate; day++) {
-        const date = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-        const isAvailable = availability.some(avail => avail.date === date);
-        
-        // Check if this date is in the past (for current month)
-        const isPastDate = (year === today.getFullYear() && 
-                          month === today.getMonth() && 
-                          day < today.getDate());
-        
-        // Disable past dates even if they're available
-        const isSelectable = isAvailable && !isPastDate;
-
-        calendarGrid.innerHTML += `
-            <div class="text-sm py-2 ${
-                isSelectable
-                    ? "bg-blue-600 text-white rounded-full cursor-pointer"
-                    : "bg-gray-200 text-gray-400 cursor-not-allowed"
-            }" data-date="${date}" ${isSelectable ? "" : "disabled"}>
-                ${day}
-            </div>`;
-    }
-
-    // Add click event to available days only
-   document.querySelectorAll("#calendarGrid div[data-date]:not([disabled])").forEach((day) => {
-        day.addEventListener("click", function () {
-            document
-                .querySelectorAll("#calendarGrid div")
-                .forEach((d) => d.classList.remove("bg-blue-600", "text-white"));
-            this.classList.add("bg-blue-600", "text-white");
-            selectedDateInput.value = this.getAttribute("data-date");
-
-            // Update time slots for the selected date
-            updateTimeSlots(this.getAttribute("data-date"), availability);
+                // Update time slots for the selected date
+                updateTimeSlots(this.getAttribute("data-date"), availability);
+                checkFormValidity();
+            });
         });
-    });
-}
+    }
 
-function updateTimeSlots(selectedDate, availability) {
-    const timeButtonsContainer = document.querySelector("#bookingModal .grid-cols-3");
+    function updateTimeSlots(selectedDate, availability) {
+    // FIX: Use ID selector for time slots container
+    const timeButtonsContainer = document.getElementById("timeSlots");
     timeButtonsContainer.innerHTML = ""; // Clear previous time slots
     
-     if (!availability || availability.length === 0) {
+    if (!availability || availability.length === 0) {
         timeButtonsContainer.innerHTML = `
-            <p class="col-span-3 text-sm text-gray-600 py-4 text-center">
+            <p class="col-span-2 text-sm text-gray-600 py-4 text-center">
                 No schedules have been set for this month.
                 Please try selecting a different month.
             </p>`;
         return;
     }
+    
     // Find the availability for the selected date
     const availableDay = availability.find(avail => avail.date === selectedDate);
     
     if (availableDay) {
-        console.log("Available day data:", availableDay); // Debug
-        
         // Parse start and end times from 12-hour format
         let startHour, endHour;
         
@@ -567,57 +632,192 @@ function updateTimeSlots(selectedDate, availability) {
         
         const bookedTimes = availableDay.booked_times || []; // Get booked times
         
-        console.log(`Rendering time slots from ${startHour}:00 to ${endHour}:00`);
-        console.log("Booked times:", bookedTimes);
+        // Get service duration and buffer time
+        const serviceDuration = parseInt(document.getElementById('serviceDuration').value || 60);
+        const bufferTime = parseInt(document.getElementById('bufferTime').value || 0);
+        const totalSlotTime = serviceDuration + bufferTime; // Total time needed per slot
         
-        // Generate time slots
-        for (let hour = startHour; hour < endHour; hour++) {
-            // Format hour with padding
-            const timeStr = `${String(hour).padStart(2, '0')}:00`;
-            const time12 = convertTo12HourFormat(hour);
+        console.log(`Service duration: ${serviceDuration} mins, Buffer: ${bufferTime} mins`);
+        console.log(`Total slot time: ${totalSlotTime} mins`);
+        console.log(`Rendering time slots from ${startHour}:00 to ${endHour}:00`);
+        
+        // NEW: Adjust end time based on service duration and buffer
+        // This ensures we don't create slots that would go past the end time
+        const adjustedEndHour = endHour - Math.ceil(totalSlotTime / 60);
+        
+        // If service duration is over 3 hours, offer morning/afternoon options
+        if (serviceDuration >= 180) {
+            // Find midpoint for morning/afternoon split
+            const midPoint = startHour + Math.floor((endHour - startHour) / 2);
             
-            // Check if this time is booked
-            const isBooked = bookedTimes.some(bookedTime => 
-                bookedTime === timeStr || bookedTime.startsWith(timeStr + ':')
-            );
+            // Check if morning slot is available
+            const isMorningBooked = isTimeSlotBooked(startHour, midPoint, bookedTimes, totalSlotTime);
             
-            // Create the time slot button
-            timeButtonsContainer.innerHTML += `
-                <button
-                    type="button"
-                    class="time-btn text-sm py-2 border border-gray-200 rounded hover:border-gray-300 ${
-                        isBooked ? "bg-gray-300 text-gray-500 cursor-not-allowed" : ""
-                    }"
-                    data-time="${timeStr}"
-                    ${isBooked ? "disabled" : ""}
-                >
-                    ${time12} ${isBooked ? "(Booked)" : ""}
-                </button>`;
+            // Check if afternoon slot is available
+            const isAfternoonBooked = isTimeSlotBooked(midPoint, endHour, bookedTimes, totalSlotTime);
+            
+            // Morning slot button
+            const morningBtn = document.createElement('button');
+            morningBtn.type = 'button';
+            morningBtn.className = `time-btn col-span-2 text-sm py-3 border ${isMorningBooked ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'border-gray-200 rounded hover:border-gray-300'} mb-2`;
+            morningBtn.dataset.time = `${String(startHour).padStart(2, '0')}:00`;
+            morningBtn.dataset.duration = serviceDuration;
+            
+            // Display duration including buffer time in the button text
+            const morningEndTime = midPoint;
+            morningBtn.textContent = `Morning (${convertTo12HourFormat(startHour)} - ${convertTo12HourFormat(morningEndTime)})`;
+            morningBtn.title = `Duration: ${serviceDuration} mins + ${bufferTime} mins buffer`;
+            
+            if (isMorningBooked) {
+                morningBtn.disabled = true;
+                morningBtn.textContent += ' (Booked)';
+            }
+            
+            // Afternoon slot button
+            const afternoonBtn = document.createElement('button');
+            afternoonBtn.type = 'button';
+            afternoonBtn.className = `time-btn col-span-2 text-sm py-3 border ${isAfternoonBooked ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'border-gray-200 rounded hover:border-gray-300'}`;
+            afternoonBtn.dataset.time = `${String(midPoint).padStart(2, '0')}:00`;
+            afternoonBtn.dataset.duration = serviceDuration;
+            
+            // Display duration including buffer time in the button text
+            afternoonBtn.textContent = `Afternoon (${convertTo12HourFormat(midPoint)} - ${convertTo12HourFormat(endHour)})`;
+            afternoonBtn.title = `Duration: ${serviceDuration} mins + ${bufferTime} mins buffer`;
+            
+            if (isAfternoonBooked) {
+                afternoonBtn.disabled = true;
+                afternoonBtn.textContent += ' (Booked)';
+            }
+            
+            timeButtonsContainer.appendChild(morningBtn);
+            timeButtonsContainer.appendChild(afternoonBtn);
+        }
+        // For services between 1-3 hours, offer 2-hour blocks
+        else if (serviceDuration >= 60 && serviceDuration < 180) {
+            // Calculate how many hours the service + buffer will take
+            const slotHours = Math.ceil(totalSlotTime / 60);
+            
+            for (let hour = startHour; hour <= adjustedEndHour; hour += slotHours) {
+                // Make sure we don't create slots that extend beyond the end time
+                if (hour + slotHours <= endHour) {
+                    // Check if any hour in this block is booked
+                    const isBlockBooked = isTimeSlotBooked(hour, hour + slotHours, bookedTimes, totalSlotTime);
+                    
+                    const blockBtn = document.createElement('button');
+                    blockBtn.type = 'button';
+                    blockBtn.className = `time-btn text-sm py-3 border ${isBlockBooked ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'border-gray-200 rounded hover:border-gray-300'} mb-2`;
+                    blockBtn.dataset.time = `${String(hour).padStart(2, '0')}:00`;
+                    blockBtn.dataset.duration = serviceDuration;
+                    
+                    // Display duration including buffer time in the button text
+                    const serviceEndHour = hour + Math.ceil(serviceDuration / 60);
+                    blockBtn.textContent = `${convertTo12HourFormat(hour)} - ${convertTo12HourFormat(serviceEndHour)}`;
+                    
+                    // Add buffer time indicator if there is a buffer
+                    if (bufferTime > 0) {
+                        blockBtn.textContent += ` (+${bufferTime}m)`;
+                    }
+                    
+                    if (isBlockBooked) {
+                        blockBtn.disabled = true;
+                        blockBtn.textContent += ' (Booked)';
+                    }
+                    
+                    timeButtonsContainer.appendChild(blockBtn);
+                }
+            }
+        }
+        // For shorter services (less than 1 hour), show hourly slots
+        else {
+            // Generate hourly time slots
+            for (let hour = startHour; hour <= adjustedEndHour; hour++) {
+                // Format hour with padding
+                const timeStr = `${String(hour).padStart(2, '0')}:00`;
+                
+                // Check if this time slot is booked
+                // Here we consider both the service duration and buffer time
+                const isBooked = isTimeSlotBooked(hour, hour + Math.ceil(totalSlotTime / 60), bookedTimes, totalSlotTime);
+                
+                // Create the time slot button
+                const timeBtn = document.createElement('button');
+                timeBtn.type = 'button';
+                timeBtn.className = `time-btn text-sm py-2 border ${isBooked ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'border-gray-200 rounded hover:border-gray-300'}`;
+                timeBtn.dataset.time = timeStr;
+                timeBtn.dataset.duration = serviceDuration;
+                
+                // Calculate end time including service duration but not buffer
+                const serviceEndHour = hour + Math.ceil(serviceDuration / 60);
+                const serviceEndMinutes = (serviceDuration % 60);
+                
+                // Show the actual service time without buffer
+                timeBtn.textContent = convertTo12HourFormat(hour);
+                
+                // Add buffer time indicator if there is a buffer
+                if (bufferTime > 0) {
+                    timeBtn.title = `Duration: ${serviceDuration} mins + ${bufferTime} mins buffer`;
+                    
+                    // For shorter durations, optionally show the end time
+                    if (serviceDuration <= 60) {
+                        const endTimeStr = serviceEndMinutes > 0 ? 
+                            `${hour}:${serviceEndMinutes}` : 
+                            `${hour + 1}:00`;
+                        timeBtn.textContent = `${convertTo12HourFormat(hour)}`;
+                    }
+                }
+                
+                if (isBooked) {
+                    timeBtn.disabled = true;
+                    timeBtn.textContent += ' (Booked)';
+                }
+                
+                timeButtonsContainer.appendChild(timeBtn);
+            }
         }
         
         // Add click event to time buttons
         document.querySelectorAll(".time-btn:not([disabled])").forEach((button) => {
             button.addEventListener("click", function() {
                 document.querySelectorAll(".time-btn").forEach((btn) => 
-                    btn.classList.remove("bg-blue-600", "text-white"));
-                this.classList.add("bg-blue-600", "text-white");
+                    btn.classList.remove("selected", "bg-blue-600", "text-white"));
+                this.classList.add("selected", "bg-blue-600", "text-white");
                 document.getElementById("selectedTime").value = this.getAttribute("data-time");
+                document.getElementById("selectedDuration").value = this.getAttribute("data-duration");
+                checkFormValidity();
             });
         });
     } else {
         timeButtonsContainer.innerHTML = `
-            <p class="col-span-3 text-sm text-gray-600 py-4 text-center">
+            <p class="col-span-2 text-sm text-gray-600 py-4 text-center">
                 No available time slots for this date.
             </p>`;
     }
 }
 
-// Helper function to convert 24-hour time to 12-hour format
-function convertTo12HourFormat(hour) {
-    const period = hour >= 12 ? "PM" : "AM";
-    const hour12 = hour % 12 || 12; // Convert 0 to 12 for midnight
-    return `${hour12}:00 ${period}`;
+// NEW: Helper function to check if a time slot is booked
+function isTimeSlotBooked(startHour, endHour, bookedTimes, totalSlotMinutes) {
+    // Convert hours to minutes for easier comparison
+    const startMinutes = startHour * 60;
+    const endMinutes = endHour * 60;
+    
+    return bookedTimes.some(time => {
+        const parts = time.split(':');
+        const bookedHour = parseInt(parts[0]);
+        const bookedMinute = parts.length > 1 ? parseInt(parts[1]) : 0;
+        const bookedTimeInMinutes = bookedHour * 60 + bookedMinute;
+        
+        // Check if the booked time overlaps with this slot
+        return (bookedTimeInMinutes >= startMinutes && bookedTimeInMinutes < endMinutes) || 
+               (bookedTimeInMinutes + totalSlotMinutes > startMinutes && bookedTimeInMinutes < startMinutes);
+    });
 }
+
+    // Helper function to convert 24-hour time to 12-hour format
+    function convertTo12HourFormat(hour) {
+        const period = hour >= 12 ? "PM" : "AM";
+        const hour12 = hour % 12 || 12; // Convert 0 to 12 for midnight
+        return `${hour12}:00 ${period}`;
+    }
+
     // Event listeners for navigation buttons
     nextMonthButton.addEventListener("click", () => {
         currentDate.setMonth(currentDate.getMonth() + 1);
@@ -629,13 +829,11 @@ function convertTo12HourFormat(hour) {
         updateCalendar();
     });
 
-
     // Location-based restriction logic
-
     bookButton.addEventListener("click", function (e) {
         e.preventDefault(); // Prevent default modal opening
         const locationRestriction = document.getElementById("locationRestriction").value;
-        console.log("Location restriction:", locationRestriction); // Add this debugging line
+        console.log("Location restriction:", locationRestriction);
         
         // Only check location if restriction is 'minglanilla_only'
         if (locationRestriction === "minglanilla_only") {
@@ -687,13 +885,7 @@ function convertTo12HourFormat(hour) {
         }
     });
 
-
-    // Open and close modal
-//     bookButton.addEventListener("click", () => {
-//         bookingModal.classList.remove("hidden");
-//         currentDate = new Date(); 
-//         updateCalendar(); 
-// });
+    // Modal close events
     closeModal.addEventListener("click", () => {
         bookingModal.classList.add("hidden");
     });
@@ -703,7 +895,8 @@ function convertTo12HourFormat(hour) {
             bookingModal.classList.add("hidden");
         }
     });
-     // Separate modals for different error scenarios
+
+    // Error scenario modals
     window.showLocationRestrictionModal = function () {
         const modal = document.createElement("div");
         modal.className = "fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50";
@@ -743,65 +936,50 @@ function convertTo12HourFormat(hour) {
         document.body.appendChild(modal);
     };
 
-});
+    // Form submission handler
+    document.getElementById('bookingForm').addEventListener('submit', function(e) {
+        document.getElementById('notesInput').value = document.getElementById('notes').value;
+       
+        // Validation for date and time
+        const date = document.getElementById('selectedDate').value;
+        const time = document.getElementById('selectedTime').value;
+        const duration = document.getElementById('selectedDuration').value;
+        
+        if (!date || !time) {
+            e.preventDefault();
+            alert('Please select both a date and a time before proceeding to payment.');
+            return false;
+        }
 
+        if (!duration) {
+            document.getElementById('selectedDuration').value = document.getElementById('serviceDuration').value;
+        }
+        
+        const submitBtn = this.querySelector('button[type="submit"]');
+        showSpinnerOnButton(submitBtn);
+    });
 
-     
-
-        document.getElementById('bookingForm').addEventListener('submit', function(e) {
-    document.getElementById('notesInput').value = document.getElementById('notes').value;
-   
-   const submitBtn = this.querySelector('button[type="submit"]');
-   showSpinnerOnButton(submitBtn);
-
-   // Validation for date and time
-   const date = document.getElementById('selectedDate').value;
-    const time = document.getElementById('selectedTime').value;
-    if (!date || !time) {
-        e.preventDefault();
-        alert('Please select both a date and a time before proceeding to payment.');
-        return false;
+    // Button state management functions
+    function showSpinnerOnButton(button) {
+        const btnText = button.querySelector('.btn-text');
+        const btnSpinner = button.querySelector('.btn-spinner');
+        button.disabled = true;
+        button.classList.add('disabled');
+        if (btnText) btnText.style.display = 'none';
+        if (btnSpinner) btnSpinner.style.display = 'inline-block';
     }
-  
-  });
-
-
-  function showSpinnerOnButton(button) {
-const btnText = button.querySelector('.btn-text');
-const btnSpinner = button.querySelector('.btn-spinner');
-button.disabled = true;
-button.classList.add('disabled');
-if (btnText) btnText.style.display = 'none';
-if (btnSpinner) btnSpinner.style.display = 'inline-block';
-}
-function restoreButton(button, text) {
-    const btnText = button.querySelector('.btn-text');
-    const btnSpinner = button.querySelector('.btn-spinner');
-    button.disabled = false;
-    button.classList.remove('disabled');
-    if (btnText) btnText.style.display = 'inline-block';
-    if (btnSpinner) btnSpinner.style.display = 'none';
-    if (btnText && text) btnText.textContent = text;
-}
-
-
-document.addEventListener("DOMContentLoaded", function() {
-    // Get the submit button reference
-    const submitButton = document.querySelector('#bookingForm button[type="submit"]');
     
-    // Initially disable the submit button
-    submitButton.disabled = true;
-    submitButton.classList.add('opacity-50', 'cursor-not-allowed');
-    
-    // Create a validation message element
-    const validationMsg = document.createElement('p');
-    validationMsg.className = 'text-red-500 text-sm mt-2 text-center';
-    validationMsg.innerText = 'Please select both a date and time to proceed';
-    
-    // Insert the validation message before the submit button
-    submitButton.parentNode.insertBefore(validationMsg, submitButton);
-    
-    // Function to check if both date and time are selected
+    function restoreButton(button, text) {
+        const btnText = button.querySelector('.btn-text');
+        const btnSpinner = button.querySelector('.btn-spinner');
+        button.disabled = false;
+        button.classList.remove('disabled');
+        if (btnText) btnText.style.display = 'inline-block';
+        if (btnSpinner) btnSpinner.style.display = 'none';
+        if (btnText && text) btnText.textContent = text;
+    }
+
+    // Form validation function
     function checkFormValidity() {
         const dateSelected = document.getElementById('selectedDate').value;
         const timeSelected = document.getElementById('selectedTime').value;
@@ -816,42 +994,7 @@ document.addEventListener("DOMContentLoaded", function() {
             validationMsg.style.display = 'block';
         }
     }
-    
-    // Monitor date selection
-    const calendarGrid = document.getElementById('calendarGrid');
-    calendarGrid.addEventListener('click', function(e) {
-        // Add a slight delay to ensure the selectedDate is updated
-        setTimeout(checkFormValidity, 100);
-    });
-    
-    // Monitor time selection
-    const timeContainer = document.querySelector("#bookingModal .grid-cols-3");
-    timeContainer.addEventListener('click', function(e) {
-        if (e.target.classList.contains('time-btn')) {
-            // Add a slight delay to ensure the selectedTime is updated
-            setTimeout(checkFormValidity, 100);
-        }
-    });
-    
-    // Add form validation on submit as a backup
-    document.getElementById('bookingForm').addEventListener('submit', function(e) {
-        document.getElementById('notesInput').value = document.getElementById('notes').value;
-        
-        // Double-check validation
-        const date = document.getElementById('selectedDate').value;
-        const time = document.getElementById('selectedTime').value;
-        
-        if (!date || !time) {
-            e.preventDefault();
-            alert('Please select both a date and a time before proceeding to payment.');
-            return false;
-        }
-        
-        const submitBtn = this.querySelector('button[type="submit"]');
-        showSpinnerOnButton(submitBtn);
-    });
 });
-
       </script>
   </body>
 </html>

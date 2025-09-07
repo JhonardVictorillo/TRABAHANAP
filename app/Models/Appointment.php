@@ -33,6 +33,7 @@ class Appointment extends Model
         'completed_at',
         'review',
         'no_show_by',
+        'duration',
     ];
 
     public function customer()

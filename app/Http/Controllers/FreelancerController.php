@@ -254,11 +254,39 @@ public function getAppointments(Request $request)
 
     // Format appointments for FullCalendar
     $events = $appointments->map(function ($appointment) {
+     
+        // Format time with duration
+        $startTime = $appointment->time;
+        $duration = $appointment->duration ?? ($appointment->post ? $appointment->post->service_duration : 60);
+        
+        // Calculate end time
+        $startTimeParts = explode(':', $startTime);
+        $startHour = (int)$startTimeParts[0];
+        $startMinute = isset($startTimeParts[1]) ? (int)$startTimeParts[1] : 0;
+        
+        $endHour = $startHour + floor($duration / 60);
+        $endMinute = ($startMinute + $duration % 60) % 60;
+        if ($startMinute + $duration % 60 >= 60) {
+            $endHour++;
+        }
+        
+        // Format for display
+        $timeDisplay = sprintf(
+            "%d:%02d - %d:%02d", 
+            $startHour, $startMinute, $endHour, $endMinute
+        );
+        
         return [
             'id' => $appointment->id,
-            'title' => $appointment->customer->firstname . ' ' . $appointment->customer->lastname . ' (' . ucfirst($appointment->status) . ')',
-            'start' => $appointment->date,
-            'color' => $this->getStatusColor($appointment->status), 
+            'title' => $appointment->customer->firstname . ' ' . $appointment->customer->lastname . 
+                     ' (' . ucfirst($appointment->status) . ')' .
+                     '\n' . $timeDisplay,
+            'start' => $appointment->date . 'T' . $appointment->time,
+            'end' => $appointment->date . 'T' . sprintf("%02d:%02d:00", $endHour, $endMinute),
+            'color' => $this->getStatusColor($appointment->status),
+            'extendedProps' => [
+                'duration' => $duration
+            ]
         ];
     });
 
@@ -295,6 +323,8 @@ public function show($id)
         'total_amount' => $appointment->total_amount,
         'fee_status' => $appointment->fee_status,
         'notes' => $appointment->notes, 
+         'duration' => $appointment->duration ?? ($appointment->post ? $appointment->post->service_duration : 60),
+        'buffer_time' => $appointment->post ? $appointment->post->buffer_time : 0,
          'subservices' => $appointment->post && $appointment->post->subServices
             ? $appointment->post->subServices->pluck('sub_service')->toArray()
             : [],

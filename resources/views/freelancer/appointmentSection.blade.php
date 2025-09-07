@@ -19,111 +19,130 @@
       </div>
     </section>
     
-   <div id="appointmentModal" class="Apptmodal hidden">
-  <div class="Apptmodal-content enhanced-modal" style="max-width:430px; padding:2.5rem 2rem 2rem 2rem;">
-    <button id="closeAppointmentModal" class="close-button enhanced-close" title="Close">
-      <i class="fas fa-times"></i>
-    </button>
-    <div class="enhanced-title" style="margin-bottom:1.2rem;">
-      <i class="fas fa-calendar-check" style="color:#2563eb; margin-right:8px;"></i>
-      Appointment Details
+ <div id="appointmentModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" style="display: none;">
+    <div class="bg-white rounded-xl shadow-lg w-full max-w-lg">
+        <div class="flex items-center justify-between px-6 py-4 border-b">
+            <div class="flex items-center gap-2">
+               <i class="ri-calendar-check-line text-2xl text-blue-600"></i>
+                <h5 class="text-lg font-semibold text-gray-800">Appointment Details</h5>
+            </div>
+            <button id="closeAppointmentModal" type="button" class="text-gray-400 hover:text-gray-600 close-modal">
+                <i class="ri-close-line text-2xl"></i>
+            </button>
+        </div>
+        <div class="px-6 py-4 space-y-3">
+            <div class="flex items-center gap-2">
+                <i class="ri-user-line text-primary"></i>
+                <span class="font-medium">Customer Name:</span>
+                <span id="appointmentName"></span>
+            </div>
+            <div class="flex items-center gap-2">
+                <i class="ri-briefcase-line text-primary"></i>
+                <span class="font-medium">Service(s):</span>
+                <span id="appointmentSubservices"></span>
+            </div>
+            <div class="flex items-center gap-2">
+                <i class="ri-calendar-line text-primary"></i>
+                <span class="font-medium">Date:</span>
+                <span id="appointmentDate"></span>
+            </div>
+            <div class="flex items-center gap-2">
+                <i class="ri-time-line text-primary"></i>
+                <span class="font-medium">Time:</span>
+                <div id="appointmentTime" class="flex-1">N/A</div>
+            </div>
+            <div class="flex items-center gap-2">
+                <i class="ri-map-pin-line text-primary"></i>
+                <span class="font-medium">Address:</span>
+                <span id="appointmentAddress"></span>
+            </div>
+            <div class="flex items-center gap-2">
+                <i class="ri-phone-line text-primary"></i>
+                <span class="font-medium">Contact:</span>
+                <span id="appointmentContact"></span>
+            </div>
+            <div class="flex items-center gap-2">
+                <i class="ri-information-line text-primary"></i>
+                <span class="font-medium">Status:</span>
+                <span id="appointmentStatus"></span>
+            </div>
+            <div class="flex items-center gap-2">
+                <i class="ri-money-dollar-circle-line text-primary"></i>
+                <span class="font-medium">Payment Status:</span>
+                <span id="appointmentPaymentStatus"></span>
+            </div>
+            <div class="flex items-center gap-2">
+                <i class="ri-money-dollar-circle-line text-primary"></i>
+                <span class="font-medium">Payment Amount:</span>
+                <span id="appointmentPaymentAmount"></span>
+            </div>
+            <div class="flex flex-col gap-1">
+                <div class="flex items-center gap-2">
+                    <i class="ri-sticky-note-line text-primary"></i>
+                    <span class="font-medium">Notes:</span>
+                </div>
+                <div class="ml-6 mt-1 p-2 bg-gray-50 rounded">
+                    <span id="appointmentNotes" class="text-sm text-gray-700"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex justify-end gap-2 px-6 py-4 border-t">
+            <button id="acceptAppointmentBtn" class="btn flex items-center gap-1 bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded" data-id="">
+                <i class="ri-check-line"></i> 
+                <span class="btn-text">Accept</span>
+                <span class="btn-spinner" style="display:none;">
+                    <i class="ri-loader-4-line animate-spin"></i>
+                </span>
+            </button>
+            <button id="declineAppointmentBtn" class="btn flex items-center gap-1 bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded" data-id="">
+                <i class="ri-close-line"></i> 
+                <span class="btn-text">Decline</span>
+                <span class="btn-spinner" style="display:none;">
+                    <i class="ri-loader-4-line animate-spin"></i>
+                </span>
+            </button>
+            <button id="completeAppointmentBtn" class="btn flex items-center gap-1 bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded" data-id="">
+                <i class="ri-check-double-line"></i> 
+                <span class="btn-text">Complete</span>
+                <span class="btn-spinner" style="display:none;">
+                    <i class="ri-loader-4-line animate-spin"></i>
+                </span>
+            </button>
+            
+            
+        </div>
+
+        <div id="declineReasonContainer" style="display:none;" class="px-6 py-4 border-t">
+            <label for="declineReason" class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="ri-error-warning-line text-red-500"></i> Reason for Declining:
+            </label>
+            <textarea id="declineReason" placeholder="Enter reason for declining the appointment..." rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"></textarea>
+            <div class="flex justify-end gap-2 mt-4">
+                <button id="confirmDeclineBtn" class="btn flex items-center gap-1 bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded">
+                    <i class="ri-check-line"></i> 
+                    <span class="btn-text">Confirm Decline</span>
+                    <span class="btn-spinner" style="display:none;">
+                        <i class="ri-loader-4-line animate-spin"></i>
+                    </span>
+                </button>
+                <button id="cancelDeclineBtn" class="btn flex items-center gap-1 bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded">
+                    <i class="ri-arrow-go-back-line"></i> Cancel
+                </button>
+            </div>
+        </div>
+
+        <form id="noShowForm" method="POST" action="{{ route('appointments.no_show', 0) }}" style="display:none;" class="px-6 py-4 border-t">
+            @csrf
+            <button type="submit" class="btn flex items-center gap-1 w-full bg-yellow-600 hover:bg-yellow-700 text-white px-3 py-2 rounded justify-center">
+                <i class="ri-user-unfollow-line"></i> 
+                <span class="btn-text">Mark Customer as No-Show</span>
+                <span class="btn-spinner" style="display:none;">
+                    <i class="ri-loader-4-line animate-spin"></i>
+                </span>
+            </button>
+        </form>
     </div>
-    <div class="enhanced-body" style="margin-bottom:1.2rem;">
-      <div class="appt-details-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px 18px;">
-        <div class="appt-detail">
-        <span class="appt-label"><i class="fas fa-briefcase" style="color:#2563eb;"></i> Service(s):</span>
-        <span id="appointmentSubservices" class="appt-value"></span>
-      </div>
-      <div class="appt-detail">
-          <span class="appt-label"><i class="fas fa-user" style="color:#2563eb;"></i> Name:</span>
-          <span id="appointmentName" class="appt-value"></span>
-        </div>
-        <div class="appt-detail">
-          <span class="appt-label"><i class="fas fa-calendar-day" style="color:#2563eb;"></i> Date:</span>
-          <span id="appointmentDate" class="appt-value"></span>
-        </div>
-        <div class="appt-detail">
-          <span class="appt-label"><i class="fas fa-clock" style="color:#2563eb;"></i> Time:</span>
-          <span id="appointmentTime" class="appt-value"></span>
-        </div>
-        <div class="appt-detail">
-          <span class="appt-label"><i class="fas fa-map-marker-alt" style="color:#2563eb;"></i> Address:</span>
-          <span id="appointmentAddress" class="appt-value"></span>
-        </div>
-        <div class="appt-detail">
-          <span class="appt-label"><i class="fas fa-phone" style="color:#2563eb;"></i> Contact:</span>
-          <span id="appointmentContact" class="appt-value"></span>
-        </div>
-        <div class="appt-detail">
-          <span class="appt-label"><i class="fas fa-info-circle" style="color:#2563eb;"></i> Status:</span>
-          <span id="appointmentStatus" class="appt-value"></span>
-        </div>
-        <div class="appt-detail">
-          <span class="appt-label"><i class="fas fa-money-bill-wave" style="color:#2563eb;"></i> Payment Status:</span>
-          <span id="appointmentPaymentStatus" class="appt-value"></span>
-        </div>
-        <div class="appt-detail">
-          <span class="appt-label"><i class="fas fa-coins" style="color:#2563eb;"></i> Payment Amount:</span>
-          <span id="appointmentPaymentAmount" class="appt-value"></span>
-        </div>
-      </div>
-      <div class="appt-notes" style="margin-top:1.2rem;">
-        <span class="appt-label"><i class="fas fa-sticky-note" style="color:#2563eb;"></i> Notes:</span>
-        <span id="appointmentNotes" class="appt-value"></span>
-      </div>
-    </div>
-    <div class="enhanced-actions" style="margin-top:1.5rem;gap:0.7rem;justify-content:center;">
-      <button id="acceptAppointmentBtn" class="action-button accept-button enhanced-btn" data-id="">
-        <i class="fas fa-check-circle"></i> 
-        <span class="btn-text">Accept</span>
-        <span class="btn-spinner" style="display:none;">
-          <i class="fas fa-spinner fa-spin"></i>
-        </span>
-      </button>
-      <button id="declineAppointmentBtn" class="action-button decline-button enhanced-btn" data-id="">
-        <i class="fas fa-times-circle"></i> 
-        <span class="btn-text">Decline</span>
-        <span class="btn-spinner" style="display:none;">
-          <i class="fas fa-spinner fa-spin"></i>
-        </span>
-      </button>
-      <button id="completeAppointmentBtn" class="action-button complete-button enhanced-btn" data-id="">
-        <i class="fas fa-flag-checkered"></i> 
-        <span class="btn-text">Complete</span>
-        <span class="btn-spinner" style="display:none;">
-          <i class="fas fa-spinner fa-spin"></i>
-        </span>
-      </button>
-    </div>
-    <div id="declineReasonContainer" style="display:none;margin-top:1.2rem;">
-      <label for="declineReason" class="enhanced-label" style="margin-bottom:0.4rem;">
-        <i class="fas fa-comment-dots"></i> Reason for Declining:
-      </label>
-      <textarea id="declineReason" placeholder="Enter reason..." rows="3" class="enhanced-textarea"></textarea>
-      <div style="display:flex;gap:0.7rem;justify-content:center;">
-        <button id="confirmDeclineBtn" class="action-button decline-button enhanced-btn">
-          <i class="fas fa-check"></i> 
-         <span class="btn-text">Confirm Decline</span>
-        <span class="btn-spinner" style="display:none;">
-          <i class="fas fa-spinner fa-spin"></i>
-        </span>
-        </button>
-        <button id="cancelDeclineBtn" class="action-button cancel-button enhanced-btn">
-          <i class="fas fa-undo"></i> Cancel
-        </button>
-      </div>
-      <form id="noShowForm" method="POST" action="{{ route('appointments.no_show', 0) }}" style="display:none;margin-top:1rem;">
-        @csrf
-        <button type="submit" class="action-button warning-button enhanced-btn">
-          <i class="fas fa-user-slash"></i> 
-          <span class="btn-text">Mark Customer as No-Show</span>
-          <span class="btn-spinner" style="display:none;">
-            <i class="fas fa-spinner fa-spin"></i>
-          </span>
-        </button>
-      </form>
-    </div>
-  </div>
 </div>
     
 <script>
@@ -143,12 +162,71 @@
     resetModalState();
   });
 
+
+  function formatTo12Hour(timeStr) {
+    try {
+        // Handle various time formats
+        let parts = timeStr.split(':');
+        let hour = parseInt(parts[0], 10);
+        let minute = parts.length > 1 ? parseInt(parts[1], 10) : 0;
+        
+        const period = hour >= 12 ? 'PM' : 'AM';
+        const hour12 = hour % 12 || 12; // Convert 0 to 12 for midnight
+        
+        // Format with leading zeros for minutes
+        return `${hour12}:${minute.toString().padStart(2, '0')} ${period}`;
+    } catch (error) {
+        console.error("Error in formatTo12Hour:", error, timeStr);
+        return timeStr; // Return original string if parsing fails
+    }
+}
+
+function formatTimeRange(startTime, durationMinutes) {
+    if (!startTime) return 'N/A';
+    
+    try {
+        // Parse the start time (expecting format like "09:00" or "14:30")
+        const [hours, minutes] = startTime.split(':').map(Number);
+        
+        // Create start date object (using a dummy date)
+        const startDate = new Date(2000, 0, 1, hours, minutes);
+        
+        // Create end date by adding duration
+        const endDate = new Date(startDate.getTime() + (durationMinutes * 60 * 1000));
+        
+        // Format both times in 12-hour format
+        const startFormatted = formatTo12Hour(startTime);
+        
+        // Format end time with proper minutes
+        const endHours = endDate.getHours();
+        const endMinutes = endDate.getMinutes();
+        const endTimeStr = `${endHours}:${endMinutes.toString().padStart(2, '0')}`;
+        const endFormatted = formatTo12Hour(endTimeStr);
+        
+        return `${startFormatted} - ${endFormatted}`;
+    } catch (error) {
+        console.error("Error in formatTimeRange:", error);
+        return `${startTime} - Error`;
+    }
+}
+
   function openAppointmentModal(data, eventId) {
     console.log('Appointment data:', data);
 
     document.getElementById('appointmentName').textContent = data.name || 'N/A';
     document.getElementById('appointmentDate').textContent = data.date || 'N/A';
-    document.getElementById('appointmentTime').textContent = convertTo12HourFormat(data.time) || 'N/A';
+   // Get the duration from the appointment data
+    const duration = data.duration || 60; // Default to 60 minutes if not provided
+    
+    // Format time as a range (start - end) with service duration
+    let timeDisplay = formatTimeRange(data.time, duration);
+    
+    // Add duration information
+    timeDisplay += `<span class="text-xs text-gray-500 block mt-1">
+        ${duration} minute service
+    </span>`;
+    
+    document.getElementById('appointmentTime').innerHTML = timeDisplay;
     document.getElementById('appointmentAddress').textContent = data.address || 'N/A';
     document.getElementById('appointmentContact').textContent = data.contact || 'N/A';
     document.getElementById('appointmentStatus').textContent = data.status || 'N/A';

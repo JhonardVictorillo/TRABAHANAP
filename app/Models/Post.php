@@ -15,6 +15,9 @@ class Post extends Model
          'rate',
          'rate_type',
          'location_restriction',
+          'service_duration',
+        'buffer_time',
+        'scheduling_mode'
 
     ];
 
@@ -75,4 +78,55 @@ class Post extends Model
     {
         return $this->appointments()->whereNotNull('rating')->count();
     }
+
+
+
+    public function getDefaultDuration()
+{
+    // If post has explicit duration, use it
+    if (!empty($this->service_duration)) {
+        return $this->service_duration;
+    }
+    
+    // Get category name from the freelancer's category
+    $categoryName = null;
+    if ($this->freelancer && $this->freelancer->categories()->first()) {
+        $categoryName = strtolower($this->freelancer->categories()->first()->name);
+    }
+    
+    // Map service categories to default durations (in minutes)
+    $durationMap = [
+        'welder' => 180,
+        'event designer' => 120,
+        'housekeeping' => 180,
+        'grooming' => 60,
+        'electricals' => 120,
+        'gardening' => 120,
+        'technicians' => 90,
+        'masonry' => 240,
+        'plumbing' => 120,
+        'tutoring' => 60,
+        'carpentry' => 180,
+        'nails services' => 60,
+    ];
+    
+    // Look for exact category match or partial match
+    if (isset($durationMap[$categoryName])) {
+        return $durationMap[$categoryName];
+    }
+    
+    // Check for partial matches
+    foreach ($durationMap as $category => $duration) {
+        if (strpos($categoryName, $category) !== false) {
+            return $duration;
+        }
+    }
+    
+    return 60; // Default to 1 hour
+}
+
+public function getBufferTime()
+{
+    return $this->buffer_time ?: 15;
+}
 }

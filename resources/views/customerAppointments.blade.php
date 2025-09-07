@@ -101,7 +101,7 @@
             <div class="flex items-center gap-2">
                 <i class="ri-time-line text-primary"></i>
                 <span class="font-medium">Time:</span>
-                <span id="appointmentTime"></span>
+                <div id="appointmentTime" class="flex-1">N/A</div>
             </div>
             <div class="flex items-center gap-2">
                 <i class="ri-map-pin-line text-primary"></i>
@@ -432,14 +432,56 @@ function handleButtonVisibility(status) {
 }
 
 function formatTo12Hour(timeStr) {
-    // Handles "HH:mm" or "HH:mm:ss" formats
-    let [hour, minute] = timeStr.split(':');
-    hour = parseInt(hour, 10);
-    const period = hour >= 12 ? 'PM' : 'AM';
-    const hour12 = hour % 12 || 12;
-    return `${hour12}:${minute} ${period}`;
+    try {
+        // Handle various time formats
+        let parts = timeStr.split(':');
+        let hour = parseInt(parts[0], 10);
+        let minute = parts.length > 1 ? parseInt(parts[1], 10) : 0;
+        
+        const period = hour >= 12 ? 'PM' : 'AM';
+        const hour12 = hour % 12 || 12; // Convert 0 to 12 for midnight
+        
+        // Format with leading zeros for minutes
+        return `${hour12}:${minute.toString().padStart(2, '0')} ${period}`;
+    } catch (error) {
+        console.error("Error in formatTo12Hour:", error, timeStr);
+        return timeStr; // Return original string if parsing fails
+    }
 }
 
+function formatTimeRange(startTime, durationMinutes) {
+    if (!startTime) return 'N/A';
+    
+    console.log("Formatting time range:", startTime, "Duration:", durationMinutes); // Debug
+      
+   
+    try {
+        // Parse the start time (expecting format like "09:00" or "14:30")
+        const [hours, minutes] = startTime.split(':').map(Number);
+        
+        // Create start date object (using a dummy date)
+        const startDate = new Date(2000, 0, 1, hours, minutes);
+        
+        // Create end date by adding duration
+        const endDate = new Date(startDate.getTime() + (durationMinutes * 60 * 1000));
+        
+        // Format both times in 12-hour format
+        const startFormatted = formatTo12Hour(startTime);
+        
+        // Format end time with proper minutes
+        const endHours = endDate.getHours();
+        const endMinutes = endDate.getMinutes();
+        const endTimeStr = `${endHours}:${endMinutes.toString().padStart(2, '0')}`;
+        const endFormatted = formatTo12Hour(endTimeStr);
+        
+        console.log("Calculated end time:", endTimeStr, "Formatted:", endFormatted); // Debug
+        
+        return `${startFormatted} - ${endFormatted}`;
+    } catch (error) {
+        console.error("Error in formatTimeRange:", error);
+        return `${startTime} - Error`;
+    }
+}
 // Add a variable to store current appointment data
 let currentAppointmentData = null;
 
@@ -451,8 +493,7 @@ function openAppointmentModal(data) {
     document.getElementById('appointmentSubservices').textContent =
     data.services_list || 'N/A';
     document.getElementById('appointmentDate').textContent = data.date || 'N/A';
-    document.getElementById('appointmentTime').textContent = 
-    data.time ? formatTo12Hour(data.time) : 'N/A';
+ 
     document.getElementById('appointmentAddress').textContent = data.address || 'N/A';
     document.getElementById('appointmentStatus').textContent = data.status || 'N/A';
     document.getElementById('appointmentNotes').textContent = data.notes || 'No additional notes';
@@ -494,6 +535,27 @@ function openAppointmentModal(data) {
         totalAmountContainer.style.display = 'none';
     }
     
+     console.log("Debug - Appointment Duration:", { 
+        time: data.time, 
+        duration: data.duration,
+        bufferTime: data.post ? data.post.buffer_time : 0 
+    });
+    
+   const duration = data.duration || (data.post ? data.post.service_duration : 60);
+    const bufferTime = data.post ? data.post.buffer_time : 0;
+    
+    // Display time range with buffer information
+    let timeDisplay = formatTimeRange(data.time, duration);
+    
+    // Add buffer time info if present
+    if (bufferTime > 0) {
+        timeDisplay += `<span class="text-xs text-gray-500 block">${duration} minute service + ${bufferTime} minute buffer</span>`;
+    } else {
+        timeDisplay += `<span class="text-xs text-gray-500 block">${duration} minute service</span>`;
+    }
+    
+    document.getElementById('appointmentTime').innerHTML = timeDisplay;
+
     
     // Show or hide buttons based on appointment status
    

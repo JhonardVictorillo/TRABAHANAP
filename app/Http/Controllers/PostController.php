@@ -46,6 +46,9 @@ class PostController extends Controller
              'rate' => 'required|numeric|min:0',
              'rate_type' => 'required|in:hourly,daily,fixed',
               'location_restriction' => 'required|in:minglanilla_only,open',
+             'service_duration' => 'required|integer|min:15|max:480', // Added validation
+            'buffer_time' => 'required|integer|min:0|max:60',  // Added validation
+            'scheduling_mode' => 'required|in:hourly,half_day,full_day',
         ]);
 
         if ($validator->fails()) {
@@ -66,7 +69,10 @@ class PostController extends Controller
                 'rate' => $request->rate,
                 'rate_type' => $request->rate_type,
                  'location_restriction' => $request->location_restriction, 
-            ]);
+                'service_duration' => $request->service_duration, // Add this line
+                'buffer_time' => $request->buffer_time, // Add this line
+                'scheduling_mode' => $request->scheduling_mode,
+                ]);
 
             // Store SubServices
             foreach ($request->sub_services as $sub_service) {
@@ -149,7 +155,10 @@ class PostController extends Controller
             'rate' => 'required|numeric|min:0',
              'rate_type' => 'required|in:hourly,daily,fixed',
              'location_restriction' => 'required|in:minglanilla_only,open',
-        ]);
+              'service_duration' => 'required|integer|min:15|max:480', // Added validation
+             'buffer_time' => 'required|integer|min:0|max:60',        // Added validation
+            'scheduling_mode' => 'required|in:hourly,half_day,full_day',
+            ]);
 
         if ($validator->fails()) {
             return response()->json([
@@ -165,6 +174,9 @@ class PostController extends Controller
             $post->rate = $request->rate;           // <-- Add this
             $post->rate_type = $request->rate_type;
             $post->location_restriction = $request->location_restriction; 
+            $post->service_duration = $request->service_duration; // Add this line
+            $post->buffer_time = $request->buffer_time;  
+            $post->scheduling_mode = $request->scheduling_mode; // Add this line
             $post->save();
 
             // Update SubServices

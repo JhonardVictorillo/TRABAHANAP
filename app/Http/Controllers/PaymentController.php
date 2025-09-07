@@ -76,6 +76,7 @@ class PaymentController extends Controller
                 'time' => $request->time,
                 'notes' => $request->notes,
                 'commitment_fee' => $commitmentFee,
+                 'duration' => $request->duration, 
             ],
             ]);
 
@@ -125,6 +126,7 @@ class PaymentController extends Controller
                     'fee_status' => 'paid',
                     'status' => 'pending',
                     'stripe_session_id' => $session->id,
+                     'duration' => $meta->duration ?? 60, 
                 ]);
                 
                 // Create a "held" record for the commitment fee (in escrow)

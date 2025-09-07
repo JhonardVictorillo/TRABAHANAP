@@ -212,6 +212,41 @@
                 </select>
             </div>
             <div class="form-group">
+                <label for="service_duration" class="block text-sm font-medium text-gray-700 mb-1">Service Duration</label>
+                <select name="service_duration" id="service_duration" class="form-control w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="30">30 minutes</option>
+                    <option value="45">45 minutes</option>
+                    <option value="60" selected>1 hour</option>
+                    <option value="90">1.5 hours</option>
+                    <option value="120">2 hours</option>
+                    <option value="180">3 hours</option>
+                    <option value="240">4 hours</option>
+                    <option value="360">6 hours</option>
+                    <option value="480">8 hours (Full day)</option>
+                </select>
+                <p class="text-xs text-gray-500 mt-1">How long does your service typically take to complete?</p>
+            </div>
+
+            <div class="form-group mt-4">
+                <label for="buffer_time" class="block text-sm font-medium text-gray-700 mb-1">Buffer Time Between Appointments</label>
+                <select name="buffer_time" id="buffer_time" class="form-control w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="0">No buffer</option>
+                    <option value="15" selected>15 minutes</option>
+                    <option value="30">30 minutes</option>
+                    <option value="60">1 hour</option>
+                </select>
+                <p class="text-xs text-gray-500 mt-1">Buffer time allows you to travel between appointments or prepare for the next client.</p>
+            </div>
+            <div class="mb-4">
+                <label for="scheduling_mode" class="block text-sm font-medium text-gray-700 mb-1">Scheduling Mode</label>
+                <select name="scheduling_mode" id="scheduling_mode" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
+                    <option value="hourly">Hourly (1-3 hour jobs)</option>
+                    <option value="half_day">Half Day (4 hour block)</option>
+                    <option value="full_day">Full Day (8 hour commitment)</option>
+                </select>
+                <p class="text-xs text-gray-500 mt-1">How should customers book your service?</p>
+            </div>
+            <div class="form-group">
                 <label for="location_restriction">Location Restriction</label>
                 <select name="location_restriction" id="location_restriction" class="form-control">
                     <option value="minglanilla_only">Only available in Minglanilla</option>
@@ -285,6 +320,41 @@
                         <option value="daily">Daily</option>
                         <option value="fixed">Fixed</option>
                     </select>
+                </div>
+                <div class="form-group">
+                    <label for="edit-service-duration" class="block text-sm font-medium text-gray-700 mb-1">Service Duration</label>
+                    <select name="service_duration" id="edit-service-duration" class="form-control w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="30">30 minutes</option>
+                        <option value="45">45 minutes</option>
+                        <option value="60">1 hour</option>
+                        <option value="90">1.5 hours</option>
+                        <option value="120">2 hours</option>
+                        <option value="180">3 hours</option>
+                        <option value="240">4 hours</option>
+                        <option value="360">6 hours</option>
+                        <option value="480">8 hours (Full day)</option>
+                    </select>
+                    <p class="text-xs text-gray-500 mt-1">How long does your service typically take to complete?</p>
+                </div>
+
+                <div class="form-group mt-4">
+                    <label for="edit-buffer-time" class="block text-sm font-medium text-gray-700 mb-1">Buffer Time</label>
+                    <select name="buffer_time" id="edit-buffer-time" class="form-control w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="0">No buffer</option>
+                        <option value="15">15 minutes</option>
+                        <option value="30">30 minutes</option>
+                        <option value="60">1 hour</option>
+                    </select>
+                    <p class="text-xs text-gray-500 mt-1">Buffer time allows you to travel between appointments or prepare for the next client.</p>
+                </div>
+                <div class="mb-4">
+                    <label for="edit-scheduling-mode" class="block text-sm font-medium text-gray-700 mb-1">Scheduling Mode</label>
+                    <select name="scheduling_mode" id="edit-scheduling-mode" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
+                        <option value="hourly">Hourly (1-3 hour jobs)</option>
+                        <option value="half_day">Half Day (4 hour block)</option>
+                        <option value="full_day">Full Day (8 hour commitment)</option>
+                    </select>
+                    <p class="text-xs text-gray-500 mt-1">How should customers book your service?</p>
                 </div>
                 <div class="form-group">
                     <label for="edit-location-restriction">Location Restriction</label>
@@ -380,6 +450,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         document.getElementById('edit-rate').value = data.post.rate ?? '';
                         document.getElementById('edit-rate-type').value = data.post.rate_type ?? 'hourly';
                         document.getElementById('edit-location-restriction').value = data.post.location_restriction ?? 'minglanilla_only';
+                        document.getElementById('edit-service-duration').value = data.post.service_duration ?? '60';
+                        document.getElementById('edit-buffer-time').value = data.post.buffer_time ?? '15';
+                        document.getElementById('edit-scheduling-mode').value = data.post.scheduling_mode ?? 'hourly';
                         // Fix potential undefined array issue
                     // Fix sub-services
             subServicesContainer.innerHTML = '';

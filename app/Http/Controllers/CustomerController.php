@@ -294,6 +294,8 @@ public function getAppointments(Request $request)
         'name' => $appointment->name,
         'rate' => $appointment->post->rate ?? 0,
         'rate_type' => $appointment->post->rate_type ?? '',
+          'duration' => $appointment->duration ?? ($appointment->post ? $appointment->post->service_duration : 60),
+        'buffer_time' => $appointment->post ? $appointment->post->buffer_time : 0,
     ];
 
     // Add subservices as a simple concatenated string
@@ -666,32 +668,42 @@ public function getAvailability(Request $request, $freelancerId)
     try {
         // Get current appointment ID for rescheduling
         $currentAppointmentId = $request->input('current_appointment_id');
-          $today = now()->toDateString();
-        $currentMonth = now()->month;
-        $currentYear = now()->year;
-
+        $year = $request->input('year', now()->year);
+        $month = $request->input('month', now()->month);
+        $today = now()->toDateString();
+        
         // Log parameters for debugging
         \Log::info("Fetching availability", [
             'freelancer_id' => $freelancerId,
+            'year' => $year,
+            'month' => $month,
             'current_appointment_id' => $currentAppointmentId
         ]);
         
+        // Get the appointment date for rescheduling if applicable
         $appointmentDate = null;
         if ($currentAppointmentId) {
             $currentAppointment = Appointment::find($currentAppointmentId);
             $appointmentDate = $currentAppointment ? $currentAppointment->date : null;
         }
 
-       $availabilities = FreelancerAvailability::where('freelancer_id', $freelancerId)
-        ->where(function ($query) use ($today, $appointmentDate) {
-            $query->whereDate('date', '>=', $today);
-            // Always include the appointment date if it is today or in the future
-            if ($appointmentDate && $appointmentDate >= $today) {
-                $query->orWhereDate('date', $appointmentDate);
-            }
-        })
-        ->orderBy('date')
-        ->get();
+        // Get the freelancer's availabilities for the specified month
+        $availabilities = FreelancerAvailability::where('freelancer_id', $freelancerId)
+            ->where(function ($query) use ($year, $month, $today, $appointmentDate) {
+                $query->whereYear('date', $year)
+                    ->whereMonth('date', $month);
+                
+                // Always include the appointment date if rescheduling
+                if ($appointmentDate) {
+                    $query->orWhereDate('date', $appointmentDate);
+                }
+            })
+            ->where(function($query) use ($today) {
+                // Ensure we only include today or future dates
+                $query->whereDate('date', '>=', $today);
+            })
+            ->orderBy('date')
+            ->get();
             
         // Log what was found
         \Log::info("Availability records found", [
@@ -705,9 +717,9 @@ public function getAvailability(Request $request, $freelancerId)
         }
 
         // Build query for booked appointments
-       $appointmentsQuery = Appointment::where('freelancer_id', $freelancerId)
-        ->whereIn('date', $availabilities->pluck('date'))
-        ->whereNotIn('status', ['canceled', 'declined']);
+        $appointmentsQuery = Appointment::where('freelancer_id', $freelancerId)
+            ->whereIn('date', $availabilities->pluck('date'))
+            ->whereNotIn('status', ['canceled', 'declined']);
         
         // If rescheduling, exclude the current appointment
         if ($currentAppointmentId) {
@@ -721,18 +733,58 @@ public function getAvailability(Request $request, $freelancerId)
             'count' => $appointments->count()
         ]);
 
-        // Format the response
+        // Format the response with booking details including duration
         $response = $availabilities->map(function ($availability) use ($appointments) {
-            $bookedTimes = $appointments
-                ->where('date', $availability->date)
-                ->pluck('time')
-                ->toArray();
-
+            // Get all bookings for this date with their complete details
+            $bookings = $appointments->where('date', $availability->date)
+                ->map(function ($appointment) {
+                    // Get the post for this appointment to retrieve duration and buffer time
+                    $post = $appointment->post;
+                    
+                    // Get the service duration and buffer time
+                    $duration = $appointment->duration ?? ($post ? $post->getDefaultDuration() : 60);
+                    $bufferTime = $post ? $post->getBufferTime() : 0;
+                    
+                    // Parse appointment time (HH:MM format)
+                    $timeParts = explode(':', $appointment->time);
+                    $startHour = (int)$timeParts[0];
+                    $startMinute = isset($timeParts[1]) ? (int)$timeParts[1] : 0;
+                    
+                    // Calculate end time in minutes
+                    $startTimeInMinutes = ($startHour * 60) + $startMinute;
+                    $endTimeInMinutes = $startTimeInMinutes + $duration;
+                    
+                    // Calculate buffer end time
+                    $bufferEndTimeInMinutes = $endTimeInMinutes + $bufferTime;
+                    
+                    // Format the end times back to hours and minutes
+                    $endHour = floor($endTimeInMinutes / 60);
+                    $endMinute = $endTimeInMinutes % 60;
+                    
+                    $bufferEndHour = floor($bufferEndTimeInMinutes / 60);
+                    $bufferEndMinute = $bufferEndTimeInMinutes % 60;
+                    
+                    // Return booking details with timing information
+                    return [
+                        'appointment_id' => $appointment->id,
+                        'time' => $appointment->time,
+                        'duration' => $duration,
+                        'buffer_time' => $bufferTime,
+                        'end_time' => sprintf("%02d:%02d", $endHour, $endMinute),
+                        'buffer_end_time' => sprintf("%02d:%02d", $bufferEndHour, $bufferEndMinute),
+                        'total_minutes' => $duration + $bufferTime
+                    ];
+                })->values()->toArray();
+            
+            // Also keep the simple array of booked times for backward compatibility
+            $bookedTimes = collect($bookings)->pluck('time')->toArray();
+            
             return [
                 'date' => $availability->date,
                 'start_time' => $availability->start_time,
                 'end_time' => $availability->end_time,
                 'booked_times' => $bookedTimes,
+                'bookings' => $bookings
             ];
         });
         
@@ -740,11 +792,11 @@ public function getAvailability(Request $request, $freelancerId)
     } catch (\Exception $e) {
         \Log::error('Error fetching availability: ' . $e->getMessage(), [
             'file' => $e->getFile(),
-            'line' => $e->getLine()
+            'line' => $e->getLine(),
+            'trace' => $e->getTraceAsString()
         ]);
         return response()->json(['error' => 'Failed to fetch availability'], 500);
     }
 }
-
     
 }
