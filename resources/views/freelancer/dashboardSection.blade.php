@@ -461,141 +461,534 @@
     
 
     <!-- Dashboard Section -->
-    <div class="dashboard-section" id="dashboardSection" style="display: none;">
-      <div class="content-header">
+   <div class="dashboard-section" id="dashboardSection" style="display: none;">
+  <!-- Dashboard Header -->
+  <div class="dashboard-header">
+    <div class="header-content">
+      <h1 class="dashboard-title">
+        <i class='bx bx-chart-line'></i>
+        Dashboard Overview
+      </h1>
+      <p class="dashboard-subtitle">Monitor your business performance and client interactions</p>
+    </div>
+    <div class="dashboard-actions">
+      <button class="refresh-btn" onclick="refreshDashboard()">
+        <i class='bx bx-refresh'></i>
+        Refresh Data
+      </button>
+    </div>
+  </div>
+
+  <!-- Enhanced Stats Cards -->
+  <div class="dashboard-content">
+    <div class="stats-cards">
+      <div class="card enhanced-card clients-card" id="clientsCard" onclick="showTable('clients')">
+        <div class="card-icon">
+          <i class='bx bx-group'></i>
+        </div>
+        <div class="card-info">
+          <div class="card-number">{{ $totalClients }}</div>
+          <h3>Total Clients</h3>
+          <p class="card-subtitle">Active client relationships</p>
+        </div>
+        <div class="card-indicator active"></div>
       </div>
-      <div class="dashboard-content">
-        <div class="stats-cards">
-          <div class="card" id="clientsCard">
-            <div class="card-icon">
-              <span class="material-symbols-outlined">group</span>
-            </div>
-            <div class="card-info">
-              <h3>Clients</h3>
-              <p>{{ $totalClients }}</p>
-            </div>
-          </div>
-          <div class="card" id="appointmentsCard">
-            <div class="card-icon">
-              <span class="material-symbols-outlined">calendar_today</span>
-            </div>
-            <div class="card-info">
-              <h3>Appointments</h3>
-              <p>{{ $totalAppointments }}</p>
-            </div>
-          </div>
-          <div class="card" id="reviewsCard">
-            <div class="card-icon">
-              <span class="material-symbols-outlined">star</span>
-            </div>
-            <div class="card-info">
-              <h3>Reviews</h3>
-              <p>{{ $averageRating }}</p>
-            </div>
-          </div>
+
+      <div class="card enhanced-card appointments-card" id="appointmentsCard" onclick="showTable('appointments')">
+        <div class="card-icon">
+          <i class='bx bx-calendar-event'></i>
         </div>
-        <div class="tables">
-          <div class="table-container" id="clientsTable">
-            <h3>Total Clients</h3>
-            <table class="table">
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Email</th>
-                  <th>Phone</th>
-                  <th>Joined Date</th>
-                </tr>
-              </thead>
-              <tbody>
-              @forelse ($clients as $client)
-                <tr>
-                  <td>{{ $client->firstname }} {{ $client->lastname }}</td>
-                  <td>{{ $client->email }}</td>
-                  <td>{{ $client->contact_number ?? 'N/A' }}</td>
-                  <td>{{ $client->created_at->format('Y-m-d') }}</td>
-                </tr>
-              
-              @empty
-                <tr>
-                  <td colspan="4">No clients found.</td>
-                </tr>
-              @endforelse
-              </tbody>
-            </table>
-          </div>
-          <div class="table-container" id="appointmentsTable" style="display: none;">
-            <h3>Total Appointments</h3>
-            <table class="table">
-              <thead>
-                <tr>
-                  <th>Client Name</th>
-                  <th>Date</th>
-                  <th>Time</th>
-                  <th>Status</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-              @forelse ($appointments as $appointment)
-                  <tr>
-                    <td>{{ $appointment->customer->firstname }} {{ $appointment->customer->lastname }}</td>
-                    <td>{{ $appointment->date }}</td>
-                    <td>{{ $appointment->time }}</td>
-                    <td>{{ ucfirst($appointment->status) }}</td>
-                    <td>
-                      @if ($appointment->status != 'completed')
-                        <button class="btn-mark-done" data-id="{{ $appointment->id }}">Mark as Done</button>
-                      @else
-                        Completed
-                      @endif
-                    </td>
-                  </tr>
-                @empty
-                  <tr>
-                    <td colspan="5">No appointments found.</td>
-                  </tr>
-                @endforelse
-              </tbody>
-            </table>
-          </div>
-          <div class="table-container" id="reviewsTable" style="display: none;">
-            <h3>Client Reviews</h3>
-            <table class="table">
-              <thead>
-                <tr>
-                  <th>Client Name</th>
-                  <th>Rating</th>
-                  <th>Comment</th>
-                </tr>
-              </thead>
-              <tbody>
-              @forelse ($reviews as $review)
-                    <tr>
-                      <td>{{ $review->customer->firstname }} {{ $review->customer->lastname }}</td>
-                      <td>
-                        @for ($i = 0; $i < $review->rating; $i++)
-                          ⭐
-                        @endfor
-                      </td>
-                      <td>{{ $review->review  ?? 'No comment' }}</td>
-                    </tr>
-                  @empty
-                    <tr>
-                      <td colspan="3">No reviews found.</td>
-                    </tr>
-                  @endforelse
-              </tbody>
-            </table>
-          </div>
+        <div class="card-info">
+          <div class="card-number">{{ $totalAppointments }}</div>
+          <h3>Total Appointments</h3>
+          <p class="card-subtitle">All time bookings</p>
         </div>
+        <div class="card-indicator"></div>
+      </div>
+
+      <div class="card enhanced-card reviews-card" id="reviewsCard" onclick="showTable('reviews')">
+        <div class="card-icon">
+          <i class='bx bx-star'></i>
+        </div>
+        <div class="card-info">
+          <div class="card-number">{{ number_format($averageRating, 1) }}</div>
+          <h3>Average Rating</h3>
+          <p class="card-subtitle">{{ $ratingBreakdown->sum() }} total reviews</p>
+        </div>
+        <div class="card-indicator"></div>
       </div>
     </div>
 
+    <!-- Enhanced Tables Section -->
+   
+    <div class="tables-container">
+      <!-- Clients Table -->
+      <div class="table-container enhanced-table-container" id="clientsTable">
+        <div class="table-header">
+          <div class="table-title">
+            <i class='bx bx-group'></i>
+            <h3>Client Management</h3>
+          </div>
+          <div class="table-controls">
+            <div class="search-container">
+              <i class='bx bx-search'></i>
+              <input type="text" placeholder="Search clients..." class="search-input" id="clientSearch">
+            </div>
+          </div>
+        </div>
+
+        <div class="table-wrapper">
+          <table class="enhanced-table">
+            <thead>
+              <tr>
+                <th>
+                  <div class="th-content">
+                    <i class='bx bx-user'></i>
+                    Client Information
+                  </div>
+                </th>
+                <th>
+                  <div class="th-content">
+                    <i class='bx bx-envelope'></i>
+                    Contact Details
+                  </div>
+                </th>
+                <th>
+                  <div class="th-content">
+                    <i class='bx bx-calendar'></i>
+                    Member Since
+                  </div>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              @forelse ($clients as $client)
+                <tr class="table-row">
+                  <td>
+                    <div class="client-profile">
+                      <div class="client-avatar">
+                        <img src="{{ $client->profile_picture ? asset('storage/' . $client->profile_picture) : asset('images/defaultprofile.jpg') }}" 
+                             alt="{{ $client->firstname }}" onerror="this.src='{{ asset('images/defaultprofile.jpg') }}'">
+                      </div>
+                      <div class="client-details">
+                        <span class="client-name">{{ $client->firstname }} {{ $client->lastname }}</span>
+                        <span class="client-status">Active Client</span>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="contact-details">
+                      <div class="contact-item">
+                        <i class='bx bx-envelope'></i>
+                        <span>{{ $client->email }}</span>
+                      </div>
+                      <div class="contact-item">
+                        <i class='bx bx-phone'></i>
+                        <span>{{ $client->contact_number ?? 'Not provided' }}</span>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="date-info">
+                      <span class="date">{{ $client->created_at->format('M d, Y') }}</span>
+                      <span class="time-ago">{{ $client->created_at->diffForHumans() }}</span>
+                    </div>
+                  </td>
+                </tr>
+              @empty
+                <tr>
+                  <td colspan="3">
+                    <div class="empty-state">
+                      <i class='bx bx-group'></i>
+                      <h4>No clients yet</h4>
+                      <p>Your client list will appear here once you start getting appointments</p>
+                    </div>
+                  </td>
+                </tr>
+              @endforelse
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Clients Pagination -->
+        <div class="table-pagination">
+            <div class="pagination-info">
+                <span>Showing {{ $clients->firstItem() ?? 0 }} to {{ $clients->lastItem() ?? 0 }} of {{ $clients->total() }} clients</span>
+            </div>
+            <div class="pagination-controls">
+                @if ($clients->onFirstPage())
+                    <button class="pagination-btn" disabled>
+                        <i class='bx bx-chevron-left'></i>
+                        Previous
+                    </button>
+                @else
+                    <a href="{{ $clients->previousPageUrl() }}&active_tab=clients" class="pagination-btn">
+                        <i class='bx bx-chevron-left'></i>
+                        Previous
+                    </a>
+                @endif
+                
+                <div class="pagination-numbers">
+                    @foreach ($clients->getUrlRange(1, $clients->lastPage()) as $page => $url)
+                        @if ($page == $clients->currentPage())
+                            <button class="page-number active">{{ $page }}</button>
+                        @else
+                            <a href="{{ $url }}&active_tab=clients" class="page-number">{{ $page }}</a>
+                        @endif
+                    @endforeach
+                </div>
+                
+                @if ($clients->hasMorePages())
+                    <a href="{{ $clients->nextPageUrl() }}&active_tab=clients" class="pagination-btn">
+                        Next
+                        <i class='bx bx-chevron-right'></i>
+                    </a>
+                @else
+                    <button class="pagination-btn" disabled>
+                        Next
+                        <i class='bx bx-chevron-right'></i>
+                    </button>
+                @endif
+            </div>
+        </div>
+      </div>
+      <!-- END Clients Table -->
+
+      <!-- Appointments Table -->
+      <div class="table-container enhanced-table-container" id="appointmentsTable" style="display: none;">
+        <div class="table-header">
+          <div class="table-title">
+            <i class='bx bx-calendar-event'></i>
+            <h3>Appointment Management</h3>
+          </div>
+          <div class="table-controls">
+            <div class="search-container">
+              <i class='bx bx-search'></i>
+              <input type="text" placeholder="Search appointments..." class="search-input" id="appointmentSearch">
+            </div>
+            <div class="filter-container">
+              <select class="filter-select" id="statusFilter">
+                <option value="">All Status</option>
+                <option value="pending">Pending</option>
+                <option value="accepted">Accepted</option>
+                <option value="completed">Completed</option>
+                <option value="declined">Declined</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="table-wrapper">
+          <table class="enhanced-table">
+            <thead>
+              <tr>
+                <th>
+                  <div class="th-content">
+                    <i class='bx bx-user'></i>
+                    Client & Service
+                  </div>
+                </th>
+                <th>
+                  <div class="th-content">
+                    <i class='bx bx-calendar'></i>
+                    Schedule
+                  </div>
+                </th>
+                <th>
+                  <div class="th-content">
+                    <i class='bx bx-check-circle'></i>
+                    Status
+                  </div>
+                </th>
+               
+              </tr>
+            </thead>
+            <tbody>
+              @forelse ($appointments as $appointment)
+                <tr class="table-row">
+                  <td>
+                    <div class="client-profile">
+                      <div class="client-avatar">
+                        <img src="{{ $appointment->customer->profile_picture ? asset('storage/' . $appointment->customer->profile_picture) : asset('images/defaultprofile.jpg') }}" 
+                             alt="{{ $appointment->customer->firstname }}" onerror="this.src='{{ asset('images/defaultprofile.jpg') }}'">
+                      </div>
+                      <div class="client-details">
+                        <span class="client-name">{{ $appointment->customer->firstname }} {{ $appointment->customer->lastname }}</span>
+                        <span class="service-name">{{ $appointment->post->title ?? 'General Service' }}</span>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="schedule-info">
+                      <div class="date-time">
+                        <i class='bx bx-calendar'></i>
+                        <span>{{ \Carbon\Carbon::parse($appointment->date)->format('M d, Y') }}</span>
+                      </div>
+                      <div class="date-time">
+                        <i class='bx bx-time'></i>
+                        <span>{{ \Carbon\Carbon::parse($appointment->time)->format('g:i A') }}</span>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="status-badge status-{{ $appointment->status }}">
+                      @if($appointment->status == 'pending')
+                        <i class='bx bx-clock'></i>
+                      @elseif($appointment->status == 'accepted')
+                        <i class='bx bx-check'></i>
+                      @elseif($appointment->status == 'completed')
+                        <i class='bx bx-check-circle'></i>
+                      @elseif($appointment->status == 'declined')
+                        <i class='bx bx-x'></i>
+                      @endif
+                      {{ ucfirst($appointment->status) }}
+                    </div>
+                  </td>
+                  
+                </tr>
+              @empty
+                <tr>
+                  <td colspan="4">
+                    <div class="empty-state">
+                      <i class='bx bx-calendar-x'></i>
+                      <h4>No appointments yet</h4>
+                      <p>Your appointment history will appear here</p>
+                    </div>
+                  </td>
+                </tr>
+              @endforelse
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Appointments Pagination -->
+        <div class="table-pagination">
+            <div class="pagination-info">
+                <span>Showing {{ $appointments->firstItem() ?? 0 }} to {{ $appointments->lastItem() ?? 0 }} of {{ $appointments->total() }} appointments</span>
+            </div>
+            <div class="pagination-controls">
+                @if ($appointments->onFirstPage())
+                    <button class="pagination-btn" disabled>
+                        <i class='bx bx-chevron-left'></i>
+                        Previous
+                    </button>
+                @else
+                    <a href="{{ $appointments->previousPageUrl() }}&active_tab=appointments" class="pagination-btn">
+                        <i class='bx bx-chevron-left'></i>
+                        Previous
+                    </a>
+                @endif
+                
+                <div class="pagination-numbers">
+                    @foreach ($appointments->getUrlRange(1, $appointments->lastPage()) as $page => $url)
+                        @if ($page == $appointments->currentPage())
+                            <button class="page-number active">{{ $page }}</button>
+                        @else
+                            <a href="{{ $url }}&active_tab=appointments" class="page-number">{{ $page }}</a>
+                        @endif
+                    @endforeach
+                </div>
+                
+                @if ($appointments->hasMorePages())
+                    <a href="{{ $appointments->nextPageUrl() }}&active_tab=appointments" class="pagination-btn">
+                        Next
+                        <i class='bx bx-chevron-right'></i>
+                    </a>
+                @else
+                    <button class="pagination-btn" disabled>
+                        Next
+                        <i class='bx bx-chevron-right'></i>
+                    </button>
+                @endif
+            </div>
+        </div>
+      </div>
+      <!-- END Appointments Table -->
+
+      <!-- Reviews Table -->
+      <div class="table-container enhanced-table-container" id="reviewsTable" style="display: none;">
+        <div class="table-header">
+          <div class="table-title">
+            <i class='bx bx-star'></i>
+            <h3>Client Reviews & Ratings</h3>
+          </div>
+          <div class="table-controls">
+            <div class="search-container">
+              <i class='bx bx-search'></i>
+              <input type="text" placeholder="Search reviews..." class="search-input" id="reviewSearch">
+            </div>
+            <div class="filter-container">
+              <select class="filter-select" id="ratingFilter">
+                <option value="">All Ratings</option>
+                <option value="5">5 Stars</option>
+                <option value="4">4 Stars</option>
+                <option value="3">3 Stars</option>
+                <option value="2">2 Stars</option>
+                <option value="1">1 Star</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="table-wrapper">
+          <table class="enhanced-table">
+            <thead>
+              <tr>
+                <th>
+                  <div class="th-content">
+                    <i class='bx bx-user'></i>
+                    Client Information
+                  </div>
+                </th>
+                <th>
+                  <div class="th-content">
+                    <i class='bx bx-star'></i>
+                    Rating & Review
+                  </div>
+                </th>
+                <th>
+                  <div class="th-content">
+                    <i class='bx bx-calendar'></i>
+                    Date Received
+                  </div>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              @forelse ($reviews as $review)
+                <tr class="table-row">
+                  <td>
+                    <div class="client-profile">
+                      <div class="client-avatar">
+                        <img src="{{ $review->customer->profile_picture ? asset('storage/' . $review->customer->profile_picture) : asset('images/defaultprofile.jpg') }}" 
+                             alt="{{ $review->customer->firstname }}" onerror="this.src='{{ asset('images/defaultprofile.jpg') }}'">
+                      </div>
+                      <div class="client-details">
+                        <span class="client-name">{{ $review->customer->firstname }} {{ $review->customer->lastname }}</span>
+                        <span class="client-status">Verified Client</span>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="review-content">
+                      <div class="rating-stars">
+                        @for ($i = 1; $i <= 5; $i++)
+                          @if ($i <= $review->rating)
+                            <i class='bx bxs-star star-filled'></i>
+                          @else
+                            <i class='bx bx-star star-empty'></i>
+                          @endif
+                        @endfor
+                        <span class="rating-number">{{ $review->rating }}/5</span>
+                      </div>
+                      <p class="review-text">{{ $review->review ?? 'No comment provided' }}</p>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="date-info">
+                      <span class="date">{{ $review->created_at->format('M d, Y') }}</span>
+                      <span class="time-ago">{{ $review->created_at->diffForHumans() }}</span>
+                    </div>
+                  </td>
+                </tr>
+              @empty
+                <tr>
+                  <td colspan="3">
+                    <div class="empty-state">
+                      <i class='bx bx-star'></i>
+                      <h4>No reviews yet</h4>
+                      <p>Client reviews will appear here after completed appointments</p>
+                    </div>
+                  </td>
+                </tr>
+              @endforelse
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Reviews Pagination -->
+        <div class="table-pagination">
+            <div class="pagination-info">
+                <span>Showing {{ $reviews->firstItem() ?? 0 }} to {{ $reviews->lastItem() ?? 0 }} of {{ $reviews->total() }} reviews</span>
+            </div>
+            <div class="pagination-controls">
+                @if ($reviews->onFirstPage())
+                    <button class="pagination-btn" disabled>
+                        <i class='bx bx-chevron-left'></i>
+                        Previous
+                    </button>
+                @else
+                    <a href="{{ $reviews->previousPageUrl() }}&active_tab=reviews" class="pagination-btn">
+                        <i class='bx bx-chevron-left'></i>
+                        Previous
+                    </a>
+                @endif
+                
+                <div class="pagination-numbers">
+                    @foreach ($reviews->getUrlRange(1, $reviews->lastPage()) as $page => $url)
+                        @if ($page == $reviews->currentPage())
+                            <button class="page-number active">{{ $page }}</button>
+                        @else
+                            <a href="{{ $url }}&active_tab=reviews" class="page-number">{{ $page }}</a>
+                        @endif
+                    @endforeach
+                </div>
+                
+                @if ($reviews->hasMorePages())
+                    <a href="{{ $reviews->nextPageUrl() }}&active_tab=reviews" class="pagination-btn">
+                        Next
+                        <i class='bx bx-chevron-right'></i>
+                    </a>
+                @else
+                    <button class="pagination-btn" disabled>
+                        Next
+                        <i class='bx bx-chevron-right'></i>
+                    </button>
+                @endif
+            </div>
+        </div>
+      </div>
+      <!-- END Reviews Table -->
+    </div>
+    <!-- END Tables Container -->
+  </div>
+  <!-- END Dashboard Content -->
+</div>
+<!-- END Dashboard Section -->
+
+
+
     <script>
+// ===============================================
+// MAIN DASHBOARD INITIALIZATION
+// ===============================================
 document.addEventListener("DOMContentLoaded", function () {
+    console.log('Dashboard initializing...'); // Debug log
+    
+    // Initialize all components
+    initializeModals();
+    initializeProfilePicture();
+    initializePortfolioModal();
+    initializeDashboardTables();
+    initializeProfileTabs();
+    initializeSearchAndFilters();
+    initializeFormValidation();
+    
+    console.log('Dashboard initialization complete'); // Debug log
+});
+
+// ===============================================
+// MODAL INITIALIZATION
+// ===============================================
+function initializeModals() {
     const modal = document.getElementById("editProfileModal");
     const openModalBtn = document.querySelector(".edit-profile-btn");
-    const closeModalBtn = modal.querySelector(".p-close");
+    const closeModalBtn = modal?.querySelector(".p-close");
+
+    if (!modal || !openModalBtn || !closeModalBtn) {
+        console.warn('Modal elements not found');
+        return;
+    }
 
     function openUpdateProfileModal() {
         modal.style.display = "block";
@@ -614,444 +1007,583 @@ document.addEventListener("DOMContentLoaded", function () {
             closeUpdateProfileModal();
         }
     });
-});
 
-document.addEventListener('DOMContentLoaded', function () {
+    // Make openUpdateProfileModal globally available
+    window.openUpdateProfileModal = openUpdateProfileModal;
+}
+
+// ===============================================
+// PROFILE PICTURE HANDLING
+// ===============================================
+function initializeProfilePicture() {
+    // Legacy profile picture handling
     const profilePictureInput = document.getElementById('profile_picture');
     const currentProfilePicture = document.getElementById('currentProfilePicture');
     const newProfilePicturePreview = document.getElementById('newProfilePicturePreview');
 
-    profilePictureInput.addEventListener('change', function (event) {
-        const file = event.target.files[0];
+    if (profilePictureInput && currentProfilePicture && newProfilePicturePreview) {
+        profilePictureInput.addEventListener('change', function (event) {
+            const file = event.target.files[0];
 
-        if (file) {
-            const reader = new FileReader();
-
-            reader.onload = function (e) {
-                newProfilePicturePreview.src = e.target.result;
-                newProfilePicturePreview.classList.remove('hidden');
-                currentProfilePicture.classList.add('hidden');
-            };
-
-            reader.readAsDataURL(file);
-        } else {
-            // If no file is selected, reset the preview
-            newProfilePicturePreview.src = '#';
-            newProfilePicturePreview.classList.add('hidden');
-            currentProfilePicture.classList.remove('hidden');
-        }
-    });
-});
-
-// Portfolio Modal Functions
-function openPortfolioModal(imageSrc, title, description) {
-  const modal = document.getElementById('portfolioModal');
-  const modalImage = document.getElementById('portfolioModalImage');
-  const modalTitle = document.getElementById('portfolioModalTitle');
-  const modalDesc = document.getElementById('portfolioModalDescription');
-  
-  modalImage.src = imageSrc;
-  modalTitle.textContent = title;
-  modalDesc.textContent = description;
-  
-  modal.style.display = 'block';
-}
-
-// Close portfolio modal
-document.addEventListener('DOMContentLoaded', function() {
-  const portfolioModal = document.getElementById('portfolioModal');
-  const closePortfolioBtn = portfolioModal.querySelector('.portfolio-modal-close');
-  
-  closePortfolioBtn.addEventListener('click', function() {
-    portfolioModal.style.display = 'none';
-  });
-  
-  window.addEventListener('click', function(event) {
-    if (event.target === portfolioModal) {
-      portfolioModal.style.display = 'none';
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    newProfilePicturePreview.src = e.target.result;
+                    newProfilePicturePreview.classList.remove('hidden');
+                    currentProfilePicture.classList.add('hidden');
+                };
+                reader.readAsDataURL(file);
+            } else {
+                newProfilePicturePreview.src = '#';
+                newProfilePicturePreview.classList.add('hidden');
+                currentProfilePicture.classList.remove('hidden');
+            }
+        });
     }
-  });
-});
 
-// Show tabs
-function showReviewsTable() {
-  // Show the reviews tab
-  document.getElementById('dashboardSection').style.display = 'block';
-  document.getElementById('profileSection').style.display = 'none';
-  
-  // Show reviews table
-  document.getElementById('clientsTable').style.display = 'none';
-  document.getElementById('appointmentsTable').style.display = 'none';
-  document.getElementById('reviewsTable').style.display = 'block';
-  
-  // Update active nav item - assuming you have nav items
-  const navItems = document.querySelectorAll('.nav-item');
-  navItems.forEach(item => item.classList.remove('active'));
-  document.querySelector('[data-section="dashboard"]').classList.add('active');
+    // New profile picture handling
+    const avatarWrapper = document.getElementById('avatarWrapper');
+    const profilePictureInputNew = document.getElementById('profilePictureInput');
+    const avatarPreview = document.getElementById('avatarPreview');
+
+    if (avatarWrapper && profilePictureInputNew) {
+        avatarWrapper.addEventListener('click', function() {
+            profilePictureInputNew.click();
+        });
+
+        profilePictureInputNew.addEventListener('change', function() {
+            if (this.files && this.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    if (avatarPreview) {
+                        avatarPreview.src = e.target.result;
+                    }
+                };
+                reader.readAsDataURL(this.files[0]);
+            }
+        });
+    }
 }
 
+// ===============================================
+// PORTFOLIO MODAL
+// ===============================================
+function initializePortfolioModal() {
+    const portfolioModal = document.getElementById('portfolioModal');
+    if (!portfolioModal) return;
 
-// Share profile
-function shareProfile() {
-  // Get the current URL
-  const profileUrl = window.location.href;
-  
-  // Check if the Web Share API is available
-  if (navigator.share) {
-    navigator.share({
-      title: `${document.querySelector('.profile-name').textContent}'s Profile`,
-      text: 'Check out this freelancer profile!',
-      url: profileUrl,
-    })
-    .catch(error => console.log('Error sharing:', error));
-  } else {
-    // Fallback - copy to clipboard
-    const tempInput = document.createElement('input');
-    document.body.appendChild(tempInput);
-    tempInput.value = profileUrl;
-    tempInput.select();
-    document.execCommand('copy');
-    document.body.removeChild(tempInput);
+    const closePortfolioBtn = portfolioModal.querySelector('.portfolio-modal-close');
     
-    // Show a notification
-    alert('Profile link copied to clipboard!');
-  }
-}
-
-// Add this to your existing JavaScript
-document.addEventListener("DOMContentLoaded", function() {
-  // Tab switching
-  const tabButtons = document.querySelectorAll('.p-tab-btn');
-  const tabContents = document.querySelectorAll('.p-tab-content');
-  
-  tabButtons.forEach(button => {
-    button.addEventListener('click', function() {
-      const tabId = this.dataset.tab;
-      
-      // Remove active class from all tabs
-      tabButtons.forEach(btn => btn.classList.remove('p-active'));
-      tabContents.forEach(content => content.classList.remove('p-active'));
-      
-      // Add active class to current tab
-      this.classList.add('p-active');
-      document.getElementById(`${tabId}-tab`).classList.add('p-active');
-    });
-  });
-  
-  // Profile picture preview
-  const profilePictureInput = document.getElementById('profilePictureInput');
-  const avatarPreview = document.getElementById('avatarPreview');
-  
-  if (profilePictureInput && avatarPreview) {
-    profilePictureInput.addEventListener('change', function() {
-      if (this.files && this.files[0]) {
-        const reader = new FileReader();
-        
-        reader.onload = function(e) {
-          avatarPreview.src = e.target.result;
-        };
-        
-        reader.readAsDataURL(this.files[0]);
-      }
-    });
-  }
-  
-  // Skills input handling
-  const skillInput = document.getElementById('skillInput');
-  const skillsContainer = document.getElementById('skills-container');
-  
-  if (skillInput && skillsContainer) {
-    skillInput.addEventListener('keydown', function(e) {
-      if (e.key === 'Enter' || e.key === ',') {
-        e.preventDefault();
-        
-        const skill = this.value.trim();
-        if (skill) {
-          // Check if skill already exists
-          const existingSkills = Array.from(skillsContainer.querySelectorAll('.p-tag')).map(tag => 
-            tag.getAttribute('data-value').toLowerCase()
-          );
-          
-          if (!existingSkills.includes(skill.toLowerCase())) {
-            addSkillTag(skill);
-          }
-          
-          this.value = '';
+    if (closePortfolioBtn) {
+        closePortfolioBtn.addEventListener('click', function() {
+            portfolioModal.style.display = 'none';
+        });
+    }
+    
+    window.addEventListener('click', function(event) {
+        if (event.target === portfolioModal) {
+            portfolioModal.style.display = 'none';
         }
-      }
+    });
+}
+
+function openPortfolioModal(imageSrc, title, description) {
+    const modal = document.getElementById('portfolioModal');
+    const modalImage = document.getElementById('portfolioModalImage');
+    const modalTitle = document.getElementById('portfolioModalTitle');
+    const modalDesc = document.getElementById('portfolioModalDescription');
+    
+    if (modal && modalImage && modalTitle && modalDesc) {
+        modalImage.src = imageSrc;
+        modalTitle.textContent = title;
+        modalDesc.textContent = description;
+        modal.style.display = 'block';
+    }
+}
+
+// ===============================================
+// DASHBOARD TABLES MANAGEMENT
+// ===============================================
+function initializeDashboardTables() {
+    console.log('Initializing dashboard tables...'); // Debug log
+    
+    // Check URL parameters on page load to maintain tab state
+    const urlParams = new URLSearchParams(window.location.search);
+    const activeTab = urlParams.get('active_tab');
+    
+    // Ensure all tables exist before proceeding
+    const tablesExist = {
+        clients: document.getElementById('clientsTable'),
+        appointments: document.getElementById('appointmentsTable'),
+        reviews: document.getElementById('reviewsTable')
+    };
+    
+    console.log('Tables found:', tablesExist); // Debug log
+    
+    // Set active tab
+    if (activeTab && ['clients', 'appointments', 'reviews'].includes(activeTab) && tablesExist[activeTab]) {
+        console.log('Restoring active tab:', activeTab); // Debug log
+        showTable(activeTab);
+    } else {
+        console.log('Setting default tab: clients'); // Debug log
+        showTable('clients'); // Default tab
+    }
+    
+    // Add click event listeners to cards with error handling
+    const cards = {
+        clients: document.getElementById('clientsCard'),
+        appointments: document.getElementById('appointmentsCard'),
+        reviews: document.getElementById('reviewsCard')
+    };
+    
+    Object.keys(cards).forEach(cardType => {
+        const card = cards[cardType];
+        if (card) {
+            // Remove existing click listener to prevent duplicates
+            const newCard = card.cloneNode(true);
+            card.parentNode.replaceChild(newCard, card);
+            
+            newCard.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Card clicked:', cardType); // Debug log
+                showTable(cardType);
+            });
+            console.log('Event listener added to:', cardType + 'Card'); // Debug log
+        } else {
+            console.error('Card not found:', cardType + 'Card'); // Debug log
+        }
+    });
+}
+
+// Enhanced table switching function with better error handling
+function showTable(tableType) {
+    console.log('Switching to table:', tableType); // Debug log
+    
+    // Hide all tables
+    const tables = ['clientsTable', 'appointmentsTable', 'reviewsTable'];
+    tables.forEach(tableId => {
+        const table = document.getElementById(tableId);
+        if (table) {
+            table.style.display = 'none';
+            console.log('Hiding table:', tableId); // Debug log
+        } else {
+            console.error('Table not found:', tableId); // Debug log
+        }
     });
     
-    // Remove skill tag
-    skillsContainer.addEventListener('click', function(e) {
-      if (e.target.classList.contains('p-tag-remove')) {
-        e.target.closest('.p-tag').remove();
-      }
+    // Remove active indicators from all cards
+    document.querySelectorAll('.enhanced-card .card-indicator').forEach(indicator => {
+        indicator.classList.remove('active');
     });
     
-    function addSkillTag(skill) {
-      const tag = document.createElement('span');
-      tag.className = 'p-tag';
-      tag.setAttribute('data-value', skill);
-      tag.innerHTML = `
+    // Remove active state from all cards
+    document.querySelectorAll('.enhanced-card').forEach(card => {
+        card.classList.remove('active');
+    });
+    
+    // Show selected table and update active state
+    const targetTable = document.getElementById(tableType + 'Table');
+    if (targetTable) {
+        targetTable.style.display = 'block';
+        console.log('Showing table:', tableType + 'Table'); // Debug log
+    } else {
+        console.error('Target table not found:', tableType + 'Table'); // Debug log
+        return;
+    }
+    
+    const activeCard = document.querySelector(`.${tableType}-card`);
+    if (activeCard) {
+        activeCard.classList.add('active');
+        const indicator = activeCard.querySelector('.card-indicator');
+        if (indicator) {
+            indicator.classList.add('active');
+        }
+        console.log('Activated card:', `.${tableType}-card`); // Debug log
+    } else {
+        console.error('Active card not found:', `.${tableType}-card`); // Debug log
+    }
+    
+    // Update URL to maintain tab state
+    const url = new URL(window.location);
+    url.searchParams.set('active_tab', tableType);
+    window.history.replaceState({}, '', url);
+}
+
+// ===============================================
+// PROFILE TABS MANAGEMENT
+// ===============================================
+function initializeProfileTabs() {
+    const tabButtons = document.querySelectorAll('.p-tab-btn');
+    const tabContents = document.querySelectorAll('.p-tab-content');
+    
+    if (tabButtons.length === 0 || tabContents.length === 0) {
+        console.warn('Profile tab elements not found');
+        return;
+    }
+    
+    tabButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const tabId = this.dataset.tab;
+            
+            // Remove active class from all tabs
+            tabButtons.forEach(btn => btn.classList.remove('p-active'));
+            tabContents.forEach(content => content.classList.remove('p-active'));
+            
+            // Add active class to current tab
+            this.classList.add('p-active');
+            const targetTab = document.getElementById(`${tabId}-tab`);
+            if (targetTab) {
+                targetTab.classList.add('p-active');
+            }
+        });
+    });
+    
+    // Skills input handling
+    const skillInput = document.getElementById('skillInput');
+    const skillsContainer = document.getElementById('skills-container');
+    
+    if (skillInput && skillsContainer) {
+        skillInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' || e.key === ',') {
+                e.preventDefault();
+                
+                const skill = this.value.trim();
+                if (skill) {
+                    // Check if skill already exists
+                    const existingSkills = Array.from(skillsContainer.querySelectorAll('.p-tag')).map(tag => 
+                        tag.getAttribute('data-value').toLowerCase()
+                    );
+                    
+                    if (!existingSkills.includes(skill.toLowerCase())) {
+                        addSkillTag(skill);
+                    }
+                    
+                    this.value = '';
+                }
+            }
+        });
+        
+        // Remove skill tag
+        skillsContainer.addEventListener('click', function(e) {
+            if (e.target.classList.contains('p-tag-remove')) {
+                e.target.closest('.p-tag').remove();
+            }
+        });
+    }
+    
+    // Bio character count
+    const bioTextarea = document.getElementById('bio');
+    const bioCount = document.getElementById('bioCount');
+    
+    if (bioTextarea && bioCount) {
+        bioTextarea.addEventListener('input', function() {
+            const count = this.value.length;
+            bioCount.textContent = count;
+            
+            if (count > 300) {
+                this.value = this.value.substring(0, 300);
+                bioCount.textContent = 300;
+            }
+        });
+    }
+}
+
+function addSkillTag(skill) {
+    const skillsContainer = document.getElementById('skills-container');
+    if (!skillsContainer) return;
+    
+    const tag = document.createElement('span');
+    tag.className = 'p-tag';
+    tag.setAttribute('data-value', skill);
+    tag.innerHTML = `
         ${skill}
         <i class='bx bx-x p-tag-remove'></i>
         <input type="hidden" name="skills[]" value="${skill}">
-      `;
-      skillsContainer.appendChild(tag);
-    }
-  }
-  
-  // Bio character count
-  const bioTextarea = document.getElementById('bio');
-  const bioCount = document.getElementById('bioCount');
-  
-  if (bioTextarea && bioCount) {
-    bioTextarea.addEventListener('input', function() {
-      const count = this.value.length;
-      bioCount.textContent = count;
-      
-      if (count > 300) {
-        this.value = this.value.substring(0, 300);
-        bioCount.textContent = 300;
-      }
-    });
-  }
-  
-  // Rate toggle functionality
-  const rateCheckboxes = document.querySelectorAll('.p-rate-checkbox');
-  
-  rateCheckboxes.forEach(checkbox => {
-    // Set initial state
-    handleRateToggle(checkbox);
-    
-    // Handle toggle changes
-    checkbox.addEventListener('change', function() {
-      handleRateToggle(this);
-    });
-  });
-  
-  function handleRateToggle(checkbox) {
-    const rateOption = checkbox.closest('.p-rate-option');
-    const inputIcon = rateOption.querySelector('.p-input-icon');
-    const input = rateOption.querySelector('input[type="number"]');
-    
-    if (checkbox.checked) {
-      inputIcon.classList.remove('p-disabled');
-      input.disabled = false;
-      input.focus();
-    } else {
-      inputIcon.classList.add('p-disabled');
-      input.disabled = true;
-      input.value = '';
-    }
-  }
-  
-  // Form validation across tabs
-  const editProfileForm = document.getElementById('editProfileForm');
-  
-  if (editProfileForm) {
-    editProfileForm.addEventListener('submit', function(e) {
-      // Temporarily make all tabs visible to ensure form validation works
-      const tabContents = document.querySelectorAll('.p-tab-content');
-      const originalDisplayStyles = [];
-      
-      // Store original display styles and make all tabs visible but hidden
-      tabContents.forEach(content => {
-        originalDisplayStyles.push(content.style.display);
-        content.style.display = 'block';
-        content.style.height = '0';
-        content.style.overflow = 'hidden';
-        content.style.opacity = '0';
-      });
-      
-      // Check if at least one rate is enabled and has a value
-      const hourlyEnabled = document.getElementById('enable_hourly').checked;
-      const dailyEnabled = document.getElementById('enable_daily').checked;
-      const weeklyEnabled = document.getElementById('enable_weekly').checked;
-      
-      let rateValid = false;
-      
-      if (hourlyEnabled) {
-        const hourlyRate = document.getElementById('hourly_rate').value;
-        if (hourlyRate && hourlyRate > 0) rateValid = true;
-      }
-      
-      if (dailyEnabled) {
-        const dailyRate = document.getElementById('daily_rate').value;
-        if (dailyRate && dailyRate > 0) rateValid = true;
-      }
-      
-      if (weeklyEnabled) {
-        const weeklyRate = document.getElementById('weekly_rate').value;
-        if (weeklyRate && weeklyRate > 0) rateValid = true;
-      }
-      
-      if (!rateValid && (hourlyEnabled || dailyEnabled || weeklyEnabled)) {
-        e.preventDefault();
-        alert('Please enter valid values for the rate options you\'ve enabled.');
-        
-        // Switch to rates tab
-        document.querySelector('.p-tab-btn[data-tab="rates"]').click();
-        
-        // Restore original display styles
-        tabContents.forEach((content, index) => {
-          content.style.display = originalDisplayStyles[index];
-          content.style.height = '';
-          content.style.overflow = '';
-          content.style.opacity = '';
-        });
-        
-        return false;
-      }
-      
-      // Let the browser's validation run
-      const isValid = editProfileForm.checkValidity();
-      
-      if (!isValid) {
-        e.preventDefault();
-        
-        // Find the first invalid input
-        const firstInvalidInput = editProfileForm.querySelector(':invalid');
-        
-        if (firstInvalidInput) {
-          // Find which tab contains the invalid input
-          const tabContent = firstInvalidInput.closest('.p-tab-content');
-          const tabId = tabContent.id.replace('-tab', '');
-          
-          // Switch to that tab
-          const tabButton = document.querySelector(`.p-tab-btn[data-tab="${tabId}"]`);
-          if (tabButton) {
-            tabButton.click();
-          }
-          
-          // Focus the invalid input
-          setTimeout(() => {
-            firstInvalidInput.focus();
-          }, 100);
-        }
-      }
-      
-      // Restore original display styles
-      tabContents.forEach((content, index) => {
-        content.style.display = originalDisplayStyles[index];
-        content.style.height = '';
-        content.style.overflow = '';
-        content.style.opacity = '';
-      });
-      
-      if (!isValid) {
-        return false;
-      }
-    });
-  }
-});
+    `;
+    skillsContainer.appendChild(tag);
+}
 
-document.addEventListener("DOMContentLoaded", function() {
-  // Profile picture upload trigger
-  const avatarWrapper = document.getElementById('avatarWrapper');
-  const profilePictureInput = document.getElementById('profilePictureInput');
-  
-  if (avatarWrapper && profilePictureInput) {
-    // When clicking on the avatar wrapper, trigger the file input
-    avatarWrapper.addEventListener('click', function() {
-      profilePictureInput.click();
-    });
-    
-    // Handle the file change to update the preview
-    profilePictureInput.addEventListener('change', function() {
-      if (this.files && this.files[0]) {
-        const reader = new FileReader();
-        
-        reader.onload = function(e) {
-          document.getElementById('avatarPreview').src = e.target.result;
-        };
-        
-        reader.readAsDataURL(this.files[0]);
-      }
-    });
-  }
-});
-
-
-// Function for image preview
-function pPreviewImage(event) {
-  const file = event.target.files[0];
-  const currentImage = document.getElementById('currentProfilePicture');
-  const newImage = document.getElementById('newProfilePicturePreview');
-  
-  if (file) {
-    const reader = new FileReader();
-    
-    reader.onload = function(e) {
-      newImage.src = e.target.result;
-      newImage.classList.remove('p-hidden');
-      currentImage.classList.add('p-hidden');
+// ===============================================
+// SEARCH AND FILTER FUNCTIONALITY
+// ===============================================
+function initializeSearchAndFilters() {
+    // Search functionality
+    const searchInputs = {
+        clientSearch: 'clients',
+        appointmentSearch: 'appointments',
+        reviewSearch: 'reviews'
     };
+
+    Object.keys(searchInputs).forEach(inputId => {
+        const input = document.getElementById(inputId);
+        if (input) {
+            input.addEventListener('input', function(e) {
+                searchTable(searchInputs[inputId], e.target.value);
+            });
+        }
+    });
+
+    // Filter functionality
+    const statusFilter = document.getElementById('statusFilter');
+    const ratingFilter = document.getElementById('ratingFilter');
     
-    reader.readAsDataURL(file);
-  }
+    if (statusFilter) {
+        statusFilter.addEventListener('change', function(e) {
+            filterAppointmentsByStatus(e.target.value);
+        });
+    }
+    
+    if (ratingFilter) {
+        ratingFilter.addEventListener('change', function(e) {
+            filterReviewsByRating(e.target.value);
+        });
+    }
 }
 
-// dynamic validation for update profile
-document.addEventListener('DOMContentLoaded', function () {
-  const editProfileForm = document.getElementById('editProfileForm');
-  if (editProfileForm) {
-    editProfileForm.addEventListener('submit', function(e) {
-      let valid = true;
-      let firstInvalid = null;
-
-      // Required fields
-      const requiredFields = [
-        { id: 'firstname', name: 'First Name' },
-        { id: 'lastname', name: 'Last Name' },
-        { id: 'email', name: 'Email' },
-        { id: 'experience_years', name: 'Years of Experience' },
-        { id: 'contact_number', name: 'Contact Number' },
-        { id: 'province', name: 'Province' },
-        { id: 'city', name: 'City' },
-        { id: 'zipcode', name: 'Zipcode' }
-      ];
-
-      requiredFields.forEach(field => {
-        const input = document.getElementById(field.id);
-        if (input && !input.value.trim()) {
-          valid = false;
-          input.classList.add('border-red-500');
-          if (!firstInvalid) firstInvalid = input;
-        } else if (input) {
-          input.classList.remove('border-red-500');
-        }
-      });
-
-      // Years of experience must be a positive number
-      const expInput = document.getElementById('experience_years');
-      if (expInput && (isNaN(expInput.value) || expInput.value < 0)) {
-        valid = false;
-        expInput.classList.add('border-red-500');
-        if (!firstInvalid) firstInvalid = expInput;
-      }
-
-      // Bio max length
-      const bioInput = document.getElementById('bio');
-      if (bioInput && bioInput.value.length > 300) {
-        valid = false;
-        bioInput.classList.add('border-red-500');
-        if (!firstInvalid) firstInvalid = bioInput;
-      }
-
-      if (!valid) {
-        e.preventDefault();
-        alert('Please fill out all required fields correctly.');
-        if (firstInvalid) firstInvalid.focus();
-        return false;
-      }
+function searchTable(tableType, searchTerm) {
+    const table = document.getElementById(tableType + 'Table');
+    if (!table) return;
+    
+    const rows = table.querySelectorAll('tbody tr:not(.empty-state)');
+    
+    rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(searchTerm.toLowerCase()) ? '' : 'none';
     });
-  }
+}
+
+function filterAppointmentsByStatus(status) {
+    const rows = document.querySelectorAll('#appointmentsTable tbody tr:not(.empty-state)');
+    
+    rows.forEach(row => {
+        if (!status) {
+            row.style.display = '';
+        } else {
+            const statusBadge = row.querySelector('.status-badge');
+            if (statusBadge) {
+                const rowStatus = statusBadge.textContent.trim().toLowerCase();
+                row.style.display = rowStatus.includes(status) ? '' : 'none';
+            }
+        }
+    });
+}
+
+function filterReviewsByRating(rating) {
+    const rows = document.querySelectorAll('#reviewsTable tbody tr:not(.empty-state)');
+    
+    rows.forEach(row => {
+        if (!rating) {
+            row.style.display = '';
+        } else {
+            const ratingNumber = row.querySelector('.rating-number');
+            if (ratingNumber) {
+                const rowRating = parseInt(ratingNumber.textContent.split('/')[0]);
+                row.style.display = rowRating === parseInt(rating) ? '' : 'none';
+            }
+        }
+    });
+}
+
+// ===============================================
+// FORM VALIDATION
+// ===============================================
+function initializeFormValidation() {
+    const editProfileForm = document.getElementById('editProfileForm');
+    
+    if (!editProfileForm) {
+        console.warn('Edit profile form not found');
+        return;
+    }
+    
+    editProfileForm.addEventListener('submit', function(e) {
+        let valid = true;
+        let firstInvalid = null;
+
+        // Required fields validation
+        const requiredFields = [
+            { id: 'firstname', name: 'First Name' },
+            { id: 'lastname', name: 'Last Name' },
+            { id: 'email', name: 'Email' },
+            { id: 'experience_years', name: 'Years of Experience' },
+            { id: 'contact_number', name: 'Contact Number' },
+            { id: 'province', name: 'Province' },
+            { id: 'city', name: 'City' },
+            { id: 'zipcode', name: 'Zipcode' }
+        ];
+
+        requiredFields.forEach(field => {
+            const input = document.getElementById(field.id);
+            if (input && !input.value.trim()) {
+                valid = false;
+                input.classList.add('border-red-500');
+                if (!firstInvalid) firstInvalid = input;
+            } else if (input) {
+                input.classList.remove('border-red-500');
+            }
+        });
+
+        // Years of experience validation
+        const expInput = document.getElementById('experience_years');
+        if (expInput && (isNaN(expInput.value) || expInput.value < 0)) {
+            valid = false;
+            expInput.classList.add('border-red-500');
+            if (!firstInvalid) firstInvalid = expInput;
+        }
+
+        // Bio length validation
+        const bioInput = document.getElementById('bio');
+        if (bioInput && bioInput.value.length > 300) {
+            valid = false;
+            bioInput.classList.add('border-red-500');
+            if (!firstInvalid) firstInvalid = bioInput;
+        }
+
+        if (!valid) {
+            e.preventDefault();
+            alert('Please fill out all required fields correctly.');
+            if (firstInvalid) {
+                // Find which tab contains the invalid input
+                const tabContent = firstInvalid.closest('.p-tab-content');
+                if (tabContent) {
+                    const tabId = tabContent.id.replace('-tab', '');
+                    const tabButton = document.querySelector(`.p-tab-btn[data-tab="${tabId}"]`);
+                    if (tabButton) {
+                        tabButton.click();
+                    }
+                }
+                setTimeout(() => firstInvalid.focus(), 100);
+            }
+            return false;
+        }
+    });
+}
+
+// ===============================================
+// UTILITY FUNCTIONS
+// ===============================================
+
+// Show reviews table function
+function showReviewsTable() {
+    console.log('Switching to reviews table from profile section');
+    
+    // Hide profile section and show dashboard section
+    const profileSection = document.getElementById('profileSection');
+    const dashboardSection = document.getElementById('dashboardSection');
+    
+    if (profileSection) profileSection.style.display = 'none';
+    if (dashboardSection) dashboardSection.style.display = 'block';
+    
+    // Show reviews table specifically
+    showTable('reviews');
+    
+    // Update sidebar navigation - remove active from all nav items
+    const navItems = document.querySelectorAll('.sidebar-links li a');
+    navItems.forEach(item => item.classList.remove('active'));
+    
+    // Add active class to dashboard nav item
+    const dashboardNav = document.querySelector('.sidebar-links li a[href="#dashboardSection"]');
+    if (dashboardNav) {
+        dashboardNav.classList.add('active');
+        console.log('Dashboard nav activated');
+    } else {
+        // Fallback - look for dashboard link by text content or other attributes
+        const dashboardLink = Array.from(navItems).find(link => 
+            link.textContent.toLowerCase().includes('dashboard') || 
+            link.getAttribute('href') === '#dashboardSection' ||
+            link.getAttribute('data-section') === 'dashboard'
+        );
+        if (dashboardLink) {
+            dashboardLink.classList.add('active');
+            console.log('Dashboard nav activated (fallback method)');
+        }
+    }
+    
+    // Update localStorage to maintain state
+    localStorage.setItem('activeSection', '#dashboardSection');
+    
+    // Update URL to show we're in dashboard with reviews active
+    const url = new URL(window.location);
+    url.searchParams.set('active_tab', 'reviews');
+    window.history.replaceState({}, '', url);
+}
+
+// Share profile function
+function shareProfile() {
+    const profileUrl = window.location.href;
+    
+    if (navigator.share) {
+        navigator.share({
+            title: `${document.querySelector('.profile-name')?.textContent || 'Freelancer'}'s Profile`,
+            text: 'Check out this freelancer profile!',
+            url: profileUrl,
+        })
+        .catch(error => console.log('Error sharing:', error));
+    } else {
+        // Fallback - copy to clipboard
+        const tempInput = document.createElement('input');
+        document.body.appendChild(tempInput);
+        tempInput.value = profileUrl;
+        tempInput.select();
+        document.execCommand('copy');
+        document.body.removeChild(tempInput);
+        
+        alert('Profile link copied to clipboard!');
+    }
+}
+
+// Image preview function
+function pPreviewImage(event) {
+    const file = event.target.files[0];
+    const currentImage = document.getElementById('currentProfilePicture');
+    const newImage = document.getElementById('newProfilePicturePreview');
+    
+    if (file && currentImage && newImage) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            newImage.src = e.target.result;
+            newImage.classList.remove('p-hidden');
+            currentImage.classList.add('p-hidden');
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
+// Refresh dashboard function
+function refreshDashboard() {
+    const refreshBtn = document.querySelector('.refresh-btn');
+    if (refreshBtn) {
+        const originalContent = refreshBtn.innerHTML;
+        refreshBtn.innerHTML = '<i class="bx bx-loader-alt bx-spin"></i> Refreshing...';
+        refreshBtn.disabled = true;
+        
+        setTimeout(() => {
+            location.reload();
+        }, 1000);
+    }
+}
+
+// ===============================================
+// DEBUG FUNCTIONS (Remove in production)
+// ===============================================
+function debugDashboard() {
+    console.log('=== DASHBOARD DEBUG INFO ===');
+    console.log('Clients table:', document.getElementById('clientsTable'));
+    console.log('Appointments table:', document.getElementById('appointmentsTable'));
+    console.log('Reviews table:', document.getElementById('reviewsTable'));
+    console.log('Clients card:', document.getElementById('clientsCard'));
+    console.log('Appointments card:', document.getElementById('appointmentsCard'));
+    console.log('Reviews card:', document.getElementById('reviewsCard'));
+    console.log('=== END DEBUG INFO ===');
+}
+
+// Call debug function on load (remove in production)
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(debugDashboard, 1000);
 });
 
-// Update modal open function
-function openUpdateProfileModal() {
-  document.getElementById('editProfileModal').style.display = 'block';
-}
-    </script>
+
+
+</script>
+
 

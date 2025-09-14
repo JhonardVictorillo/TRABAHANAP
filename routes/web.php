@@ -21,8 +21,8 @@ use App\Http\Controllers\Auth\RoleSwitchController;
 use App\Http\Controllers\PlatformWithdrawalController;
 use App\Http\Controllers\AdminPayoutController;
 use App\Http\Controllers\FreelancerPayoutController;
-use App\http\Controllers\StripeConnectController;
-use App\Http\Controllers\Admin\violationController;
+use App\Http\Controllers\StripeConnectController;
+use App\Http\Controllers\Admin\ViolationController;
 
 
 
@@ -88,7 +88,7 @@ Route::middleware(['auth'])->group(function () {
 });
 Route::put('/admin/posts/{id}/approve', [AdminController::class, 'approvePost'])->name('admin.approvePost');
 Route::put('/admin/posts/{id}/reject', [AdminController::class, 'rejectPost'])->name('admin.rejectPost');
-
+Route::get('/admin/freelancer/{id}/details', [AdminController::class, 'getFreelancerDetails'])->name('admin.freelancer.details');
     
 Route::post('/admin/freelancer/{id}/verify', [AdminController::class, 'verifyFreelancer'])->name('admin.verifyFreelancer');
 Route::post('/admin/freelancer/{id}/reject', [AdminController::class, 'rejectFreelancer'])->name('admin.rejectFreelancer');
@@ -156,7 +156,7 @@ Route::post('/appointments/{appointmentId}/complete', [FreelancerController::cla
 Route::post('/customer/appointments/review/{id}', [CustomerController::class, 'rateAppointment'])->name('customer.appointments.review');
 //search routes
 Route::get('/search', [CustomerController::class, 'search'])->name('search');
-
+Route::get('/freelancer/dashboard', [FreelancerController::class, 'dashboard'])->name('freelancer.dashboard');
 //edit category part
 Route::post('/categories', [CategoryController::class, 'store'])->name('categories.store');
 Route::get('/categories/{id}/edit', [CategoryController::class, 'edit'])->name('categories.edit');
@@ -167,7 +167,8 @@ Route::get('/categories/{category}/users', [CategoryController::class, 'getUsers
 Route::get('/posts/{id}/edit', [PostController::class, 'edit'])->name('posts.edit');
 Route::put('/posts/{id}', [PostController::class, 'update'])->name('posts.update');
 Route::delete('posts/{id}/', [PostController::class, 'delete'])->name('posts.delete');
-
+Route::get('/posts/{id}/view', [FreelancerController::class, 'viewPost'])->name('posts.view');
+//freelancer notifications
 Route::post('/freelancer/notifications/mark-all-as-read', [FreelancerController::class, 'markNotificationsAsRead'])->name('freelancer.notifications.markAllAsRead');
 Route::post('/freelancer/notifications/{id}/mark-as-read', [FreelancerController::class, 'markSingleNotificationAsRead'])->name('freelancer.notifications.markSingleAsRead');
 Route::get('/freelancer/notifications', [FreelancerController::class, 'getNotifications'])->name('notifications.get');
@@ -282,11 +283,11 @@ Route::get('/stripe/status', [StripeConnectController::class, 'getStatus'])
 
 // Admin Violation Routes
 Route::prefix('admin/violations')->middleware('auth')->group(function () {
-    Route::get('get-details/{appointmentId}', [ViolationController::class, 'getDetails']);
-    Route::post('warning', [ViolationController::class, 'sendWarning']);
-    Route::post('suspend', [ViolationController::class, 'toggleSuspension']);
-    Route::post('apply-action', [ViolationController::class, 'applyAction']);
+    Route::get('/get-details/{id}', [ViolationController::class, 'getDetails']);
+    Route::post('/warning', [ViolationController::class, 'sendWarning']);
+    Route::post('/suspend', [ViolationController::class, 'toggleSuspension']);
+    Route::post('/apply-action', [ViolationController::class, 'applyAction']);
 });
 
-Route::post('admin/violation-settings', [ViolationController::class, 'saveSettings'])
+Route::post('/admin/violation-settings', [ViolationController::class, 'saveSettings'])
     ->middleware('auth');

@@ -71,114 +71,205 @@
       </div>
 
      <!-- Appointment Details Modal -->
-<div id="appointmentModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" style="display: none;">
-    <div class="bg-white rounded-xl shadow-lg w-full max-w-lg">
-        <div class="flex items-center justify-between px-6 py-4 border-b">
-            <div class="flex items-center gap-2">
-               <i class="ri-calendar-check-line text-2xl text-blue-600"></i>
-                <h5 class="text-lg font-semibold text-gray-800">Appointment Details</h5>
+<!-- Appointment Details Modal -->
+<div id="appointmentModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4" style="display: none;">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden">
+        <!-- Modal Header -->
+        <div class="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                        <i class="ri-calendar-line text-xl text-blue-500"></i>
+                    </div>
+                    <div>
+                        <h5 class="text-xl font-semibold text-white">Appointment Details</h5>
+                        <p class="text-blue-100 text-sm">View and manage your booking</p>
+                    </div>
+                </div>
+                <button type="button" class="text-white hover:text-blue-200 transition-colors close-modal">
+                    <i class="ri-close-line text-2xl"></i>
+                </button>
             </div>
-            <button type="button" class="text-gray-400 hover:text-gray-600 close-modal">
-                <i class="ri-close-line text-2xl"></i>
-            </button>
         </div>
-        <div class="px-6 py-4 space-y-3">
-            <div class="flex items-center gap-2">
-                <i class="ri-user-line text-primary"></i>
-                <span class="font-medium">Freelancer Name:</span>
-                <span id="freelancerName"></span>
+
+        <!-- Modal Body -->
+        <div class="overflow-y-auto max-h-[calc(90vh-200px)]">
+            <!-- Freelancer Profile Section -->
+            <div class="bg-gray-50 px-6 py-4 border-b">
+                <div class="flex items-center gap-4">
+                    <div class="w-16 h-16 bg-gray-300 rounded-full overflow-hidden flex-shrink-0">
+                        <img id="freelancerProfilePic" src="{{ asset('images/defaultprofile.jpg') }}" 
+                            alt="Freelancer" class="w-full h-full object-cover">
+                    </div>
+                    <div class="flex-1">
+                        <h6 class="text-lg font-semibold text-gray-800" id="freelancerName">Loading...</h6>
+                        <div class="flex items-center gap-2 text-sm text-gray-600 mt-1">
+                            <i class="ri-star-fill text-yellow-400"></i>
+                            <span id="freelancerRating">4.8</span>
+                            <span class="text-gray-400">•</span>
+                            <span id="freelancerReviews">124 reviews</span>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <span id="appointmentStatus" class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium text-white">
+                            Status
+                        </span>
+                    </div>
+                </div>
             </div>
-            <div class="flex items-center gap-2">
-                <i class="ri-briefcase-line text-primary"></i>
-                <span class="font-medium">Booked Services:</span>
-                <span id="appointmentSubservices"></span>
+
+            <!-- Appointment Information -->
+            <div class="px-6 py-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Left Column -->
+                    <div class="space-y-4">
+                        <div class="bg-white border border-gray-200 rounded-lg p-4">
+                            <h6 class="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                                <i class="ri-information-line text-blue-600"></i>
+                                Booking Information
+                            </h6>
+                            <div class="space-y-3">
+                                <div class="flex items-start gap-3">
+                                    <i class="ri-briefcase-line text-blue-600 mt-0.5"></i>
+                                    <div class="flex-1">
+                                        <span class="text-sm font-medium text-gray-700">Service:</span>
+                                        <p class="text-sm text-gray-600 mt-1" id="appointmentSubservices">Loading...</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <i class="ri-calendar-line text-blue-600"></i>
+                                    <div class="flex-1">
+                                        <span class="text-sm font-medium text-gray-700">Date:</span>
+                                        <p class="text-sm text-gray-600" id="appointmentDate">Loading...</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-start gap-3">
+                                    <i class="ri-time-line text-blue-600 mt-0.5"></i>
+                                    <div class="flex-1">
+                                        <span class="text-sm font-medium text-gray-700">Time:</span>
+                                        <div id="appointmentTime" class="text-sm text-gray-600 mt-1">Loading...</div>
+                                    </div>
+                                </div>
+                                <div class="flex items-start gap-3">
+                                    <i class="ri-map-pin-line text-blue-600 mt-0.5"></i>
+                                    <div class="flex-1">
+                                        <span class="text-sm font-medium text-gray-700">Location:</span>
+                                        <p class="text-sm text-gray-600 mt-1" id="appointmentAddress">Loading...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Notes Section -->
+                        <div class="bg-white border border-gray-200 rounded-lg p-4">
+                            <h6 class="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                                <i class="ri-sticky-note-line text-blue-600"></i>
+                                Additional Notes
+                            </h6>
+                            <p class="text-sm text-gray-600 leading-relaxed" id="appointmentNotes">Loading...</p>
+                        </div>
+
+                        <!-- Decline Reason (Hidden by default) -->
+                        <div id="declineReasonContainer" class="bg-red-50 border border-red-200 rounded-lg p-4" style="display: none;">
+                            <h6 class="text-sm font-semibold text-red-700 mb-3 flex items-center gap-2">
+                                <i class="ri-error-warning-line text-red-600"></i>
+                                Reason for Decline
+                            </h6>
+                            <p class="text-sm text-red-600" id="declineReason">Loading...</p>
+                        </div>
+                    </div>
+
+                    <!-- Right Column -->
+                    <div class="space-y-4">
+                        <!-- Payment Information -->
+                        <div class="bg-white border border-gray-200 rounded-lg p-4">
+                            <h6 class="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                                <i class="ri-money-dollar-circle-line text-green-600"></i>
+                                Payment Details
+                            </h6>
+                            <div class="space-y-3">
+                                <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                                    <span class="text-sm text-gray-600">Service Rate:</span>
+                                    <span class="text-sm font-medium text-gray-800" id="serviceRate">Loading...</span>
+                                </div>
+                                <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                                    <span class="text-sm text-gray-600">Commitment Fee:</span>
+                                    <span class="text-sm font-medium text-gray-800" id="feeStatus">Loading...</span>
+                                </div>
+                                <div id="finalPaymentContainer" class="flex justify-between items-center py-2 border-b border-gray-100" style="display: none;">
+                                    <span class="text-sm text-gray-600">Final Payment:</span>
+                                    <span class="text-sm font-medium text-gray-800" id="finalPaymentStatus">Loading...</span>
+                                </div>
+                                <div id="totalAmountContainer" class="flex justify-between items-center py-2 bg-green-50 rounded px-3" style="display: none;">
+                                    <span class="text-sm font-semibold text-green-700">Total Amount:</span>
+                                    <span class="text-lg font-bold text-green-700">₱<span id="totalAmount">0.00</span></span>
+                                </div>
+                            </div>
+                        </div>
+
+                     
+                             <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                            <h6 class="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                                <i class="ri-information-line text-gray-600"></i>
+                                Service Information
+                            </h6>
+                            <div class="space-y-2 text-sm text-gray-600">
+                                <p><span class="font-medium">Contact:</span> <span id="appointmentContact">Loading...</span></p>
+                                <p><span class="font-medium">Appointment ID:</span> #<span id="appointmentId2">Loading...</span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="flex items-center gap-2">
-                <i class="ri-calendar-line text-primary"></i>
-                <span class="font-medium">Date:</span>
-                <span id="appointmentDate"></span>
-            </div>
-            <div class="flex items-center gap-2">
-                <i class="ri-time-line text-primary"></i>
-                <span class="font-medium">Time:</span>
-                <div id="appointmentTime" class="flex-1">N/A</div>
-            </div>
-            <div class="flex items-center gap-2">
-                <i class="ri-map-pin-line text-primary"></i>
-                <span class="font-medium">Address:</span>
-                <span id="appointmentAddress"></span>
-            </div>
-            <div class="flex items-center gap-2">
-                <i class="ri-information-line text-primary"></i>
-                <span class="font-medium">Status:</span>
-                <span id="appointmentStatus"></span>
-            </div>
-            <div id="declineReasonContainer" class="flex items-center gap-2" style="display: none;">
-                <i class="ri-error-warning-line text-red-500"></i>
-                <span class="font-medium">Reason for Decline:</span>
-                <span id="declineReason"></span>
-            </div>
-            <div class="flex items-center gap-2">
-                <i class="ri-sticky-note-line text-primary"></i>
-                <span class="font-medium">Notes:</span>
-                <span id="appointmentNotes"></span>
-            </div>
-            <div class="flex items-center gap-2">
-                <i class="ri-money-dollar-circle-line text-primary"></i>
-                <span class="font-medium">Commitment Fee Status:</span>
-                <span id="feeStatus"></span>
-            </div>
-            <div class="flex items-center gap-2">
-                <i class="ri-money-dollar-circle-line text-primary"></i>
-                <span class="font-medium">Service Rate:</span>
-                <span id="serviceRate"></span>
-            </div>
-            <div class="flex items-center gap-2" id="finalPaymentContainer" style="display: none;">
-            <i class="ri-secure-payment-line text-primary"></i>
-            <span class="font-medium">Final Payment:</span>
-            <span id="finalPaymentStatus"></span>
         </div>
-        <div class="flex items-center gap-2" id="totalAmountContainer" style="display: none;">
-            <i class="ri-money-dollar-circle-line text-primary"></i>
-            <span class="font-medium">Total Amount:</span>
-            ₱<span id="totalAmount"></span>
-        </div>
-        </div>
-        <div class="flex justify-end gap-2 px-6 py-4 border-t">
-            <button id="rescheduleButton" class="btn btn-primary flex items-center gap-1 bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded">
-                <i class="ri-calendar-event-line"></i> 
-                 <span class="btn-text">Reschedule</span>
-                <span class="btn-spinner" style="display:none;">
-                    <i class="ri-loader-4-line animate-spin"></i>
-                </span>
-            </button>
-           <button id="cancelButton" class="btn btn-danger flex items-center gap-1 bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded">
-                <i class="ri-close-circle-line"></i> 
-                 <span class="btn-text">Cancel</span>
-                <span class="btn-spinner" style="display:none;">
-                    <i class="ri-loader-4-line animate-spin"></i>
-                </span>
-            </button>
-           <button id="rateButton" class="btn btn-success flex items-center gap-1 bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded" style="display: none;">
-                <i class="ri-star-line"></i> Rate & Review
-            </button>
-            <button id="payButton" class="btn btn-success flex items-center gap-1 bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded" style="display: none;">
-                <i class="ri-bank-card-line"></i> Pay Now
-            </button>
-            
-           <button type="button" class="btn btn-secondary close-modal flex items-center gap-1 bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded">
-                <i class="ri-arrow-go-back-line"></i> Close
-            </button>
-            <form id="noShowForm" method="POST" action="{{ route('appointments.no_show', 0) }}" style="display:none;">
-                @csrf
-                <button type="submit" class="btn btn-warning flex items-center gap-1">
-                    <i class="ri-error-warning-line"></i>
-                   <span class="btn-text">Mark as No-Show</span>
+
+        <!-- Modal Footer -->
+        <div class="bg-gray-50 px-6 py-4 border-t border-gray-200">
+            <div class="flex flex-col sm:flex-row justify-end gap-3">
+                <!-- Dynamic buttons - these will be shown/hidden based on appointment status -->
+                <button id="rescheduleButton" class="btn bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 transition-all duration-200">
+                    <i class="ri-calendar-event-line"></i>
+                    <span class="btn-text">Reschedule</span>
                     <span class="btn-spinner" style="display:none;">
                         <i class="ri-loader-4-line animate-spin"></i>
                     </span>
                 </button>
-            </form>
+
+                <button id="cancelButton" class="btn bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 transition-all duration-200">
+                    <i class="ri-close-circle-line"></i>
+                    <span class="btn-text">Cancel</span>
+                    <span class="btn-spinner" style="display:none;">
+                        <i class="ri-loader-4-line animate-spin"></i>
+                    </span>
+                </button>
+
+                <button id="rateButton" class="btn bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 transition-all duration-200" style="display: none;">
+                    <i class="ri-star-line"></i>
+                    Rate & Review
+                </button>
+
+                <button id="payButton" class="btn bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 transition-all duration-200" style="display: none;">
+                    <i class="ri-bank-card-line"></i>
+                    Pay Now
+                </button>
+
+                <button type="button" class="btn bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 transition-all duration-200 close-modal">
+                    <i class="ri-arrow-go-back-line"></i>
+                    Close
+                </button>
+
+                <!-- Hidden No-Show Form -->
+                <form id="noShowForm" method="POST" action="{{ route('appointments.no_show', 0) }}" style="display:none;">
+                    @csrf
+                    <button type="submit" class="btn bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 transition-all duration-200">
+                        <i class="ri-error-warning-line"></i>
+                        <span class="btn-text">Mark as No-Show</span>
+                        <span class="btn-spinner" style="display:none;">
+                            <i class="ri-loader-4-line animate-spin"></i>
+                        </span>
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
 </div>
@@ -373,6 +464,13 @@
                     console.error('Error fetching appointment details:', error);
                 });
         },
+         eventDidMount: function(info) {
+    const status = info.event.extendedProps.status || 'pending';
+    
+    // Just add the data attribute for CSS styling and tooltip
+    info.el.setAttribute('data-status', status.toLowerCase());
+    info.el.title = `${info.event.title} - ${status}`;
+  },
         // Responsive options
         windowResize: function(view) {
             if (window.innerWidth < 768) {
@@ -383,7 +481,15 @@
             } else {
                 calendar.setOption('height', 600);
             }
+        },
+         loading: function(bool) {
+        const calendarEl = document.getElementById('calendar');
+        if (bool) {
+            calendarEl.classList.add('fc-loading');
+        } else {
+            calendarEl.classList.remove('fc-loading');
         }
+    }
     });
 
     calendar.render();
@@ -449,6 +555,22 @@ function formatTo12Hour(timeStr) {
     }
 }
 
+function getStatusColorFromBackend(status) {
+    const colorMap = {
+        'pending': '#fbbf24',           // Yellow
+        'accepted': '#2563eb',          // Blue  
+        'completed': '#10b981',         // Green
+        'canceled': '#ef4444',          // Red
+        'cancelled': '#ef4444',         // Red (alternative spelling)
+        'declined': '#6b7280',          // Gray
+        'no_show_freelancer': '#eab308', // Amber/Orange
+        'no_show_customer': '#a21caf',   // Purple
+        'rescheduled': '#8b5cf6'        // Purple for rescheduled status
+    };
+    
+    return colorMap[status] || '#6b7280'; // Default Gray
+}
+
 function formatTimeRange(startTime, durationMinutes) {
     if (!startTime) return 'N/A';
     
@@ -490,15 +612,38 @@ function openAppointmentModal(data) {
     console.log('Full appointment data:', data);
     console.log('Decline Reason:', data.decline_reason); // Debugging
     document.getElementById('freelancerName').textContent = data.freelancer_name || 'N/A';
+       const profilePic = document.getElementById('freelancerProfilePic');
+    if (data.freelancer_profile_picture) {
+        profilePic.src = `{{ asset('storage') }}/${data.freelancer_profile_picture}`;
+        profilePic.onerror = function() {
+            // Fallback to default image if the profile picture fails to load
+            this.src = "{{ asset('images/defaultprofile.png') }}";
+        };
+    } else {
+        profilePic.src = "{{ asset('images/defaultprofile.png') }}";
+    }
     document.getElementById('appointmentSubservices').textContent =
     data.services_list || 'N/A';
     document.getElementById('appointmentDate').textContent = data.date || 'N/A';
  
     document.getElementById('appointmentAddress').textContent = data.address || 'N/A';
-    document.getElementById('appointmentStatus').textContent = data.status || 'N/A';
+      // Enhanced status display with dynamic color from backend
+    const statusElement = document.getElementById('appointmentStatus');
+    const status = data.status || 'N/A';
+    statusElement.textContent = status;
+    
+    // Remove any existing background color classes
+    statusElement.className = 'inline-flex items-center px-3 py-1 rounded-full text-xs font-medium text-white';
+    
+    // Use the color from your existing getStatusColor function
+    const statusColor = getStatusColorFromBackend(status.toLowerCase());
+    statusElement.style.backgroundColor = statusColor;
+
     document.getElementById('appointmentNotes').textContent = data.notes || 'No additional notes';
     document.getElementById('feeStatus').textContent = data.fee_status || 'N/A';
-    document.getElementById('serviceRate').textContent =data.rate_type && data.rate
+     document.getElementById('appointmentContact').textContent = data.contact || 'Not provided';
+    document.getElementById('appointmentId2').textContent = data.id || 'N/A';
+    document.getElementById('serviceRate').textContent = data.rate_type && data.rate
         ? `₱${parseFloat(data.rate).toFixed(2)} per ${data.rate_type}`
         : 'N/A';
     document.getElementById('appointmentId').value = data.id;

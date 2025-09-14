@@ -29,48 +29,7 @@
 
    <script>
     document.addEventListener('DOMContentLoaded', function () {
-    // FullCalendar Initialization
-    const calendarEl = document.getElementById('calendar');
-    let calendar;
-    if (calendarEl) {
-        calendar = new FullCalendar.Calendar(calendarEl, {
-            initialView: 'dayGridMonth',
-            locale: 'en',
-            height: 600,
-            selectable: true,
-            headerToolbar: {
-                left: 'prev,next today',
-                center: 'title',
-                right: 'dayGridMonth,timeGridWeek'
-            },
-            events: '/freelancer/appointments', // Route returning JSON
-            eventClick: function (info) {
-                const eventId = info.event.id;
-                console.log('Clicked Event ID:', eventId);
-
-                fetch(`/freelancer/appointments/${eventId}`)
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('Network response was not ok');
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        console.log('Data fetched:', data);
-                        openAppointmentModal(data, eventId);
-                    })
-                    .catch(error => {
-                        console.error('Error fetching details:', error);
-                    });
-            }
-        });
-
-        calendar.render();
-    }
-
     
-
-   
     const links = document.querySelectorAll('.sidebar-links li a');
     const sections = document.querySelectorAll('main > div, .details-section, #appointmentCalendar, #rescheduleSection, #revenueSection');
     const logoutBtn = document.getElementById('logout-button');
@@ -95,13 +54,22 @@
 
                 // Calendar specific render fix (if applicable)
                
-                if (this.getAttribute('href') === '#appointmentCalendar') {
-                   
-                    setTimeout(() => {
-                        calendar.render();
-                        calendar.updateSize();
-                    }, 0);
-                }
+              if (this.getAttribute('href') === '#appointmentCalendar') {
+    setTimeout(() => {
+        // Check if calendar exists and is properly initialized
+        if (typeof window.calendar !== 'undefined' && window.calendar && typeof window.calendar.render === 'function') {
+            window.calendar.render();
+            window.calendar.updateSize();
+        } else {
+            // Try to initialize calendar if it doesn't exist
+            if (typeof initializeCalendar === 'function') {
+                initializeCalendar();
+            } else {
+                console.log('Calendar not yet initialized - will initialize when appointmentSection loads');
+            }
+        }
+    }, 100); // Increased timeout to give more time for initialization
+}
             }
         });
     });
@@ -161,16 +129,6 @@
 
     
 });
-
-// Format time utility function
-function formatTime(date) {
-    let hours = date.getHours();
-    let minutes = date.getMinutes();
-    const ampm = hours >= 12 ? 'PM' : 'AM';
-    hours = hours % 12 || 12; // 12-hour format
-    minutes = minutes < 10 ? '0' + minutes : minutes;
-    return `${hours}:${minutes} ${ampm}`;
-}
 
 
 document.addEventListener('DOMContentLoaded', function() {

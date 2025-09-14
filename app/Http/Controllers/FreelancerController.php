@@ -46,26 +46,34 @@ class FreelancerController extends Controller
     
      $notifications = auth()->user()->notifications;
      $unreadCount = auth()->user()->unreadNotifications->count();  
-      // Fetch appointments related to the freelancer
+      
+     // Fetch appointments related to the freelancer
       $appointments = Appointment::where('freelancer_id', $user->id)
       ->with('customer') // Load related customer data
       ->orderBy('created_at', 'desc')
-      ->get();
+        ->paginate(6, ['*'], 'appointments_page');
 
       $clientAppointments = Appointment::where('freelancer_id', $user->id)
-    ->whereIn('status', ['accepted', 'completed'])
-    ->with('customer') // eager load customer
-    ->get();
+            ->whereIn('status', ['accepted', 'completed'])
+            ->with('customer') // eager load customer
+            ->get();
     
             // Collect unique customers from these appointments
-        $clients = $clientAppointments->pluck('customer')->unique('id')->values();
+        $uniqueClientIds = $clientAppointments->pluck('customer_id')->unique();
+        $clients = User::whereIn('id', $uniqueClientIds)
+            ->orderBy('created_at', 'desc')
+            ->paginate(6, ['*'], 'clients_page');
 
-        // Optional count of total clients
-        $totalClients = $clients->count();
+        $totalClients = $uniqueClientIds->count();
 
      
-      $reviews = $appointments->whereNotNull('rating');
-       
+         $reviews = Appointment::where('freelancer_id', $user->id)
+        ->whereNotNull('rating')
+        ->whereNotNull('review') // Also ensure there's a review text
+        ->with('customer')
+        ->orderBy('created_at', 'desc')
+        ->paginate(6, ['*'], 'reviews_page');
+
       $averageRating = $this->calculateAverageRating($user->id);
 
       // Calculate the rating breakdown (e.g., 5-star, 4-star)
@@ -87,66 +95,87 @@ class FreelancerController extends Controller
      // Calculate completed services count
     $completedServices = $user->appointments()->where('status', 'completed')->count();
 
-    // NEW CODE: Calculate earnings and revenue values
-    // Service earnings (payments to freelancer)
-     $serviceEarnings = FreelancerEarning::where('freelancer_id', $user->id)
+   // ===========================================
+    // REVENUE CALCULATIONS - SIMPLIFIED & CLEAN
+    // ===========================================
+
+    // 1. SERVICE EARNINGS (Online Stripe payments only)
+    $serviceEarnings = FreelancerEarning::where('freelancer_id', $user->id)
         ->whereIn('source', ['service_payment', 'commitment_fee', 'commitment_fee_bonus'])
         ->sum('amount');
 
-        // Revenue from cancellations and no-shows
-        $lateCancellationRevenue = FreelancerEarning::where('freelancer_id', $user->id)
-            ->where('source', 'late_cancellation_fee')
-            ->sum('amount');
-            
-        $noShowRevenue = FreelancerEarning::where('freelancer_id', $user->id)
-            ->where('source', 'no_show_fee')
-            ->sum('amount');
+    // 2. CASH EARNINGS (Cash payments only)
+    $cashEarnings = FreelancerEarning::where('freelancer_id', $user->id)
+        ->where('source', 'service_payment_cash')
+        ->sum('amount');
 
-        // Combined cancellation revenue
-        $cancellationRevenue = $lateCancellationRevenue + $noShowRevenue;
+    // 3. TOTAL EARNINGS (All payment sources - excluding withdrawals)
+    $totalEarnings = FreelancerEarning::where('freelancer_id', $user->id)
+        ->whereNotIn('source', ['withdrawal_request', 'withdrawal_cancelled'])
+        ->sum('amount');
 
-        // Calculate current month's earnings
-        $currentMonth = date('Y-m');
-        $currentMonthEarnings = FreelancerEarning::where('freelancer_id', $user->id)
+    // 4. CURRENT MONTH EARNINGS (All sources)
+    $currentMonth = date('Y-m');
+    $currentMonthEarnings = FreelancerEarning::where('freelancer_id', $user->id)
         ->whereRaw("DATE_FORMAT(date, '%Y-%m') = ?", [$currentMonth])
-        ->whereNotIn('source', ['service_payment_cash'])
+        ->whereNotIn('source', ['withdrawal_request', 'withdrawal_cancelled'])
         ->sum('amount');
-        // Calculate available balance (total earnings - withdrawals)
-       $totalEarnings = FreelancerEarning::where('freelancer_id', $user->id)
-        ->whereNotIn('source', ['service_payment_cash']) // Exclude cash payments if you want
-        ->sum('amount');
-            
-        $processedWithdrawals = Withdrawal::where('user_id', $user->id)
-            ->whereIn('status', ['completed', 'processing'])
-            ->sum('amount');
-            
-        $availableBalance = $totalEarnings - $processedWithdrawals;
 
-         $withdrawals = Withdrawal::where('user_id', $user->id)
+    // 5. AVAILABLE BALANCE (Only online payments can be withdrawn)
+    $onlineEarnings = FreelancerEarning::where('freelancer_id', $user->id)
+        ->whereNotIn('source', ['service_payment_cash', 'withdrawal_request', 'withdrawal_cancelled'])
+        ->sum('amount');
+        
+    $processedWithdrawals = Withdrawal::where('user_id', $user->id)
+        ->whereIn('status', ['completed', 'processing'])
+        ->sum('amount');
+        
+    $availableBalance = $onlineEarnings - $processedWithdrawals;
+
+    // 6. WITHDRAWAL HISTORY
+    $withdrawals = Withdrawal::where('user_id', $user->id)
         ->orderBy('created_at', 'desc')
         ->paginate(10, ['*'], 'withdrawal_page'); 
 
-        // Get all payments for display
-        $allPayments = FreelancerEarning::where('freelancer_id', $user->id)
-            ->whereNotIn('source', ['withdrawal_request', 'withdrawal_cancelled']) // Add this line
-            ->with(['appointment', 'appointment.customer', 'appointment.post', 'appointment.post.subservices'])
-            ->orderBy('date', 'desc')
-            ->paginate(10, ['*'], 'payment_page');
+    // 7. ALL PAYMENTS (Exclude withdrawals and violation-related entries)
+    $allPayments = FreelancerEarning::where('freelancer_id', $user->id)
+        ->whereNotIn('source', [
+            'withdrawal_request', 
+            'withdrawal_cancelled',
+            'late_cancellation_fee',  // Remove since handled by violation system
+            'no_show_fee'             // Remove since handled by violation system
+        ])
+        ->with(['appointment', 'appointment.customer', 'appointment.post', 'appointment.post.subservices'])
+        ->orderBy('date', 'desc')
+        ->paginate(10, ['*'], 'payment_page');
 
-        // Get monthly earnings for chart
-        $monthlyData = FreelancerEarning::select(DB::raw('DATE_FORMAT(date, "%Y-%m") as month'), DB::raw('SUM(amount) as total'))
+    // 8. MONTHLY EARNINGS FOR CHART (Exclude withdrawals only)
+    $monthlyData = FreelancerEarning::select(
+            DB::raw('DATE_FORMAT(date, "%Y-%m") as month'), 
+            DB::raw('SUM(amount) as total')
+        )
         ->where('freelancer_id', $user->id)
-        ->whereNotIn('source', ['service_payment_cash'])
+        ->whereNotIn('source', ['withdrawal_request', 'withdrawal_cancelled'])
         ->groupBy('month')
         ->orderBy('month', 'asc')
         ->get();
-            
-        $monthlyLabels = $monthlyData->pluck('month')->map(function($month) {
-            return date('M Y', strtotime($month . '-01'));
-        })->toArray();
         
-        $monthlyEarnings = $monthlyData->pluck('total')->toArray();
+    $monthlyLabels = $monthlyData->pluck('month')->map(function($month) {
+        return date('M Y', strtotime($month . '-01'));
+    })->toArray();
 
+    $monthlyEarnings = $monthlyData->pluck('total')->toArray();
+
+        Log::info('Freelancer Earnings Debug', [
+            'freelancer_id' => $user->id,
+            'total_earnings' => $totalEarnings,
+            'service_earnings' => $serviceEarnings,
+            'all_earnings' => FreelancerEarning::where('freelancer_id', $user->id)->get(),
+            'earnings_by_source' => FreelancerEarning::where('freelancer_id', $user->id)
+                ->select('source', DB::raw('SUM(amount) as total'))
+                ->groupBy('source')
+                ->get()
+        ]);
         // If profile is complete, show the dashboard without the modal
         return view('dashboard.freelancer-dashboard', [
             'user' => $user,
@@ -168,13 +197,13 @@ class FreelancerController extends Controller
             'availabilities' => $availabilities,
              'isProfileComplete' => $isProfileComplete,
               // NEW REVENUE/EARNINGS VARIABLES
-           'serviceEarnings' => $serviceEarnings,
-            'cancellationRevenue' => $cancellationRevenue,
-            'lateCancellationRevenue' => $lateCancellationRevenue,
-            'noShowRevenue' => $noShowRevenue,
+            'serviceEarnings' => $serviceEarnings,      // Online payments only
+            'cashEarnings' => $cashEarnings,            // Cash payments only  
+            'totalEarnings' => $totalEarnings,          // All earnings combined
             'currentMonthEarnings' => $currentMonthEarnings,
-            'availableBalance' => $availableBalance,
-            'allPayments' => $allPayments,
+            'availableBalance' => $availableBalance,    // Available for withdrawal
+            'onlineEarnings' => $onlineEarnings,        // For display purposes
+            'allPayments' => $allPayments,              // Clean payment history
             'monthlyLabels' => $monthlyLabels,
             'monthlyEarnings' => $monthlyEarnings,
             'completedServices' => $completedServices,
@@ -242,7 +271,12 @@ public function declineAppointment(Request $request, $id)
          'decline_reason' => $appointment->decline_reason,
      ]);
 
-     return redirect()->back()->with('success', 'Appointment declined.');
+    return response()->json([
+        'success' => true,
+        'message' => 'Appointment declined.',
+        'appointment_id' => $appointment->id,
+        'status' => $appointment->status,
+    ]);
 }
 
 public function getAppointments(Request $request)
@@ -283,9 +317,16 @@ public function getAppointments(Request $request)
                      '\n' . $timeDisplay,
             'start' => $appointment->date . 'T' . $appointment->time,
             'end' => $appointment->date . 'T' . sprintf("%02d:%02d:00", $endHour, $endMinute),
-            'color' => $this->getStatusColor($appointment->status),
+             'backgroundColor' => $this->getStatusColor($appointment->status),
+            'borderColor' => $this->getStatusBorderColor($appointment->status),
+            
             'extendedProps' => [
-                'duration' => $duration
+                'status' => $appointment->status,
+                'time' => $appointment->time,
+                'duration' => $duration,
+                'customer_name' => $appointment->customer->firstname . ' ' . $appointment->customer->lastname,
+                'address' => $appointment->address,
+                'contact' => $appointment->customer->contact_number ?? 'N/A',
             ]
         ];
     });
@@ -305,30 +346,49 @@ private function getStatusColor($status)
     };
 }
 
+private function getStatusBorderColor($status)
+{
+    return match ($status) {
+        'pending'   => '#d97706', // amber-600
+        'accepted'  => '#1d4ed8', // blue-700
+        'completed' => '#047857', // emerald-700
+        'declined'  => '#b91c1c', // red-700
+        'no_show'   => '#374151', // gray-700
+        default     => '#6b7280', // gray-600
+    };
+}
 
 public function show($id)
 {
-     $appointment = Appointment::with(['post.subServices', 'customer'])->findOrFail($id);
+   try {
+        $appointment = Appointment::with(['post.subServices', 'customer'])->findOrFail($id);
 
-
-    return response()->json([
-        'id' => $appointment->id,
-        'name' => $appointment->customer->firstname.' '.$appointment->customer->lastname, // Ensure the customer's name is included
-        'date' => $appointment->date,
-        'time' => $appointment->time,
-        'address' => $appointment->address,
-        'contact' => $appointment->customer->contact_number, // Assuming contact is part of the customer model
-        'status' => $appointment->status,
-         'final_payment_status' => $appointment->final_payment_status,
-        'total_amount' => $appointment->total_amount,
-        'fee_status' => $appointment->fee_status,
-        'notes' => $appointment->notes, 
-         'duration' => $appointment->duration ?? ($appointment->post ? $appointment->post->service_duration : 60),
-        'buffer_time' => $appointment->post ? $appointment->post->buffer_time : 0,
-         'subservices' => $appointment->post && $appointment->post->subServices
-            ? $appointment->post->subServices->pluck('sub_service')->toArray()
-            : [],
-    ]);
+        return response()->json([
+            'id' => $appointment->id,
+            'name' => $appointment->customer->firstname.' '.$appointment->customer->lastname,
+            'date' => $appointment->date,
+            'time' => $appointment->time,
+            'address' => $appointment->address,
+            'contact' => $appointment->customer->contact_number ?? 'N/A',
+            'status' => $appointment->status,
+            'final_payment_status' => $appointment->final_payment_status,
+            'total_amount' => $appointment->total_amount,
+            'commitment_fee' => $appointment->commitment_fee ?? 0,
+            'fee_status' => $appointment->fee_status,
+            'notes' => $appointment->notes ?? 'No notes provided',
+            'duration' => $appointment->duration ?? ($appointment->post ? $appointment->post->service_duration : 60),
+            'buffer_time' => $appointment->post ? $appointment->post->buffer_time : 0,
+            'subservices' => $appointment->post && $appointment->post->subServices
+                ? $appointment->post->subServices->pluck('sub_service')->toArray()
+                : [],
+              'customer_profile_picture' => $appointment->customer->profile_picture,
+            'customer_email' => $appointment->customer->email,
+          
+        ]);
+    } catch (\Exception $e) {
+        \Log::error('Error fetching appointment details: ' . $e->getMessage());
+        return response()->json(['error' => 'Appointment not found'], 404);
+    }
 }
 
 public function markAsCompleted($appointmentId)
@@ -592,6 +652,49 @@ public function updatePaymentSettings(Request $request)
     return redirect()->back()->with('success', 'Payment settings updated successfully');
 }
 
+
+public function viewPost($id)
+{
+    try {
+        $post = Post::with(['subServices', 'freelancer.categories', 'pictures'])
+            ->where('id', $id)
+            ->where('freelancer_id', Auth::id())
+            ->firstOrFail();
+
+        // Get post pictures
+        $postPictures = $post->pictures->pluck('image_path')->toArray();
+
+        // Get sub-services
+        $subServices = $post->subServices->pluck('sub_service')->toArray();
+
+        // Get category
+        $category = $post->freelancer->categories->first()->name ?? 'Not assigned';
+
+        // Get performance data with proper null handling
+        $averageRating = $post->averageRating() ?? 0;
+        $totalReviews = $post->totalReviews() ?? 0;
+        $totalBookings = $post->appointments()->count() ?? 0;
+
+        // Ensure averageRating is a valid number
+        if (!is_numeric($averageRating)) {
+            $averageRating = 0;
+        }
+
+        return response()->json([
+            'post' => $post,
+            'post_pictures' => $postPictures,
+            'sub_services' => $subServices,
+            'category' => $category,
+            'performance' => [
+                'average_rating' => (float) $averageRating,
+                'total_reviews' => (int) $totalReviews,
+                'total_bookings' => (int) $totalBookings
+            ]
+        ]);
+    } catch (\Exception $e) {
+        return response()->json(['error' => 'Post not found'], 404);
+    }
+}
 }
 
 

@@ -183,54 +183,47 @@
       document.addEventListener('DOMContentLoaded', function () {
         // Keep all your existing JavaScript
         // Handle Edit Button Click
-        document.addEventListener('click', function (event) {
-            if (event.target.classList.contains('edit-availability-btn') || event.target.closest('.edit-availability-btn')) {
-                const button = event.target.classList.contains('edit-availability-btn') ? 
-                    event.target : event.target.closest('.edit-availability-btn');
-                
-                const availabilityId = button.getAttribute('data-availability-id');
-                const date = button.getAttribute('data-date');
-                const startTime = button.getAttribute('data-start-time');
-                const endTime = button.getAttribute('data-end-time');
+       document.addEventListener('click', function (event) {
+        if (event.target.classList.contains('edit-availability-btn') || event.target.closest('.edit-availability-btn')) {
+            const button = event.target.classList.contains('edit-availability-btn') ? 
+                event.target : event.target.closest('.edit-availability-btn');
+            
+            const availabilityId = button.getAttribute('data-availability-id');
+            const date = button.getAttribute('data-date');
+            const startTime = button.getAttribute('data-start-time');
+            const endTime = button.getAttribute('data-end-time');
 
-                // Debugging
-                console.log('Start Time (before setting):', startTime);
-                
-                // Populate the modal form with existing data
-                const editModal = document.getElementById('editAvailabilityFormContainer');
-                const editIdInput = document.getElementById('editAvailabilityId');
-                const editDateInput = document.getElementById('edit_date');
-                const editStartTimeInput = document.getElementById('edit_start_time');
-                const editEndTimeInput = document.getElementById('edit_end_time');
+            const editModal = document.getElementById('editAvailabilityFormContainer');
+            const editIdInput = document.getElementById('editAvailabilityId');
+            const editDateInput = document.getElementById('edit_date');
+            const editStartTimeInput = document.getElementById('edit_start_time');
+            const editEndTimeInput = document.getElementById('edit_end_time');
 
+            if (editModal && editIdInput && editDateInput && editStartTimeInput && editEndTimeInput) {
                 editIdInput.value = availabilityId;
                 editDateInput.value = date;
-                console.log('Start Time:', startTime); 
-                editStartTimeInput.value = startTime || ''; // Handle null or empty values
-                editEndTimeInput.value = endTime || ''; // Handle null or empty values
-
-                // Debugging
-                console.log('Start Time (after setting):', editStartTimeInput.value);
-                
-                // Show the modal
+                editStartTimeInput.value = startTime || '';
+                editEndTimeInput.value = endTime || '';
                 editModal.classList.remove('hidden');
                 editModal.scrollIntoView({ behavior: 'smooth' });
             }
-        });
+        }
+    });
 
-        // Handle Form Submission via AJAX
-        const editForm = document.getElementById('editAvailabilityForm');
+    // Handle Form Submission via AJAX
+    const editForm = document.getElementById('editAvailabilityForm');
+    if (editForm) {
         editForm.addEventListener('submit', function (event) {
-            event.preventDefault(); // Prevent default form submission
+            event.preventDefault();
             const submitBtn = editForm.querySelector('button[type="submit"]');
-            showSpinnerOnButton(submitBtn);
+            if (submitBtn && typeof showSpinnerOnGenericButton === 'function') {
+                showSpinnerOnGenericButton(submitBtn);
+            }
 
             const availabilityId = document.getElementById('editAvailabilityId').value;
             const date = document.getElementById('edit_date').value;
             const startTime = document.getElementById('edit_start_time').value;
             const endTime = document.getElementById('edit_end_time').value;
-
-            console.log('Submitting form with data:', { availabilityId, date, startTime, endTime }); // Debugging
 
             fetch(`/freelancer/availabilities/${availabilityId}`, {
                 method: 'PUT',
@@ -244,53 +237,67 @@
                     end_time: endTime,
                 }),
             })
-                .then(response => {
-                    console.log('Response:', response); // Debugging
-                    return response.json();
+            .then(response => response.json())
+            .then(data => {
+                if (submitBtn && typeof restoreGenericButton === 'function') {
+                    restoreGenericButton(submitBtn, 'Save Availability');
+                }
+                if (data.success) {
+                    alert(data.message);
+                    location.reload();
+                } else {
+                    alert(data.message || 'Failed to update availability.');
+                    console.error('Errors:', data.errors || data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error updating availability:', error);
+                if (submitBtn && typeof restoreGenericButton === 'function') {
+                    restoreGenericButton(submitBtn, 'Save Availability');
+                }
+            });
+        });
+    }
+
+    // Handle Delete Button Click
+    document.addEventListener('click', function (event) {
+        if (event.target.classList.contains('delete-availability-btn') || event.target.closest('.delete-availability-btn')) {
+            const button = event.target.classList.contains('delete-availability-btn') ? 
+                event.target : event.target.closest('.delete-availability-btn');
+                
+            const availabilityId = button.getAttribute('data-availability-id');
+            if (confirm('Are you sure you want to delete this availability?')) {
+                if (button && typeof showSpinnerOnGenericButton === 'function') {
+                    showSpinnerOnGenericButton(button);
+                }
+                
+                fetch(`/freelancer/availabilities/${availabilityId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    },
                 })
+                .then(response => response.json())
                 .then(data => {
-                    console.log('Response Data:', data); // Debugging
+                    if (button && typeof restoreGenericButton === 'function') {
+                        restoreGenericButton(button, 'Delete');
+                    }
                     if (data.success) {
-                        restoreButton(submitBtn, 'Save Availability');
-                        alert(data.message); // Show success message
-                        location.reload(); // Reload the page to update the availability list
+                        alert('Availability deleted successfully!');
+                        location.reload();
                     } else {
-                        alert(data.message || 'Failed to update availability.');
-                        console.error('Errors:', data.errors || data.error);
+                        alert('Failed to delete availability.');
                     }
                 })
-                .catch(error => console.error('Error updating availability:', error));
-        });
-
-        // Handle Delete Button Click
-        document.addEventListener('click', function (event) {
-            if (event.target.classList.contains('delete-availability-btn') || event.target.closest('.delete-availability-btn')) {
-                const button = event.target.classList.contains('delete-availability-btn') ? 
-                    event.target : event.target.closest('.delete-availability-btn');
-                    
-                const availabilityId = button.getAttribute('data-availability-id');
-                if (confirm('Are you sure you want to delete this availability?')) {
-                     showSpinnerOnButton(button);
-                    fetch(`/freelancer/availabilities/${availabilityId}`, {
-                        method: 'DELETE',
-                        headers: {
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                        },
-                    })
-                        .then(response => response.json())
-                        .then(data => {
-                                restoreButton(button, 'Delete');
-                            if (data.success) {
-                                alert('Availability deleted successfully!');
-                                location.reload(); // Reload the page to update the availability list
-                            } else {
-                                alert('Failed to delete availability.');
-                            }
-                        })
-                        .catch(error => console.error('Error deleting availability:', error));
-                }
+                .catch(error => {
+                    console.error('Error deleting availability:', error);
+                    if (button && typeof restoreGenericButton === 'function') {
+                        restoreGenericButton(button, 'Delete');
+                    }
+                });
             }
-        });
+        }
+    });
 
         // Close Modal Handlers
         const closeModalButton = document.getElementById('closeEditModal');

@@ -389,8 +389,11 @@
 
         <!-- Notes Section -->
         <div class="mb-6">
-          <label for="notes" class="block text-sm font-medium text-gray-700">Notes (Optional)</label>
-          <textarea id="notes" rows="2" class="w-full mt-1 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" placeholder="Add any additional details or instructions for the freelancer..."></textarea>
+        <label for="notes" class="block text-sm font-medium text-gray-700 mb-2">Notes to Freelancer (Optional)</label>
+        <textarea id="notes"  rows="3"  class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary resize-none text-sm" 
+            placeholder="Add any details that might help the freelancer prepare for your appointment.."
+         ></textarea>
+        <p class="mt-1.5 text-xs text-gray-500">This information will be shared with the freelancer when they receive your booking request.</p>
         </div>
 
         <!-- Commitment Fee Section -->

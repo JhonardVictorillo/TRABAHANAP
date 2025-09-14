@@ -1,319 +1,363 @@
 <div id="revenueSection" class="section" style="display: none;">
+  <!-- Section Header -->
   <div class="section-header">
-    <h1>Freelancer Wallet & Earnings</h1>
-    <p>Track your income, manage your wallet, and request withdrawals</p>
+    <h1>Wallet & Earnings</h1>
+    <p>Manage your income and withdrawal requests</p>
   </div>
 
-  <!-- Earnings Summary Cards -->
-  <div class="dashboard-cards">
-    <div class="card primary-card">
-      <div class="icon">
-        <span class="material-symbols-outlined">account_balance_wallet</span>
-      </div>
-      <div>
-        <p>Available Balance</p>
-        <h3>₱{{ number_format($availableBalance ?? 0, 2) }}</h3>
-        <button class="withdraw-btn" onclick="openWithdrawModal()">Withdraw Funds</button>
-         <button class="payment-methods-btn" onclick="openPaymentMethodsModal()">
-          <i class="ri-bank-card-line mr-1"></i> Payment Methods
-        </button>
-      </div>
-    </div>
-    
-    <div class="card">
-      <div class="icon">
-        <span class="material-symbols-outlined">payments</span>
-      </div>
-      <div>
-        <p>Total Earnings</p>
-        <h3>₱{{ number_format($totalEarnings ?? 0, 2) }}</h3>
-      </div>
-    </div>
-    
-    <div class="card">
-      <div class="icon">
-        <span class="material-symbols-outlined">calendar_today</span>
-      </div>
-      <div>
-        <p>This Month</p>
-        <h3>₱{{ number_format($currentMonthEarnings ?? 0, 2) }}</h3>
-      </div>
-    </div>
-    
-    <div class="card">
-      <div class="icon">
-        <span class="material-symbols-outlined">receipt_long</span>
-      </div>
-      <div>
-        <p>Completed Services</p>
-        <h3>{{ $completedServices ?? 0 }}</h3>
-      </div>
+  <!-- Hero Balance Card -->
+  <div class="hero-balance-card">
+    <div class="balance-label">Available Balance</div>
+    <div class="balance-amount">₱{{ number_format($availableBalance ?? 0, 2) }}</div>
+    <div class="hero-actions">
+      <button class="hero-btn primary" onclick="openWithdrawModal()">
+        <i class="ri-money-dollar-circle-line"></i>
+        Withdraw
+      </button>
+      <button class="hero-btn" onclick="openPaymentMethodsModal()">
+        <i class="ri-bank-card-line"></i>
+        Payment Methods
+      </button>
     </div>
   </div>
 
-  <!-- Tabbed navigation for earnings types -->
+  <!-- Stats Grid -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="ri-money-dollar-circle-line"></i>
+      </div>
+      <div class="stat-label">Total Earnings</div>
+      <div class="stat-value">₱{{ number_format($totalEarnings ?? 0, 2) }}</div>
+      <div class="stat-change">
+         <i class="ri-information-line"></i>
+            All payment methods
+      </div>
+    </div>
+    
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="ri-calendar-line"></i>
+      </div>
+      <div class="stat-label">This Month</div>
+      <div class="stat-value">₱{{ number_format($currentMonthEarnings ?? 0, 2) }}</div>
+      <div class="stat-change">
+        <i class="ri-trend-up-line"></i>
+            Current month earnings
+      </div>
+    </div>
+    
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="ri-file-list-3-line"></i>
+      </div>
+      <div class="stat-label">Completed Services</div>
+      <div class="stat-value">{{ $completedServices ?? 0 }}</div>
+      <div class="stat-change">
+       <i class="ri-check-line"></i>
+            Successfully completed services
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabbed navigation - SIMPLIFIED STRUCTURE -->
   <div class="revenue-tabs">
-    <button class="tab-btn active" onclick="showTab('all-payments')">All Payments</button>
-    <button class="tab-btn" onclick="showTab('withdrawals')">Withdrawal History</button>
+    <button class="tab-btn active" onclick="showTab('all-payments')">
+      <i class="ri-history-line"></i>
+      All Payments
+    </button>
+    <button class="tab-btn" onclick="showTab('withdrawals')">
+      <i class="ri-download-line"></i>
+      Withdrawal History
+    </button>
   </div>
 
-  <!-- All Payments Tab -->
+  <!-- All Payments Tab - USING OLD STRUCTURE -->
   <div id="all-payments" class="tab-content active">
     <div class="section-content">
       <div class="table-header">
-        <h2>Payment History</h2>
+        <h2>
+          <i class="ri-file-list-line"></i>
+          Payment History
+        </h2>
       </div>
       
-      <table>
-        <thead>
-          <tr>
-            <th>Date</th>
-            <th>Amount</th>
-            <th>Customer</th>
-            <th>Service</th>
-            <th>Type</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody>
-         @php
-          $displayPayments = [];
-          $appointmentPayments = [];
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Amount</th>
+              <th>Customer</th>
+              <th>Service</th>
+              <th>Type</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            @php
+            $displayPayments = [];
+            $appointmentPayments = [];
 
-          // Group all payments by appointment ID
-          foreach($allPayments ?? [] as $payment) {
-              if ($payment->appointment_id) {
-                  if (!isset($appointmentPayments[$payment->appointment_id])) {
-                      $appointmentPayments[$payment->appointment_id] = [];
-                  }
-                  $appointmentPayments[$payment->appointment_id][] = $payment;
-              } else {
-                  $displayPayments[] = $payment;
-              }
-          }
+            // Group all payments by appointment ID
+            foreach($allPayments ?? [] as $payment) {
+                if ($payment->appointment_id) {
+                    if (!isset($appointmentPayments[$payment->appointment_id])) {
+                        $appointmentPayments[$payment->appointment_id] = [];
+                    }
+                    $appointmentPayments[$payment->appointment_id][] = $payment;
+                } else {
+                    $displayPayments[] = $payment;
+                }
+            }
 
-          // Process each appointment's payments
-          foreach($appointmentPayments as $appointmentId => $payments) {
-              $servicePayment = null;
-              $commitmentFees = [];
-              $otherPayments = [];
+            // Process each appointment's payments
+            foreach($appointmentPayments as $appointmentId => $payments) {
+                $servicePayment = null;
+                $commitmentFees = [];
+                $otherPayments = [];
 
-              foreach($payments as $payment) {
-                  if (in_array($payment->source, ['service_payment', 'service_payment_cash'])) {
-                      $servicePayment = $payment;
-                  } elseif (in_array($payment->source, ['commitment_fee', 'commitment_fee_bonus'])) {
-                      $commitmentFees[] = $payment;
-                  } else {
-                      $otherPayments[] = $payment;
-                  }
-              }
+                foreach($payments as $payment) {
+                    if (in_array($payment->source, ['service_payment', 'service_payment_cash'])) {
+                        $servicePayment = $payment;
+                    } elseif (in_array($payment->source, ['commitment_fee', 'commitment_fee_bonus'])) {
+                        $commitmentFees[] = $payment;
+                    } else {
+                        $otherPayments[] = $payment;
+                    }
+                }
 
-              // Combine service payment and all commitment fees
-              if ($servicePayment) {
-                  $combinedPayment = clone $servicePayment;
-                  foreach($commitmentFees as $fee) {
-                      $combinedPayment->amount += $fee->amount;
-                  }
-                  $combinedPayment->is_combined = true;
-                  $displayPayments[] = $combinedPayment;
-              }
+                // Combine service payment and all commitment fees
+                if ($servicePayment) {
+                    $combinedPayment = clone $servicePayment;
+                    foreach($commitmentFees as $fee) {
+                        $combinedPayment->amount += $fee->amount;
+                    }
+                    $combinedPayment->is_combined = true;
+                    $displayPayments[] = $combinedPayment;
+                }
 
-              // Add other payment types (except commitment fees)
-              foreach($otherPayments as $payment) {
-                  $displayPayments[] = $payment;
-              }
-          }
+                // Add other payment types (except commitment fees)
+                foreach($otherPayments as $payment) {
+                    $displayPayments[] = $payment;
+                }
+            }
 
-          // Sort by date (newest first)
-          usort($displayPayments, function($a, $b) {
-              return strtotime($b->date) - strtotime($a->date);
-          });
-          @endphp
-        
-        @forelse($displayPayments as $payment)
-            <tr @if(!empty($payment->is_combined)) class="combined-row" @endif>
-            <td>{{ \Carbon\Carbon::parse($payment->date)->format('M d, Y') }}</td>
-            <td>₱{{ number_format($payment->amount, 2) }}</td>
-            <td>
-              @if($payment->appointment && $payment->appointment->customer)
-                {{ $payment->appointment->customer->firstname }} {{ $payment->appointment->customer->lastname }}
-              @else
-                N/A
-              @endif
-            </td>
-            <td>
-            @if($payment->appointment && $payment->appointment->post)
-              <div>
-                <strong>{{ \Illuminate\Support\Str::limit($payment->appointment->post->title, 30) }}</strong>
-                
-                @if($payment->appointment->post->subservices && $payment->appointment->post->subservices->count() > 0)
-                  <div class="subservices-list">
-                    <small style="display: block; margin-top: 5px; color: #555;">Services included:</small>
-                    <ul style="margin: 3px 0 0 15px; padding-left: 0; font-size: 0.85em;">
-                      @foreach($payment->appointment->post->subServices as $subservice)
-                        <li style="margin-bottom: 2px;">{{ $subservice->sub_service }}</li>
-                      @endforeach
-                    </ul>
+            // Sort by date (newest first)
+            usort($displayPayments, function($a, $b) {
+                return strtotime($b->date) - strtotime($a->date);
+            });
+            @endphp
+          
+            @forelse($displayPayments as $payment)
+                <tr @if(!empty($payment->is_combined)) class="combined-row" @endif>
+                <td>{{ \Carbon\Carbon::parse($payment->date)->format('M d, Y') }}</td>
+                <td>₱{{ number_format($payment->amount, 2) }}</td>
+                <td>
+                  @if($payment->appointment && $payment->appointment->customer)
+                    {{ $payment->appointment->customer->firstname }} {{ $payment->appointment->customer->lastname }}
+                  @else
+                    N/A
+                  @endif
+                </td>
+                <td>
+                @if($payment->appointment && $payment->appointment->post)
+                  <div>
+                    <strong>{{ \Illuminate\Support\Str::limit($payment->appointment->post->title, 30) }}</strong>
+                    
+                    @if($payment->appointment->post->subservices && $payment->appointment->post->subservices->count() > 0)
+                      <div class="subservices-list">
+                        <small style="display: block; margin-top: 5px; color: #555;">Services included:</small>
+                        <ul style="margin: 3px 0 0 15px; padding-left: 0; font-size: 0.85em;">
+                          @foreach($payment->appointment->post->subServices as $subservice)
+                            <li style="margin-bottom: 2px;">{{ $subservice->sub_service }}</li>
+                          @endforeach
+                        </ul>
+                      </div>
+                    @else
+                      <small style="display: block; margin-top: 5px; color: #777;">No additional services</small>
+                    @endif
                   </div>
                 @else
-                  <small style="display: block; margin-top: 5px; color: #777;">No additional services</small>
+                  General Service
                 @endif
-              </div>
-            @else
-              General Service
-            @endif
-          </td>
-            <td>
-              @if($payment->source == 'service_payment' && !empty($payment->is_combined))
-                <span class="status" style="background-color: #10B981;">Service Payment</span>
-              @elseif($payment->source == 'service_payment')
-                <span class="status" style="background-color: #10B981;">Final Payment</span>
-               @elseif($payment->source == 'service_payment_cash')
-    <span class="status" style="background-color: #3B82F6;">Service Payment (Cash)</span>
-              @elseif($payment->source == 'late_cancellation_fee')
-                <span class="status" style="background-color: #F59E0B;">Cancellation Fee</span>
-              @elseif($payment->source == 'no_show_fee')
-                <span class="status" style="background-color: #EF4444;">No-Show Fee</span>
-              @else
-                <span class="status" style="background-color: #6B7280;">Other</span>
-              @endif
-            </td>
-            <td>
-              <span class="status" style="background-color: #10B981;">
-                Paid
-              </span>
-            </td>
-          </tr>
-        @empty
-          <tr>
-            <td colspan="6" style="text-align: center;">No payments recorded yet.</td>
-          </tr>
-        @endforelse
-      </tbody>
-    </table>
-      
-      <!-- Pagination -->
-      @if(isset($allPayments) && method_exists($allPayments, 'links'))
-        <div class="pagination-container">
-          {{ $allPayments->links() }}
-        </div>
-      @endif
+              </td>
+                <td>
+                  @if($payment->source == 'service_payment' && !empty($payment->is_combined))
+                        <span class="status" style="background-color: #10B981;">Full Service Payment</span>
+                    @elseif($payment->source == 'service_payment')
+                        <span class="status" style="background-color: #10B981;">Service Payment</span>
+                    @elseif($payment->source == 'service_payment_cash')
+                        <span class="status" style="background-color: #3B82F6;">Cash Payment</span>
+                    @elseif($payment->source == 'commitment_fee')
+                        <span class="status" style="background-color: #8B5CF6;">Commitment Fee</span>
+                    @elseif($payment->source == 'commitment_fee_bonus')
+                        <span class="status" style="background-color: #F59E0B;">Bonus Payment</span>
+                    @else
+                        <span class="status" style="background-color: #6B7280;">Other</span>
+                    @endif
+                </td>
+                <td>
+                  <span class="status" style="background-color: #10B981;">
+                    Paid
+                  </span>
+                </td>
+              </tr>
+            @empty
+              <tr>
+               <td colspan="6">
+                      <div class="empty-state">
+                        <i class="ri-file-list-line"></i>
+                        <h3>No payments yet</h3>
+                        <p>Your payment history will appear here once you start receiving payments.</p>
+                      </div>
+                    </td>
+              </tr>
+            @endforelse
+          </tbody>
+        </table>
+        
+        <!-- Pagination -->
+        @if(isset($allPayments) && method_exists($allPayments, 'links'))
+          <div class="pagination-container">
+            {{ $allPayments->links() }}
+          </div>
+        @endif
+      </div>
     </div>
   </div>
-  
-  <!-- Withdrawals Tab -->
+
+  <!-- Withdrawals Tab - USING OLD STRUCTURE -->
   <div id="withdrawals" class="tab-content">
     <div class="section-content">
       <div class="table-header">
-        <h2>Withdrawal History</h2>
+        <h2>
+          <i class="ri-download-cloud-line"></i>
+          Withdrawal History
+        </h2>
       </div>
       
-      <table>
-        <thead>
-          <tr>
-            <th>Date Requested</th>
-            <th>Amount</th>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Date Requested</th>
+              <th>Amount</th>
               <th>Reference</th>
-            <th>Payment Method</th>
-            <th>Account Details</th>
-            <th>Status</th>
+              <th>Payment Method</th>
+              <th>Account Details</th>
+              <th>Status</th>
               <th>Type</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          @forelse($withdrawals ?? [] as $withdrawal)
-            <tr>
-              <td>{{ \Carbon\Carbon::parse($withdrawal->created_at)->format('M d, Y') }}</td>
-              <td>₱{{ number_format($withdrawal->amount, 2) }}</td>
-               <td>
-              @php
-              $details = is_array($withdrawal->payment_details) ? $withdrawal->payment_details : json_decode($withdrawal->payment_details, true);
-            @endphp
-            @if($withdrawal->payment_method == 'stripe')
-              Stripe Connect
-              @if($withdrawal->stripe_transfer_id)
-                <br><small>Transfer ID: {{ $withdrawal->stripe_transfer_id }}</small>
-              @endif
-            @elseif($withdrawal->payment_method == 'bank_transfer' && $details)
-              {{ strtoupper($details['bank_name'] ?? '') }} ****{{ substr($details['account_number'] ?? '', -4) }}
-            @elseif($withdrawal->payment_method == 'gcash' && $details)
-              GCash ****{{ substr($details['gcash_number'] ?? '', -4) }}
-            @elseif($withdrawal->payment_method == 'paymaya' && $details)
-              PayMaya ****{{ substr($details['paymaya_number'] ?? '', -4) }}
-            @elseif($withdrawal->payment_method == 'grab_pay' && $details)
-              GrabPay ****{{ substr($details['grab_pay_number'] ?? '', -4) }}
-            @else
-              N/A
-            @endif
-
-              </td>
-              <td>{{ ucfirst($withdrawal->payment_method) }}</td>
-              <td>
-                @php
-                  $details = is_array($withdrawal->payment_details) ? $withdrawal->payment_details : json_decode($withdrawal->payment_details, true);
-                @endphp
-                @if($withdrawal->payment_method == 'stripe')
-                  Stripe Connect
-                  @if(auth()->user()->stripe_connect_id)
-                    <br><small>Account ID: {{ auth()->user()->stripe_connect_id }}</small>
-                  @endif
-                  @if($withdrawal->stripe_payout_id)
-                    <br><small>Transfer ID: {{ $withdrawal->stripe_payout_id }}</small>
-                  @endif
-                @elseif($withdrawal->payment_method == 'bank_transfer' && $details)
-                  {{ strtoupper($details['bank_name'] ?? '') }} ****{{ substr($details['account_number'] ?? '', -4) }}
-                @elseif($withdrawal->payment_method == 'gcash' && $details)
-                  GCash ****{{ substr($details['gcash_number'] ?? '', -4) }}
-                @elseif($withdrawal->payment_method == 'paymaya' && $details)
-                  PayMaya ****{{ substr($details['paymaya_number'] ?? '', -4) }}
-                @elseif($withdrawal->payment_method == 'grab_pay' && $details)
-                  GrabPay ****{{ substr($details['grab_pay_number'] ?? '', -4) }}
-                @else
-                  N/A
-                @endif
-              </td>
-              <td>
-                <span class="status" style="background-color: 
-                  @if($withdrawal->status == 'pending')
-                    #F59E0B
-                  @elseif($withdrawal->status == 'processing')
-                    #3B82F6
-                  @elseif($withdrawal->status == 'completed')
-                    #10B981
-                  @elseif($withdrawal->status == 'rejected')
-                    #EF4444
-                  @else
-                    #6B7280
-                  @endif
-                ">
-                  {{ ucfirst($withdrawal->status) }}
-                </span>
-              </td>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            @forelse($withdrawals ?? [] as $withdrawal)
+              <tr>
+                <td>{{ \Carbon\Carbon::parse($withdrawal->created_at)->format('M d, Y') }}</td>
+                <td>₱{{ number_format($withdrawal->amount, 2) }}</td>
                 <td>
-              @if($withdrawal->appointment_id)
-                <a href="{{ route('freelancer.appointments.view', $withdrawal->appointment_id) }}" class="service-link">
-                  View Service
-                </a>
-              @else
-                Manual
-              @endif
-            </td>
-              <td>
-                @if($withdrawal->status == 'pending')
-                  <button class="cancel-btn" onclick="cancelWithdrawal({{ $withdrawal->id }})">Cancel</button>
-                @else
-                  <button class="details-btn" onclick="viewWithdrawalDetails({{ $withdrawal->id }})">Details</button>
-                @endif
-              </td>
-            </tr>
-          @empty
-            <tr>
-              <td colspan="6" style="text-align: center;">No withdrawal requests yet.</td>
-            </tr>
-          @endforelse
-        </tbody>
-      </table>
+                  @php
+                    $details = is_array($withdrawal->payment_details) ? $withdrawal->payment_details : json_decode($withdrawal->payment_details, true);
+                  @endphp
+                  @if($withdrawal->payment_method == 'stripe')
+                    Stripe Connect
+                    @if($withdrawal->stripe_transfer_id)
+                      <br><small>Transfer ID: {{ $withdrawal->stripe_transfer_id }}</small>
+                    @endif
+                  @elseif($withdrawal->payment_method == 'bank_transfer' && $details)
+                    {{ strtoupper($details['bank_name'] ?? '') }} ****{{ substr($details['account_number'] ?? '', -4) }}
+                  @elseif($withdrawal->payment_method == 'gcash' && $details)
+                    GCash ****{{ substr($details['gcash_number'] ?? '', -4) }}
+                  @elseif($withdrawal->payment_method == 'paymaya' && $details)
+                    PayMaya ****{{ substr($details['paymaya_number'] ?? '', -4) }}
+                  @elseif($withdrawal->payment_method == 'grab_pay' && $details)
+                    GrabPay ****{{ substr($details['grab_pay_number'] ?? '', -4) }}
+                  @else
+                    N/A
+                  @endif
+                </td>
+                <td>{{ ucfirst(str_replace('_', ' ', $withdrawal->payment_method)) }}</td>
+                <td>
+                  @php
+                    $details = is_array($withdrawal->payment_details) ? $withdrawal->payment_details : json_decode($withdrawal->payment_details, true);
+                  @endphp
+                  @if($withdrawal->payment_method == 'stripe')
+                    Stripe Connect
+                    @if(auth()->user()->stripe_connect_id)
+                      <br><small>Account ID: {{ auth()->user()->stripe_connect_id }}</small>
+                    @endif
+                    @if($withdrawal->stripe_payout_id)
+                      <br><small>Transfer ID: {{ $withdrawal->stripe_payout_id }}</small>
+                    @endif
+                  @elseif($withdrawal->payment_method == 'bank_transfer' && $details)
+                    {{ strtoupper($details['bank_name'] ?? '') }} ****{{ substr($details['account_number'] ?? '', -4) }}
+                  @elseif($withdrawal->payment_method == 'gcash' && $details)
+                    GCash ****{{ substr($details['gcash_number'] ?? '', -4) }}
+                  @elseif($withdrawal->payment_method == 'paymaya' && $details)
+                    PayMaya ****{{ substr($details['paymaya_number'] ?? '', -4) }}
+                  @elseif($withdrawal->payment_method == 'grab_pay' && $details)
+                    GrabPay ****{{ substr($details['grab_pay_number'] ?? '', -4) }}
+                  @else
+                    N/A
+                  @endif
+                </td>
+                <td>
+                  <span class="status" style="background-color: 
+                    @if($withdrawal->status == 'pending')
+                      #F59E0B
+                    @elseif($withdrawal->status == 'processing')
+                      #3B82F6
+                    @elseif($withdrawal->status == 'completed')
+                      #10B981
+                    @elseif($withdrawal->status == 'rejected')
+                      #EF4444
+                    @else
+                      #6B7280
+                    @endif
+                  ">
+                    {{ ucfirst($withdrawal->status) }}
+                  </span>
+                </td>
+                <td>
+                  @if($withdrawal->appointment_id)
+                    <span class="status" style="background-color: #3B82F6; color: white;">
+                      Automatic
+                    </span>
+                  @else
+                    <span class="status" style="background-color: #6B7280; color: white;">
+                      Manual
+                    </span>
+                  @endif
+                </td>
+                <td>
+                  @if($withdrawal->status == 'pending')
+                    <button class="action-btn danger" onclick="cancelWithdrawal({{ $withdrawal->id }})">
+                      <i class="ri-close-line"></i>
+                      Cancel
+                    </button>
+                  @else
+                    <button class="action-btn" onclick="viewWithdrawalDetails({{ $withdrawal->id }})">
+                      <i class="ri-eye-line"></i>
+                      Details
+                    </button>
+                  @endif
+                </td>
+              </tr>
+            @empty
+              <tr>
+                <td colspan="8">
+                  <div class="empty-state">
+                    <i class="ri-download-cloud-line"></i>
+                    <h3>No withdrawal requests yet</h3>
+                    <p>Your withdrawal history will appear here once you make withdrawal requests.</p>
+                  </div>
+                </td>
+              </tr>
+            @endforelse
+          </tbody>
+        </table>
+      </div>
       
       <!-- Pagination -->
       @if(isset($withdrawals) && method_exists($withdrawals, 'links'))
@@ -323,7 +367,6 @@
       @endif
     </div>
   </div>
-  
 </div>
 
 <!-- Withdraw Funds Modal (for completed service payments) -->

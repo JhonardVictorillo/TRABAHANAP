@@ -4,7 +4,7 @@
     <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 pb-8 sm:pb-12 border-b">
           <div>
             <a
-              href="/"
+              href=""
               class="font-poppins text-2xl text-[#2563eb] block mb-4"
             >MinglaGawa</a>
             <p class="text-sm text-gray-600 mb-6">

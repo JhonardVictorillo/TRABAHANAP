@@ -49,34 +49,55 @@
                         <th>Actions</th>
                     </tr>
                 </thead>
-                <tbody>
-                  @foreach($violations as $violation)
-                            @php
-                                // Always get user information directly from the user object
-                                $role = $violation->user_role ?? 'customer';
-                                $userId = $violation->user_id;
-                                $firstName = $violation->firstname;
-                                $lastName = $violation->lastname;
-                                
-                                // Determine violation type
-                                if (str_contains($violation->status ?? '', 'no_show')) {
-                                    $violationType = 'No-Show';
-                                    $statusColor = getStatusColor($violation->status);
-                                    $statusText = ucfirst(str_replace('_', ' ', $violation->status));
-                                } else {
-                                    $violationType = 'Late Cancellation';
-                                    $statusColor = '#e57373';
-                                    $statusText = 'Late Cancellation';
-                                }
-                                
-                                // Get violation count
-                                $violationCount = DB::table('violations')
-                                    ->where('user_id', $userId)
-                                    ->count();
-                            @endphp
-                           <tr class="violation-row {{ $role }}-violation">
-                            <td>{{ $violation->violation_id }}</td>
-                            <td>{{ $firstName }} {{ $lastName }}</td>
+              <tbody>
+                    @foreach($violations as $violation)
+                        @php
+                            $role = $violation->user_role ?? 'customer';
+                            $firstName = $violation->firstname;
+                            $lastName = $violation->lastname;
+                            $violationCount = $violation->violation_count;
+                            
+                            // Parse violation types
+                            $violationTypes = explode(',', $violation->violation_types);
+                            $hasNoShow = in_array('no_show', $violationTypes);
+                            $hasLateCancellation = in_array('late_cancellation', $violationTypes);
+                            
+                            // Determine primary violation type and status
+                            if ($hasNoShow && $hasLateCancellation) {
+                                $primaryViolationType = 'Mixed Violations';
+                                $statusColor = '#e57373';
+                                $statusText = 'Multiple Types';
+                            } elseif ($hasNoShow) {
+                                $primaryViolationType = 'No-Show';
+                                $statusColor = '#ffa726';
+                                $statusText = 'No Show';
+                            } else {
+                                $primaryViolationType = 'Late Cancellation';
+                                $statusColor = '#e57373';
+                                $statusText = 'Late Cancellation';
+                            }
+                            
+                            // Get the most recent violation ID for actions
+                            $violationIds = explode(',', $violation->violation_ids);
+                            $latestViolationId = end($violationIds);
+                            
+                            // Parse appointment dates and times
+                            $appointmentDates = explode(',', $violation->appointment_dates ?? '');
+                            $appointmentTimes = explode(',', $violation->appointment_times ?? '');
+                            $latestDate = !empty($appointmentDates[0]) ? $appointmentDates[0] : 'N/A';
+                            $latestTime = !empty($appointmentTimes[0]) ? $appointmentTimes[0] : '';
+                        @endphp
+                        
+                        <tr class="violation-row {{ $role }}-violation">
+                            <td>{{ $violation->user_id }}</td>
+                            <td>
+                                <div class="user-name-cell">
+                                    <span class="user-name">{{ $firstName }} {{ $lastName }}</span>
+                                    @if($violationCount > 1)
+                                        <span class="violation-count-badge">{{ $violationCount }} violations</span>
+                                    @endif
+                                </div>
+                            </td>
                             <td>
                                 <span class="role-badge {{ $role }}">
                                     {{ ucfirst($role) }}
@@ -87,22 +108,47 @@
                                     {{ $statusText }}
                                 </span>
                             </td>
-                            <td>{{ $violation->date }} {{ $violation->time }}</td>
                             <td>
-                                <span class="violation-type">{{ $violationType }}</span>
-                                @if($violationCount > 1)
-                                    <span class="violation-count">{{ $violationCount }}x</span>
-                                @endif
+                                <div class="date-cell">
+                                    <span class="latest-date">{{ $latestDate }}</span>
+                                    @if($latestTime)
+                                        <span class="latest-time">{{ $latestTime }}</span>
+                                    @endif
+                                    @if($violationCount > 1)
+                                        <small class="multiple-dates">+{{ $violationCount - 1 }} more</small>
+                                    @endif
+                                </div>
+                            </td>
+                            <td>
+                                <div class="violation-type-cell">
+                                    <span class="violation-type">{{ $primaryViolationType }}</span>
+                                    @if($violationCount > 1)
+                                        <div class="violation-breakdown">
+                                            @if($hasNoShow)
+                                                <span class="violation-mini-badge no-show">No-Show</span>
+                                            @endif
+                                            @if($hasLateCancellation)
+                                                <span class="violation-mini-badge cancellation">Late Cancel</span>
+                                            @endif
+                                        </div>
+                                    @endif
+                                </div>
                             </td>
                             <td class="actions-cell">
                                 <div class="action-buttons">
-                                    <button class="action-btn warning-btn" onclick="sendWarning({{ $violation->violation_id }}, '{{ $role }}', this)">
+                                    <button class="action-btn warning-btn" 
+                                            onclick="sendWarning({{ $latestViolationId }}, '{{ $role }}', this)"
+                                            title="Send Warning">
                                         Warning
                                     </button>
-                                    <button class="action-btn suspend-btn" onclick="toggleSuspension({{ $violation->violation_id }}, '{{ $role }}', this)">
+                                    <button class="action-btn suspend-btn" 
+                                            onclick="toggleSuspension({{ $latestViolationId }}, '{{ $role }}', this)"
+                                            title="Toggle Suspension">
                                         Suspend
                                     </button>
-                                    <button class="action-btn more-btn" onclick="showMoreOptions({{ $violation->violation_id }}, '{{ $role }}', this)">
+                                    <button class="action-btn more-btn" 
+                                            onclick="showMoreOptions({{ $latestViolationId }}, '{{ $role }}', {{ $violationCount }}, '{{ $firstName }} {{ $lastName }}')"
+                                            title="More Options">
                                         <i class="fas fa-ellipsis-v"></i>
                                     </button>
                                 </div>
@@ -125,132 +171,150 @@
         
         <div class="violation-settings-grid">
             <!-- Freelancer Violation Settings -->
-            <div class="violation-settings-card">
+           <div class="violation-settings-card">
                 <h4>Freelancer Violations</h4>
                 <div class="settings-group">
                     <div class="setting-item">
                         <span>No-Show Penalties</span>
                         <label class="switch">
-                            <input type="checkbox" id="freelancer-noshow-toggle" checked>
+                            <input type="checkbox" id="freelancer-noshow-toggle" 
+                                {{ $freelancerSettings->no_show_penalties ? 'checked' : '' }}>
                             <span class="slider round"></span>
                         </label>
                     </div>
                     <div class="setting-item">
                         <span>Automatic Warning</span>
                         <label class="switch">
-                            <input type="checkbox" id="freelancer-warning-toggle" checked>
+                            <input type="checkbox" id="freelancer-warning-toggle" 
+                                {{ $freelancerSettings->auto_warning ? 'checked' : '' }}>
                             <span class="slider round"></span>
                         </label>
                     </div>
                     <div class="setting-item">
                         <span>Rating Penalty</span>
                         <label class="switch">
-                            <input type="checkbox" id="freelancer-rating-toggle" checked>
+                            <input type="checkbox" id="freelancer-rating-toggle" 
+                                {{ $freelancerSettings->rating_penalty ? 'checked' : '' }}>
                             <span class="slider round"></span>
                         </label>
                     </div>
                     <div class="setting-item">
                         <span>Auto-Suspension (3+ violations)</span>
                         <label class="switch">
-                            <input type="checkbox" id="freelancer-suspension-toggle" checked>
+                            <input type="checkbox" id="freelancer-suspension-toggle" 
+                                {{ $freelancerSettings->auto_suspension ? 'checked' : '' }}>
                             <span class="slider round"></span>
                         </label>
                     </div>
                 </div>
-                <!-- Add threshold settings -->
-                    <div class="threshold-settings">
-                        <h5>Violation Thresholds</h5>
-                        
-                        <div class="setting-config">
-                            <label>Warning Threshold</label>
-                            <input type="number" id="freelancer-warning-threshold" value="2" min="1" max="10">
-                        </div>
-                        
-                        <div class="setting-config">
-                            <label>Restriction Threshold</label>
-                            <input type="number" id="freelancer-restriction-threshold" value="3" min="2" max="10">
-                        </div>
-                        
-                        <div class="setting-config">
-                            <label>Suspension Threshold</label>
-                            <input type="number" id="freelancer-suspension-threshold" value="5" min="3" max="10">
-                        </div>
-                        
-                        <div class="setting-config">
-                            <label>Ban Threshold</label>
-                            <input type="number" id="freelancer-ban-threshold" value="7" min="4" max="15">
-                        </div>
+                
+                <div class="threshold-settings">
+                    <h5>Violation Thresholds</h5>
+                    
+                    <div class="setting-config">
+                        <label>Warning Threshold</label>
+                        <input type="number" id="freelancer-warning-threshold" 
+                            value="{{ $freelancerSettings->warning_threshold }}" min="1" max="10">
                     </div>
+                    
+                    <div class="setting-config">
+                        <label>Restriction Threshold</label>
+                        <input type="number" id="freelancer-restriction-threshold" 
+                            value="{{ $freelancerSettings->restriction_threshold }}" min="2" max="10">
+                    </div>
+                    
+                    <div class="setting-config">
+                        <label>Suspension Threshold</label>
+                        <input type="number" id="freelancer-suspension-threshold" 
+                            value="{{ $freelancerSettings->suspension_threshold }}" min="3" max="10">
+                    </div>
+                    
+                    <div class="setting-config">
+                        <label>Ban Threshold</label>
+                        <input type="number" id="freelancer-ban-threshold" 
+                            value="{{ $freelancerSettings->ban_threshold }}" min="4" max="15">
+                    </div>
+                </div>
+                
                 <div class="setting-config">
                     <label>Suspension Duration (days)</label>
-                    <input type="number" id="freelancer-suspension-days" value="7" min="1" max="30">
+                    <input type="number" id="freelancer-suspension-days" 
+                        value="{{ $freelancerSettings->suspension_days }}" min="1" max="30">
                 </div>
             </div>
-            
-            <!-- Customer Violation Settings -->
+
+            <!-- Same for customer settings - replace hardcoded values with database values -->
             <div class="violation-settings-card">
                 <h4>Customer Violations</h4>
                 <div class="settings-group">
                     <div class="setting-item">
                         <span>No-Show Penalties</span>
                         <label class="switch">
-                            <input type="checkbox" id="customer-noshow-toggle" checked>
+                            <input type="checkbox" id="customer-noshow-toggle" 
+                                {{ $customerSettings->no_show_penalties ? 'checked' : '' }}>
                             <span class="slider round"></span>
                         </label>
                     </div>
                     <div class="setting-item">
                         <span>Automatic Warning</span>
                         <label class="switch">
-                            <input type="checkbox" id="customer-warning-toggle" checked>
+                            <input type="checkbox" id="customer-warning-toggle" 
+                                {{ $customerSettings->auto_warning ? 'checked' : '' }}>
                             <span class="slider round"></span>
                         </label>
                     </div>
                     <div class="setting-item">
                         <span>Booking Restrictions</span>
                         <label class="switch">
-                            <input type="checkbox" id="customer-booking-toggle" checked>
+                            <input type="checkbox" id="customer-booking-toggle" 
+                                {{ $customerSettings->booking_restrictions ? 'checked' : '' }}>
                             <span class="slider round"></span>
                         </label>
                     </div>
                     <div class="setting-item">
                         <span>Auto-Suspension (3+ violations)</span>
                         <label class="switch">
-                            <input type="checkbox" id="customer-suspension-toggle" checked>
+                            <input type="checkbox" id="customer-suspension-toggle" 
+                                {{ $customerSettings->auto_suspension ? 'checked' : '' }}>
                             <span class="slider round"></span>
                         </label>
                     </div>
                 </div>
 
-                <!-- Add threshold settings -->
                 <div class="threshold-settings">
                     <h5>Violation Thresholds</h5>
                     
                     <div class="setting-config">
                         <label>Warning Threshold</label>
-                        <input type="number" id="customer-warning-threshold" value="2" min="1" max="10">
+                        <input type="number" id="customer-warning-threshold" 
+                            value="{{ $customerSettings->warning_threshold }}" min="1" max="10">
                     </div>
                     
                     <div class="setting-config">
                         <label>Restriction Threshold</label>
-                        <input type="number" id="customer-restriction-threshold" value="3" min="2" max="10">
+                        <input type="number" id="customer-restriction-threshold" 
+                            value="{{ $customerSettings->restriction_threshold }}" min="2" max="10">
                     </div>
                     
                     <div class="setting-config">
                         <label>Suspension Threshold</label>
-                        <input type="number" id="customer-suspension-threshold" value="5" min="3" max="10">
+                        <input type="number" id="customer-suspension-threshold" 
+                            value="{{ $customerSettings->suspension_threshold }}" min="3" max="10">
                     </div>
                     
                     <div class="setting-config">
                         <label>Ban Threshold</label>
-                        <input type="number" id="customer-ban-threshold" value="7" min="4" max="15">
+                        <input type="number" id="customer-ban-threshold" 
+                            value="{{ $customerSettings->ban_threshold }}" min="4" max="15">
                     </div>
                 </div>
+                
                 <div class="setting-config">
                     <label>Suspension Duration (days)</label>
-                    <input type="number" id="customer-suspension-days" value="7" min="1" max="30">
+                    <input type="number" id="customer-suspension-days" 
+                        value="{{ $customerSettings->suspension_days }}" min="1" max="30">
                 </div>
             </div>
-        </div>
         
         <div class="settings-actions">
             <button class="save-settings-btn">
@@ -265,8 +329,11 @@
                     <i class="fas fa-spinner fa-spin"></i>
                 </span>
             </button>
+            </div>
         </div>
     </div>
+   </div>
+   </div>
 </div>
 
 <!-- More Options Modal -->
@@ -497,7 +564,7 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                restoreButton(Button, 'Warning');
+                restoreButton(button, 'Warning');
                 alert('Warning sent successfully!');
                 location.reload();
             } else {
@@ -537,26 +604,29 @@ window.toggleSuspension = function(violationId, role, button) {
 };
     
     // IMPORTANT: Define showMoreOptions in the global scope
-   window.showMoreOptions = function(violationId, role) {
+   window.showMoreOptions = function(violationId, role, violationCount, userName) {
     // Get violation data and populate modal
     fetch('/admin/violations/get-details/' + violationId)
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                document.getElementById('modal-user-name').textContent = data.user_name;
+                // Use the passed userName or fallback to API data
+                document.getElementById('modal-user-name').textContent = userName || data.user_name;
                 
                 // Set the role badge with appropriate class
                 const roleBadge = document.getElementById('modal-user-role-badge');
                 roleBadge.textContent = role.charAt(0).toUpperCase() + role.slice(1);
                 roleBadge.className = 'violation-role-badge ' + role;
                 
-                // Set violation type
-                document.getElementById('modal-violation-badge').textContent = data.violation_type;
+                // Set violation type with count
+                const violationBadge = document.getElementById('modal-violation-badge');
+                if (violationCount > 1) {
+                    violationBadge.textContent = `${data.violation_type} (${violationCount} total)`;
+                } else {
+                    violationBadge.textContent = data.violation_type;
+                }
                 
                 // Set severity dots based on violation count
-                let violationCount = data.violation_count || 1;
-                
-                // Update severity dots
                 const dots = document.querySelectorAll('.severity-dot');
                 dots.forEach((dot, index) => {
                     dot.classList.toggle('active', index < Math.min(violationCount, 3));
@@ -625,53 +695,83 @@ window.toggleSuspension = function(violationId, role, button) {
 });
     
     // Settings save functionality
-    document.querySelector('.save-settings-btn').addEventListener('click', function() {
-        const settings = {
-            freelancer: {
-                no_show_penalties: document.getElementById('freelancer-noshow-toggle').checked,
-                auto_warning: document.getElementById('freelancer-warning-toggle').checked,
-                rating_penalty: document.getElementById('freelancer-rating-toggle').checked,
-                auto_suspension: document.getElementById('freelancer-suspension-toggle').checked,
-                suspension_days: document.getElementById('freelancer-suspension-days').value,
-            
-                // New threshold settings
-                warning_threshold: document.getElementById('freelancer-warning-threshold').value,
-                restriction_threshold: document.getElementById('freelancer-restriction-threshold').value,
-                suspension_threshold: document.getElementById('freelancer-suspension-threshold').value,
-                ban_threshold: document.getElementById('freelancer-ban-threshold').value
-            },
-            customer: {
-                no_show_penalties: document.getElementById('customer-noshow-toggle').checked,
-                auto_warning: document.getElementById('customer-warning-toggle').checked,
-                booking_restrictions: document.getElementById('customer-booking-toggle').checked,
-                auto_suspension: document.getElementById('customer-suspension-toggle').checked,
-                suspension_days: document.getElementById('customer-suspension-days').value,
-           
-                // New threshold settings
+  document.querySelector('.save-settings-btn').addEventListener('click', function() {
+    const button = this;
+    showSpinnerOnButton(button);
+    
+    const settings = {
+        freelancer: {
+            no_show_penalties: document.getElementById('freelancer-noshow-toggle').checked,
+            auto_warning: document.getElementById('freelancer-warning-toggle').checked,
+            rating_penalty: document.getElementById('freelancer-rating-toggle').checked,
+            auto_suspension: document.getElementById('freelancer-suspension-toggle').checked,
+            suspension_days: document.getElementById('freelancer-suspension-days').value,
+            warning_threshold: document.getElementById('freelancer-warning-threshold').value,
+            restriction_threshold: document.getElementById('freelancer-restriction-threshold').value,
+            suspension_threshold: document.getElementById('freelancer-suspension-threshold').value,
+            ban_threshold: document.getElementById('freelancer-ban-threshold').value
+        },
+        customer: {
+            no_show_penalties: document.getElementById('customer-noshow-toggle').checked,
+            auto_warning: document.getElementById('customer-warning-toggle').checked,
+            booking_restrictions: document.getElementById('customer-booking-toggle').checked,
+            auto_suspension: document.getElementById('customer-suspension-toggle').checked,
+            suspension_days: document.getElementById('customer-suspension-days').value,
             warning_threshold: document.getElementById('customer-warning-threshold').value,
             restriction_threshold: document.getElementById('customer-restriction-threshold').value,
             suspension_threshold: document.getElementById('customer-suspension-threshold').value,
             ban_threshold: document.getElementById('customer-ban-threshold').value
-            }
-        };
-        
-        // AJAX request to save settings
-        fetch('/admin/violation-settings', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-            },
-            body: JSON.stringify(settings)
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert('Settings saved successfully!');
-            } else {
-                alert('Error: ' + data.message);
-            }
-        });
+        }
+    };
+    
+    fetch('/admin/violation-settings', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        },
+        body: JSON.stringify(settings)
+    })
+    .then(response => response.json())
+    .then(data => {
+        restoreButton(button, 'Save Settings');
+        if (data.success) {
+            alert('Settings saved successfully!');
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        restoreButton(button, 'Save Settings');
+        alert('Network error: ' + error.message);
     });
 });
+
+const resetBtn = document.querySelector('.reset-settings-btn');
+if (resetBtn) {
+    resetBtn.addEventListener('click', function() {
+        // Reset to default values (adjust as needed)
+        document.getElementById('freelancer-noshow-toggle').checked = true;
+        document.getElementById('freelancer-warning-toggle').checked = true;
+        document.getElementById('freelancer-rating-toggle').checked = true;
+        document.getElementById('freelancer-suspension-toggle').checked = true;
+        document.getElementById('freelancer-suspension-days').value = 7;
+        document.getElementById('freelancer-warning-threshold').value = 2;
+        document.getElementById('freelancer-restriction-threshold').value = 3;
+        document.getElementById('freelancer-suspension-threshold').value = 5;
+        document.getElementById('freelancer-ban-threshold').value = 7;
+
+        document.getElementById('customer-noshow-toggle').checked = true;
+        document.getElementById('customer-warning-toggle').checked = true;
+        document.getElementById('customer-booking-toggle').checked = true;
+        document.getElementById('customer-suspension-toggle').checked = true;
+        document.getElementById('customer-suspension-days').value = 7;
+        document.getElementById('customer-warning-threshold').value = 2;
+        document.getElementById('customer-restriction-threshold').value = 3;
+        document.getElementById('customer-suspension-threshold').value = 5;
+        document.getElementById('customer-ban-threshold').value = 7;
+    });
+}
+});
+
 </script>

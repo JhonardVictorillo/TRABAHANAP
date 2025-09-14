@@ -53,18 +53,20 @@ class CustomerController extends Controller
     }
     
     // Price filter - using either hourly_rate or price depending on your structure
-        if ($request->filled('price_range')) {
-            $priceRange = $request->price_range;
-
-            if ($priceRange == 'low') {
-                $query->where('rate', '<', 1000);
-            } elseif ($priceRange == 'medium') {
-                $query->whereBetween('rate', [1000, 3000]);
-            } elseif ($priceRange == 'high') {
-                $query->where('rate', '>', 3000);
-            }
-        }
+      if ($request->filled('min_price') || $request->filled('max_price')) {
+    $minPrice = $request->input('min_price', 0);
+    $maxPrice = $request->input('max_price');
     
+    $query->where(function($q) use ($minPrice, $maxPrice) {
+        // Always apply minimum price if provided
+        $q->where('rate', '>=', $minPrice);
+        
+        // Only apply maximum price if it's provided and not 10000+
+        if (!empty($maxPrice) && $maxPrice < 10000) {
+            $q->where('rate', '<=', $maxPrice);
+        }
+    });
+}
     // Experience level filter
     if ($request->filled('experience')) {
         $experience = $request->experience;
@@ -81,41 +83,45 @@ class CustomerController extends Controller
               ->orWhere('province', 'like', "%{$location}%");
         });
     }
+
+    // Availability filters (new)
+if ($request->filled('available_now')) {
+    $today = now()->format('Y-m-d');
+    $query->whereHas('freelancer.availabilities', function($q) use ($today) {
+        $q->where('date', '=', $today);
+    });
+}
+
+if ($request->filled('offers_remote')) {
+    $query->where(function($q) {
+        $q->where('location_restriction', '!=', 'minglanilla_only')
+          ->orWhereNull('location_restriction');
+    });
+}
     
     // Rating filter - using a safer approach
     if ($request->filled('rating') && is_numeric($request->rating)) {
-        $minRating = (float)$request->rating;
-        // First get all results
-        $posts = $query->paginate(12);
-        
-        // Then manually filter by rating
-        $posts->setCollection($posts->getCollection()->filter(function($post) use ($minRating) {
-            return $post->average_rating >= $minRating;
-        }));
-    } else {
-        // Normal pagination without rating filter
-        $posts = $query->paginate(12);
-    }
+    $minRating = (float)$request->rating;
     
-    // Sort options
-            // Sorting logic in your dashboard method
-            if ($request->filled('sort')) {
-                $sort = $request->sort;
-                
-             if ($sort == 'price_low') {
-                    $query->orderBy('rate', 'asc');
-                } elseif ($sort == 'price_high') {
-                    $query->orderBy('rate', 'desc');
-                 // Ensure we only select posts columns
-                } elseif ($sort == 'rating') {
-                    $query->orderBy(DB::raw('IFNULL(average_rating, 0)'), 'desc');
-                } elseif ($sort == 'newest') {
-                    $query->orderBy('posts.created_at', 'desc');
-                }
-                } else {
-                    // Default sort
-                    $query->orderBy(DB::raw('IFNULL(average_rating, 0)'), 'desc');
-                }
+    $query->having('average_rating', '>=', $minRating);
+}
+        // Apply sorting AFTER all filters
+        if ($request->filled('sort')) {
+            $sort = $request->sort;
+            
+            if ($sort == 'price_low') {
+                $query->orderBy('rate', 'asc');
+            } elseif ($sort == 'price_high') {
+                $query->orderBy('rate', 'desc');
+            } elseif ($sort == 'rating') {
+                $query->orderBy(DB::raw('IFNULL(average_rating, 0)'), 'desc');
+            } elseif ($sort == 'newest') {
+                $query->orderBy('posts.created_at', 'desc');
+            }
+        } else {
+            // Default sort
+            $query->orderBy(DB::raw('IFNULL(average_rating, 0)'), 'desc');
+        }
     $posts = $query->paginate(12);
     // dd(DB::getQueryLog());
 
@@ -169,14 +175,19 @@ $popularCategories = collect($mostBookedCategories)->map(function($category) {
     $freelancerIds = $completedAppointments->pluck('freelancer_id')->unique()->toArray();
     
     // Get the freelancer profiles
-    $recentFreelancers = User::whereIn('id', $freelancerIds)
+   $recentFreelancers = User::whereIn('id', $freelancerIds)
         ->where('role', 'freelancer')
         ->where('is_verified', true)
         ->with('categories')
-        ->take(6)
-        ->get();
+        ->paginate(6);
+    
+    // Also get the total count for display purposes
+    $totalFreelancers = User::whereIn('id', $freelancerIds)
+        ->where('role', 'freelancer')
+        ->where('is_verified', true)
+        ->count();
     // Pass the data to the profile view
-    return view('customerProfile', compact('user','recentFreelancers', 'notifications'));
+     return view('customerProfile', compact('user', 'recentFreelancers', 'notifications', 'totalFreelancers'));
 }
 
 public function showFreelancerProfile($id, $postId = null)
@@ -280,12 +291,14 @@ public function getAppointments(Request $request)
         'id' => $appointment->id,
         'freelancer_id' => $appointment->freelancer_id,
         'freelancer_name' => $appointment->freelancer->firstname . ' ' . $appointment->freelancer->lastname,
+        'freelancer_profile_picture' => $appointment->freelancer->profile_picture,
         'date' => $appointment->date,
         'time' => $appointment->time,
         'address' => $appointment->address,
         'contact' => $appointment->contact ?? 'N/A',
         'notes' => $appointment->notes,
-        'status' => ucfirst($appointment->status),
+         'status' => ucfirst($appointment->status),
+        'status_color' => $this->getStatusColor($appointment->status), 
         'fee_status' => $appointment->fee_status,
         'commitment_fee' => $appointment->commitment_fee,
         'decline_reason' => $appointment->decline_reason,

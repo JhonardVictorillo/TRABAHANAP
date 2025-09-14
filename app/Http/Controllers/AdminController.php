@@ -21,12 +21,16 @@ use App\Notifications\WithdrawalProcessedNotification;
 use App\Notifications\WithdrawalRejectedNotification;
 use Illuminate\Support\Facades\Log;
 use App\Notifications\WithdrawalStatusNotification;
+use App\Models\ViolationSetting;
+
 
 
 class AdminController extends Controller
 {
    public function dashboard(Request $request){
-        $totalFreelancers = User::where('role', 'freelancer')->count();
+      $totalFreelancers = User::where('role', 'freelancer')
+    ->where('profile_completed', 1)
+    ->count();
         $totalCustomers = User::where('role', 'customer')->count();
 
         // Fetch pending accounts (freelancers with is_verified = 0)
@@ -38,9 +42,35 @@ class AdminController extends Controller
     
         // Fetch pending posts (posts with status = 'pending')
         $totalPendingPosts = Post::where('status', 'pending')->count();
-        $freelancers = User::with('categories')->where('role', 'freelancer')->get(); 
-        $customer = User::where('role', 'customer')->get();
-        $users = User::all();
+      // ADD PAGINATION TO THESE QUERIES:
+    
+    // Paginated freelancers for dashboard table
+    $freelancers = User::with('categories')
+    ->where('role', 'freelancer')
+    ->where('profile_completed', 1)
+    ->orderBy('created_at', 'desc')
+    ->simplePaginate(10, ['*'], 'freelancersPage');
+    
+    // Paginated customers for dashboard table
+    $customer = User::where('role', 'customer')
+        ->where('profile_completed', 1)
+        ->orderBy('created_at', 'desc')
+        ->simplePaginate(10, ['*'], 'customersPage');
+    
+    // Paginated pending accounts for dashboard table
+    $pendingAccounts = User::with('categories')
+        ->where('role', 'freelancer')
+        ->where('is_verified', 0)
+        ->orderBy('created_at', 'desc')
+        ->simplePaginate(10, ['*'], 'pendingAccountsPage');
+    
+    // Paginated pending posts for dashboard table
+    $pendingPosts = Post::with('freelancer', 'subServices', 'pictures')
+        ->where('status', 'pending')
+        ->orderBy('created_at', 'desc')
+        ->simplePaginate(10, ['*'], 'pendingPostsPage');
+
+    $users = User::all();
     
       $posts = Post::with('freelancer')->where('status', 'pending')->get();
     
@@ -82,21 +112,22 @@ class AdminController extends Controller
         ->simplePaginate(10, ['*'], 'bookingPage');
 
     // Violations Search (example: search by customer or freelancer name)
-    $violations = DB::table('violations as v')
+   // Violations Search - GROUPED BY USER
+$violations = DB::table('violations as v')
     ->leftJoin('appointments as a', 'v.appointment_id', '=', 'a.id')
     ->leftJoin('users as u', 'v.user_id', '=', 'u.id')
     ->select(
-        'v.id as violation_id',
-        'v.violation_type',
-        'v.user_role',
-        'v.created_at as violation_date',
-        'a.id as appointment_id',
-        'a.date',
-        'a.time',
-        'a.status',
         'u.id as user_id',
         'u.firstname',
-        'u.lastname'
+        'u.lastname',
+        'v.user_role',
+        DB::raw('COUNT(*) as violation_count'),
+        DB::raw('MAX(v.created_at) as latest_violation_date'),
+        DB::raw('GROUP_CONCAT(DISTINCT v.violation_type) as violation_types'),
+        DB::raw('GROUP_CONCAT(DISTINCT v.id) as violation_ids'),
+        DB::raw('GROUP_CONCAT(DISTINCT a.date ORDER BY a.date DESC) as appointment_dates'),
+        DB::raw('GROUP_CONCAT(DISTINCT a.time ORDER BY a.date DESC) as appointment_times'),
+        DB::raw('GROUP_CONCAT(DISTINCT a.status ORDER BY a.date DESC) as appointment_statuses')
     )
     ->when(!empty($search), function($query) use ($search) {
         $query->where('u.firstname', 'like', "%$search%")
@@ -104,9 +135,11 @@ class AdminController extends Controller
     })
     ->where(function($query) {
         $query->where('v.violation_type', 'late_cancellation')
+              ->orWhere('v.violation_type', 'no_show')
               ->orWhereNotNull('a.id')->where('a.status', 'like', 'no_show%');
     })
-    ->orderBy('v.created_at', 'desc')
+    ->groupBy('u.id', 'u.firstname', 'u.lastname', 'v.user_role')
+    ->orderBy('latest_violation_date', 'desc')
     ->simplePaginate(5, ['*'], 'violationPage');
 
     // User Stats Search (example: search by user name)
@@ -204,7 +237,40 @@ $rejectedWithdrawals = Withdrawal::with('freelancer')
     ->orderBy('created_at', 'desc')
    ->simplePaginate(5, ['*'], 'rejectedWithdrawalPage');
 
- 
+ // Load violation settings
+$freelancerSettings = ViolationSetting::where('user_role', 'freelancer')->first();
+$customerSettings = ViolationSetting::where('user_role', 'customer')->first();
+
+// Create default settings if they don't exist
+if (!$freelancerSettings) {
+    $freelancerSettings = ViolationSetting::create([
+        'user_role' => 'freelancer',
+        'no_show_penalties' => true,
+        'auto_warning' => true,
+        'rating_penalty' => true,
+        'auto_suspension' => true,
+        'suspension_days' => 7,
+        'warning_threshold' => 2,
+        'restriction_threshold' => 3,
+        'suspension_threshold' => 5,
+        'ban_threshold' => 7
+    ]);
+}
+
+if (!$customerSettings) {
+    $customerSettings = ViolationSetting::create([
+        'user_role' => 'customer',
+        'no_show_penalties' => true,
+        'auto_warning' => true,
+        'booking_restrictions' => true,
+        'auto_suspension' => true,
+        'suspension_days' => 7,
+        'warning_threshold' => 2,
+        'restriction_threshold' => 3,
+        'suspension_threshold' => 5,
+        'ban_threshold' => 7
+    ]);
+}
         
     return View('dashboard.admin-dashboard', [
             'totalFreelancers' => $totalFreelancers,
@@ -242,6 +308,10 @@ $rejectedWithdrawals = Withdrawal::with('freelancer')
             'rejectedWithdrawals' => $rejectedWithdrawals,
             'availableRevenue' => $availableRevenue,
             'platformWithdrawals' => $platformWithdrawals,
+            'pendingAccounts' => $pendingAccounts, // Add this new variable
+            'pendingPosts' => $pendingPosts,
+            'freelancerSettings' => $freelancerSettings,
+            'customerSettings' => $customerSettings,
         ]);
     
    }
@@ -550,6 +620,34 @@ public function markNotificationsAsRead()
         return response()->json([
             'success' => false,
             'message' => 'Error: ' . $e->getMessage()
+        ], 500);
+    }
+}
+
+public function getFreelancerDetails($id)
+{
+    try {
+        $freelancer = User::with('categories')
+            ->where('id', $id)
+            ->where('role', 'freelancer')
+            ->first();
+
+        if (!$freelancer) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Freelancer not found'
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'freelancer' => $freelancer
+        ]);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Error fetching freelancer details'
         ], 500);
     }
 }

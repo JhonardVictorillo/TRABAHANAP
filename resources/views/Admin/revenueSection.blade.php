@@ -38,15 +38,15 @@
     
     <!-- New Card to Open Withdrawal Modal -->
    <div class="card action-card">
-  <button type="button" onclick="openAdminWithdrawalModal()" class="admin-withdrawal-btn" style="background: white; width: 100%; border: none; display: flex; align-items: center; text-align: left; padding: 0;">
-    <div class="icon">
-      <span class="material-symbols-outlined">account_balance</span>
-    </div>
-    <div>
-      <p>Withdraw Revenue</p>
-      <span>To bank account</span>
-    </div>
-  </button>
+    <button type="button" onclick="openAdminWithdrawalModal()" class="admin-withdrawal-btn" style="background: transparent; width: 100%; border: none; display: flex; align-items: center; text-align: left; padding: 0; gap: 15px;">
+        <div class="icon">
+            <span class="material-symbols-outlined">account_balance</span>
+        </div>
+        <div>
+            <p>Withdraw Revenue</p>
+            <h3 style="font-size: 24px; color: #2563eb; margin: 5px 0 0 0; font-weight: 600;">To bank account</h3>
+        </div>
+    </button>
 </div>
   </div>
 

@@ -15,8 +15,17 @@ use App\Notifications\ViolationNotification;
 
 class ViolationController extends Controller
 {
-    public function getDetails($violationId)
+    private function checkAdminAccess()
 {
+    if (!auth()->check() || auth()->user()->role !== 'admin') {
+        abort(403, 'Unauthorized access');
+    }
+}
+    
+    public function getDetails($violationId)
+{   
+    $this->checkAdminAccess();
+    
     // Find the violation instead of appointment
     $violation = Violation::find($violationId);
     
@@ -48,6 +57,7 @@ class ViolationController extends Controller
      */
  public function sendWarning(Request $request)
 {
+    $this->checkAdminAccess();
     $violationId = $request->violation_id;
     
     $violation = Violation::find($violationId);
@@ -82,163 +92,175 @@ class ViolationController extends Controller
 }
 
     
-     public function toggleSuspension(Request $request)
-    {
-       $violationId = $request->violation_id;
-    
-    $violation = Violation::find($violationId);
-    
-    if (!$violation) {
-        return response()->json(['success' => false, 'message' => 'Violation not found']);
-    }
-    
-    $user = User::find($violation->user_id);
-        
-        // Check if user is already suspended
-        $isSuspended = $user->is_suspended;
-        
-        // Get the settings for this user role
-        $settings = ViolationSetting::where('user_role', $role)->first();
-        $suspensionDays = $settings ? $settings->suspension_days : 7;
-        
-        if ($isSuspended) {
-            // Remove suspension
-            $user->is_suspended = false;
-            $user->suspended_until = null;
-            $user->save();
-            
-            return response()->json([
-                'success' => true, 
-                'message' => 'User has been unsuspended.'
-            ]);
-        } else {
-            // Apply suspension
-            $user->is_suspended = true;
-            $user->suspended_until = now()->addDays($suspensionDays);
-            $user->save();
-            
-            // Record violation if doesn't exist
-            $violation = Violation::firstOrCreate(
-                ['appointment_id' => $appointmentId, 'user_id' => $user->id],
-                [
-                    'user_role' => $role,
-                    'violation_type' => 'no_show',
-                    'status' => 'active',
-                ]
-            );
-            
-            // Record the suspension action
-            $action = ViolationAction::create([
-                'violation_id' => $violation->id,
-                'action_type' => 'suspension',
-                'notes' => 'Account suspended due to no-show',
-                'action_data' => ['days' => $suspensionDays],
-                'admin_id' => auth()->id()
-            ]);
-            
-            // Send notification to user
-            try {
-                $user->notify(new ViolationNotification($violation, $action));
-            } catch (\Exception $e) {
-                // Log the error but don't stop execution
-                \Log::error('Failed to send suspension notification: ' . $e->getMessage());
-            }
-            
-            return response()->json([
-                'success' => true, 
-                'message' => "User has been suspended for {$suspensionDays} days."
-            ]);
-        }
-    }
-    
-      public function applyAction(Request $request)
-    {
-        $violationId = $request->violation_id;
-        $action = $request->action;
-        $notes = $request->notes;
-    
-    $violation = Violation::find($violationId);
-    
-    if (!$violation) {
-        return response()->json(['success' => false, 'message' => 'Violation not found']);
-    }
-    
-    $user = User::find($violation->user_id);
-        
-      
-        // Update user violation count
-        $user->violation_count += 1;
-        $user->no_show_count += 1;
-        $user->last_violation_at = now();
-        
-        // Prepare action data
-        $actionData = [];
-        
-        switch($action) {
-            case 'fee':
-                $actionData['fee_amount'] = $request->fee_amount;
-                $violation->status = 'fee_applied';
-                break;
-                
-            case 'suspend':
-                $days = $request->suspension_days ?? 7;
-                $actionData['days'] = $days;
-                $violation->status = 'suspended';
-                
-                // Apply the suspension
-                $user->is_suspended = true;
-                $user->suspended_until = now()->addDays($days);
-                break;
-                
-            case 'ban':
-                $violation->status = 'banned';
-                
-                // Permanently ban the user
-                $user->is_suspended = true;
-                $user->is_banned = true;
-                break;
-                
-            case 'restrict':
-             
-                $actionData['restrictions'] = ['booking_limit' => true];
-                $violation->status = 'restricted';
+    public function toggleSuspension(Request $request)
+{
+    $this->checkAdminAccess();
 
-                // Actually apply the restriction to the user
-                $user->is_restricted = true;
-                $user->restriction_end = now()->addDays(7); // or your desired duration
-                $user->restriction_reason = $notes;
-                break;
-                
-            case 'warning':
-                $violation->status = 'warned';
-                break;
-        }
-        
+    $violationId = $request->violation_id;
+    $role = $request->role; // Get role from request
+    
+    $violation = Violation::find($violationId);
+    
+    if (!$violation) {
+        return response()->json(['success' => false, 'message' => 'Violation not found']);
+    }
+    
+    $user = User::find($violation->user_id);
+    
+    if (!$user) {
+        return response()->json(['success' => false, 'message' => 'User not found']);
+    }
+    
+    // Check if user is already suspended
+    $isSuspended = $user->is_suspended;
+    
+    // Get the settings for this user role
+    $settings = ViolationSetting::where('user_role', $role)->first();
+    $suspensionDays = $settings ? $settings->suspension_days : 7;
+    
+    if ($isSuspended) {
+        // Remove suspension
+        $user->is_suspended = false;
+        $user->suspended_until = null;
         $user->save();
-        $violation->save();
         
-        // Record the action
-        $violationAction = ViolationAction::create([
+        // Record the unsuspension action
+        ViolationAction::create([
             'violation_id' => $violation->id,
-            'action_type' => $action,
-            'notes' => $notes,
-            'action_data' => $actionData,
+            'action_type' => 'unsuspension',
+            'notes' => 'Account unsuspended by admin',
+            'admin_id' => auth()->id()
+        ]);
+        
+        return response()->json([
+            'success' => true, 
+            'message' => 'User has been unsuspended.'
+        ]);
+    } else {
+        // Apply suspension
+        $user->is_suspended = true;
+        $user->suspended_until = now()->addDays($suspensionDays);
+        $user->save();
+        
+        // Record the suspension action
+        $action = ViolationAction::create([
+            'violation_id' => $violation->id,
+            'action_type' => 'suspension',
+            'notes' => "Account suspended for {$suspensionDays} days due to violation",
+            'action_data' => ['days' => $suspensionDays],
             'admin_id' => auth()->id()
         ]);
         
         // Send notification to user
         try {
-            $user->notify(new ViolationNotification($violation, $violationAction));
+            $user->notify(new ViolationNotification($violation, $action));
         } catch (\Exception $e) {
-            // Log the error but don't stop execution
-            \Log::error('Failed to send violation action notification: ' . $e->getMessage());
+            \Log::error('Failed to send suspension notification: ' . $e->getMessage());
         }
         
-        return response()->json(['success' => true]);
+        return response()->json([
+            'success' => true, 
+            'message' => "User has been suspended for {$suspensionDays} days."
+        ]);
     }
+}
+    
+      public function applyAction(Request $request)
+{
+    $this->checkAdminAccess();
+
+    $violationId = $request->violation_id;
+    $action = $request->action;
+    $notes = $request->notes;
+    $role = $request->role; // Add this line
+    
+    $violation = Violation::find($violationId);
+    
+    if (!$violation) {
+        return response()->json(['success' => false, 'message' => 'Violation not found']);
+    }
+    
+    $user = User::find($violation->user_id);
+    
+    if (!$user) {
+        return response()->json(['success' => false, 'message' => 'User not found']);
+    }
+    
+    // Update user violation count
+    $user->violation_count = ($user->violation_count ?? 0) + 1;
+    $user->no_show_count = ($user->no_show_count ?? 0) + 1;
+    $user->last_violation_at = now();
+    
+    // Prepare action data
+    $actionData = [];
+    
+    switch($action) {
+        case 'fee':
+            $feeAmount = $request->fee_amount;
+            if (!$feeAmount || $feeAmount <= 0) {
+                return response()->json(['success' => false, 'message' => 'Invalid fee amount']);
+            }
+            $actionData['fee_amount'] = $feeAmount;
+            $violation->status = 'fee_applied';
+            break;
+            
+        case 'suspend':
+            $days = $request->suspension_days ?? 7;
+            $actionData['days'] = $days;
+            $violation->status = 'suspended';
+            
+            $user->is_suspended = true;
+            $user->suspended_until = now()->addDays($days);
+            break;
+            
+        case 'ban':
+            $violation->status = 'banned';
+            $user->is_suspended = true;
+            $user->is_banned = true;
+            break;
+            
+        case 'restrict':
+            $actionData['restrictions'] = ['booking_limit' => true];
+            $violation->status = 'restricted';
+            $user->is_restricted = true;
+            $user->restriction_end = now()->addDays(7);
+            $user->restriction_reason = $notes;
+            break;
+            
+        case 'warning':
+            $violation->status = 'warned';
+            break;
+            
+        default:
+            return response()->json(['success' => false, 'message' => 'Invalid action type']);
+    }
+    
+    $user->save();
+    $violation->save();
+    
+    // Record the action
+    $violationAction = ViolationAction::create([
+        'violation_id' => $violation->id,
+        'action_type' => $action,
+        'notes' => $notes,
+        'action_data' => $actionData,
+        'admin_id' => auth()->id()
+    ]);
+    
+    // Send notification to user
+    try {
+        $user->notify(new ViolationNotification($violation, $violationAction));
+    } catch (\Exception $e) {
+        \Log::error('Failed to send violation action notification: ' . $e->getMessage());
+    }
+    
+    return response()->json(['success' => true, 'message' => 'Action applied successfully']);
+}
     
     public function saveSettings(Request $request)
 {
+    $this->checkAdminAccess();
+
     // Validate input
     $request->validate([
         'freelancer' => 'required|array',
@@ -285,4 +307,4 @@ class ViolationController extends Controller
     
     return response()->json(['success' => true]);
 }
-};
+}

@@ -57,6 +57,9 @@ class User extends Authenticatable
         'restriction_end',
         'restriction_reason',
         'ban_reason',
+        'auto_transfer_enabled',
+        'stripe_connect_id'
+
 
     ];
 
@@ -80,12 +83,17 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+              'reset_token_expires_at' => 'datetime',
+             'profile_completed' => 'boolean',
              'suspended_until' => 'datetime',
             'last_violation_at' => 'datetime',
             'is_suspended' => 'boolean',
             'is_banned' => 'boolean',
             'is_restricted' => 'boolean',
              'restriction_end' => 'datetime',
+            'is_verified' => 'boolean',
+              'auto_transfer_enabled' => 'boolean',
+              'skills' => 'array',
             
         ];
     }

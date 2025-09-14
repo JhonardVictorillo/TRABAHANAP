@@ -149,50 +149,85 @@
 
         <!-- Recent Freelancers Section -->
         <div class="mt-8">
-            <h3 class="text-lg font-semibold text-gray-700 mb-4 flex items-center">
-                <i class="ri-team-line text-blue-600 mr-2"></i>Recent Freelancers <!-- Changed from text-primary -->
-                Recent Freelancers
-            </h3>
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                @forelse ($recentFreelancers as $freelancer)
-                    <div class="bg-white rounded-lg shadow p-6 transition-transform hover:-translate-y-1">
-                        <!-- Freelancer Profile Picture -->
-                        <img 
-                            src="{{ $freelancer->profile_picture ? asset('storage/' . $freelancer->profile_picture) : asset('images/defaultprofile.jpg') }}" 
-                            alt="{{ $freelancer->firstname }} {{ $freelancer->lastname }}" 
-                            class="w-24 h-24 rounded-full mx-auto object-cover shadow-md"
-                        >
-                        <!-- Freelancer Name -->
-                        <h4 class="mt-4 text-center text-lg font-medium text-gray-800">
-                            {{ $freelancer->firstname }} {{ $freelancer->lastname }}
-                        </h4>
-                        <!-- Freelancer Categories -->
-                        <div class="text-center mt-2 flex flex-wrap justify-center gap-2">
-                            @forelse ($freelancer->categories as $category)
-                               <span class="inline-block bg-blue-100 text-blue-600 text-xs font-medium px-2 py-1 rounded-full">
-                                    {{ $category->name }}
-                                </span>
-                            @empty
-                                <span class="text-gray-400">No categories</span>
-                            @endforelse
-                        </div>
-                        <!-- View Profile Button -->
-                        <a 
-                            href="{{ route('freelancer.profile', $freelancer->id) }}" 
-                            class="block w-full mt-4 py-2 text-center text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition" <!-- Changed from bg-primary -->
-                        >
-                            <i class="ri-eye-line mr-1"></i>View Profile
-                        </a>
-                    </div>
-                @empty
-                    <div class="md:col-span-3 bg-white rounded-lg shadow p-6 text-center">
-                        <p class="text-gray-500 flex items-center justify-center gap-2">
-                            <i class="ri-information-line"></i>No recent freelancers available.
-                        </p>
-                    </div>
-                @endforelse
+    <h3 class="text-lg font-semibold text-gray-700 mb-4 flex items-center justify-between">
+        <span class="flex items-center">
+            <i class="ri-team-line text-blue-600 mr-2"></i>
+            Recent Freelancers
+        </span>
+        @if($recentFreelancers->total() > 0)
+            <span class="text-sm text-gray-500">
+                Showing {{ $recentFreelancers->firstItem() }}-{{ $recentFreelancers->lastItem() }} of {{ $totalFreelancers }}
+            </span>
+        @endif
+    </h3>
+    
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6" id="freelancers-container">
+        @forelse ($recentFreelancers as $freelancer)
+            <div class="freelancer-card bg-white rounded-lg shadow p-6 transition-transform hover:-translate-y-1">
+                <!-- Freelancer Profile Picture -->
+                <img 
+                    src="{{ $freelancer->profile_picture ? asset('storage/' . $freelancer->profile_picture) : asset('images/defaultprofile.jpg') }}" 
+                    alt="{{ $freelancer->firstname }} {{ $freelancer->lastname }}" 
+                    class="w-24 h-24 rounded-full mx-auto object-cover shadow-md"
+                >
+                <!-- Freelancer Name -->
+                <h4 class="mt-4 text-center text-lg font-medium text-gray-800">
+                    {{ $freelancer->firstname }} {{ $freelancer->lastname }}
+                </h4>
+                <!-- Freelancer Categories -->
+                <div class="text-center mt-2 flex flex-wrap justify-center gap-2">
+                    @forelse ($freelancer->categories as $category)
+                       <span class="inline-block bg-blue-100 text-blue-600 text-xs font-medium px-2 py-1 rounded-full">
+                            {{ $category->name }}
+                        </span>
+                    @empty
+                        <span class="text-gray-400">No categories</span>
+                    @endforelse
+                </div>
+                <!-- View Profile Button -->
+                 <a 
+                    href="{{ route('freelancer.profile', $freelancer->id) }}" 
+                    class="block w-full mt-4 py-2 text-center text-md font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition"
+                >
+                     <span style="color: white !important;"><i class="ri-eye-line mr-1"></i>View Profile</span>
+                </a>
+            </div>
+        @empty
+            <div class="md:col-span-3 bg-white rounded-lg shadow p-6 text-center">
+                <p class="text-gray-500 flex items-center justify-center gap-2">
+                    <i class="ri-information-line"></i>No recent freelancers available.
+                </p>
+            </div>
+        @endforelse
+    </div>
+    
+    <!-- Simplified Pagination Controls -->
+    @if($recentFreelancers->hasPages())
+        <div class="mt-6 flex justify-between items-center">
+            <div>
+                @if (!$recentFreelancers->onFirstPage())
+                    <a href="{{ $recentFreelancers->previousPageUrl() }}" class="px-4 py-2 bg-white border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition flex items-center gap-2">
+                        <i class="ri-arrow-left-s-line"></i>
+                        Previous
+                    </a>
+                @endif
+            </div>
+            
+            <span class="text-sm text-gray-500">
+                Page {{ $recentFreelancers->currentPage() }} of {{ $recentFreelancers->lastPage() }}
+            </span>
+            
+            <div>
+                @if ($recentFreelancers->hasMorePages())
+                    <a href="{{ $recentFreelancers->nextPageUrl() }}" class="px-4 py-2 bg-white border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition flex items-center gap-2">
+                        Next
+                        <i class="ri-arrow-right-s-line"></i>
+                    </a>
+                @endif
             </div>
         </div>
+    @endif
+</div>
 
         <!-- Edit Profile Modal -->
         <div id="editProfileModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4" style="display: none;">
@@ -434,23 +469,23 @@
             adjustModalForMobile();
         });
 
-function showSpinnerOnButton(button) {
-const btnText = button.querySelector('.btn-text');
-const btnSpinner = button.querySelector('.btn-spinner');
-button.disabled = true;
-button.classList.add('disabled');
-if (btnText) btnText.style.display = 'none';
-if (btnSpinner) btnSpinner.style.display = 'inline-block';
-}
-function restoreButton(button, text) {
-    const btnText = button.querySelector('.btn-text');
-    const btnSpinner = button.querySelector('.btn-spinner');
-    button.disabled = false;
-    button.classList.remove('disabled');
-    if (btnText) btnText.style.display = 'inline-block';
-    if (btnSpinner) btnSpinner.style.display = 'none';
-    if (btnText && text) btnText.textContent = text;
-}
+        function showSpinnerOnButton(button) {
+        const btnText = button.querySelector('.btn-text');
+        const btnSpinner = button.querySelector('.btn-spinner');
+        button.disabled = true;
+        button.classList.add('disabled');
+        if (btnText) btnText.style.display = 'none';
+        if (btnSpinner) btnSpinner.style.display = 'inline-block';
+        }
+        function restoreButton(button, text) {
+            const btnText = button.querySelector('.btn-text');
+            const btnSpinner = button.querySelector('.btn-spinner');
+            button.disabled = false;
+            button.classList.remove('disabled');
+            if (btnText) btnText.style.display = 'inline-block';
+            if (btnSpinner) btnSpinner.style.display = 'none';
+            if (btnText && text) btnText.textContent = text;
+        }
 
 
 // Dynamic validation for update profile
@@ -492,6 +527,8 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 });
+
+ 
 
     </script>
   

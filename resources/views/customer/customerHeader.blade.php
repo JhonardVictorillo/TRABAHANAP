@@ -1,126 +1,132 @@
 <header class="sticky top-0 z-50 bg-white shadow-sm">
-  <div class="flex items-center justify-between px-4 sm:px-8 h-16">
-    <a href="" class="font-poppins text-xl sm:text-2xl font-extrabold">
+  <!-- Main header container with proper alignment -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-8">
+    <div class="flex items-center justify-between h-16">
+      <!-- Logo Section - Left aligned -->
       <a href="" class="font-poppins text-xl sm:text-2xl font-extrabold">
-  <span class="text-[#2563eb]">Mingla</span><span class="text-[#3b82f6]">Gawa</span> 
-</a>
-    </a>
-    <div class="hidden sm:flex items-center flex-1 max-w-xl mx-4 sm:mx-8">
-      <div class="relative w-full">
-        <form action="{{ route('search') }}" method="GET" style="display: flex; align-items: center; width: 100%;">
-          <input
-            type="text"
-            name="q" 
-            class="search-bar w-full h-10 pl-10 pr-4 text-sm bg-gray-50 border-none !rounded-button"
-            placeholder="Search for services or freelancers..."
-            value="{{ request('q') }}"
-          />
-          <div class="absolute left-3 top-0 w-4 h-10 flex items-center justify-center text-gray-400">
-            <i class="ri-search-line"></i>
-          </div>
-        </form>
-      </div>
-    </div>
-    <div class="flex items-center gap-2 sm:gap-6">
-      <div class="relative inline-block text-left" id="notification-container">
-        <!-- Notification Icon - Mobile-friendly -->
-        <button id="notification-icon" class="flex items-center gap-1 sm:gap-2 text-sm font-medium text-gray-700 hover:text-primary">
-          <div class="relative w-6 h-6 flex items-center justify-center">
-            <i class="ri-notification-line"></i>
-            @if(auth()->user()->unreadNotifications->count() > 0)
-              <span class="absolute -top-1 -right-2 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
-                {{ auth()->user()->unreadNotifications->count() }}
-              </span>
-            @endif
-          </div>
-          <span class="hidden sm:inline">Notifications</span>
-        </button>
-
-        <!-- Notification Dropdown -->
-        <div id="notification-dropdown" class="hidden absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg z-50">
-          <div class="p-4 border-b">
-            <h3 class="text-lg font-semibold text-gray-700">Notifications</h3>
-          </div>
-          <ul id="notification-list" class="max-h-64 overflow-y-auto">
-            @foreach(auth()->user()->notifications as $notification)
-              <li class="flex items-start justify-between px-4 py-3 border-b hover:bg-gray-50 {{ $notification->read_at ? 'bg-gray-100' : '' }}">
-                <div>
-                  <p class="text-sm {{ $notification->read_at ? 'text-gray-500' : 'text-gray-600' }}">
-                    {{ $notification->data['message'] }}
-                  </p>
-                  <p class="text-xs text-gray-400">{{ $notification->created_at->diffForHumans() }}</p>
-                </div>
-                @if(!$notification->read_at)
-                  <button
-                    class="text-sm text-primary hover:underline mark-as-read"
-                    data-id="{{ $notification->id }}"
-                  >
-                    Mark as Read
-                  </button>
-                @endif
-              </li>
-            @endforeach
-          </ul>
-          @if(auth()->user()->unreadNotifications->count() > 0)
-            <div class="p-4 border-t">
-              <button id="mark-all-read" class="w-full py-2 text-sm font-medium text-white bg-primary hover:bg-primary/90 rounded-lg">
-                Mark All as Read
-              </button>
+        <span class="text-[#2563eb]">Mingla</span><span class="text-[#3b82f6]">Gawa</span> 
+      </a>
+      
+      <!-- Desktop Search Bar - Center -->
+      <div class="hidden sm:flex items-center flex-1 max-w-xl mx-4 sm:mx-8">
+        <div class="relative w-full">
+          <form action="{{ route('search') }}" method="GET" style="display: flex; align-items: center; width: 100%;">
+            <input
+              type="text"
+              name="q" 
+              class="search-bar w-full h-10 pl-10 pr-4 text-sm bg-gray-50 border-none !rounded-button"
+              placeholder="Search for services or freelancers..."
+              value="{{ request('q') }}"
+            />
+            <div class="absolute left-3 top-0 w-4 h-10 flex items-center justify-center text-gray-400">
+              <i class="ri-search-line"></i>
             </div>
-          @endif
+          </form>
         </div>
       </div>
       
-     
-           
-      <div class="relative inline-block text-left">
-        <button id="profileBtn" class="w-12 h-12 rounded-full overflow-hidden focus:outline-none">
-          <img src="{{ $user->profile_picture ? asset('storage/' . $user->profile_picture) : asset('images/defaultprofile.png') }}" alt="User" class="w-full h-full object-cover" />
-        </button>
-
-        <div id="dropdownMenu" class="hidden absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg z-50">
-          <div class="flex items-center gap-3 p-4 border-b">
-            <img src="{{ $user->profile_picture ? asset('storage/' . $user->profile_picture) : asset('images/defaultprofile.png') }}" alt="User" class="w-12 h-12 rounded-full object-cover" />
-            <div>
-              <p class="font-bold leading-tight">{{ $user->firstname }} {{ $user->lastname }}</p>
+      <!-- Right Section - Notifications and Profile -->
+      <div class="flex items-center gap-2 sm:gap-6">
+        <!-- Notifications -->
+        <div class="relative inline-block text-left" id="notification-container">
+          <!-- Notification Icon - Mobile-friendly -->
+          <button id="notification-icon" class="flex items-center gap-1 sm:gap-2 text-sm font-medium text-gray-700 hover:text-primary">
+            <div class="relative w-6 h-6 flex items-center justify-center">
+              <i class="ri-notification-line"></i>
+              @if(auth()->user()->unreadNotifications->count() > 0)
+                <span class="absolute -top-1 -right-2 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
+                  {{ auth()->user()->unreadNotifications->count() }}
+                </span>
+              @endif
             </div>
-          </div>
+            <span class="hidden sm:inline">Notifications</span>
+          </button>
 
-          <!-- Menu Items -->
-          <ul class="py-2 text-sm text-gray-700">
-            <li>
-              <a href="{{ route('customer.profile') }}" class="flex items-center px-4 py-2 hover:bg-gray-100">
-                <!-- Profile Icon -->
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-3 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A4 4 0 017 16h10a4 4 0 011.879.804M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-                Profile
-              </a>
-            </li>
-            
-            <li>
-              <a href="{{ route('customer.appointments.view') }}" class="flex items-center px-4 py-2 hover:bg-gray-100">
-                <!-- Appointment Icon -->
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-3 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10m-13 5h16a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v7a2 2 0 002 2z" />
-                </svg>
-                Appointment
-              </a>
-            </li>
-            
-            <li>
-              <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
-                @csrf
-              </form>
-              <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="flex items-center px-4 py-2 text-red-600 hover:bg-gray-100">
-                <!-- Logout Icon -->
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-3 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7" />
-                </svg>
-                Logout
-              </a>
-            </li>
-          </ul>
+          <!-- Notification Dropdown -->
+          <div id="notification-dropdown" class="hidden absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg z-50">
+            <div class="p-4 border-b">
+              <h3 class="text-lg font-semibold text-gray-700">Notifications</h3>
+            </div>
+            <ul id="notification-list" class="max-h-64 overflow-y-auto">
+              @foreach(auth()->user()->notifications as $notification)
+                <li class="flex items-start justify-between px-4 py-3 border-b hover:bg-gray-50 {{ $notification->read_at ? 'bg-gray-100' : '' }}">
+                  <div>
+                    <p class="text-sm {{ $notification->read_at ? 'text-gray-500' : 'text-gray-600' }}">
+                      {{ $notification->data['message'] }}
+                    </p>
+                    <p class="text-xs text-gray-400">{{ $notification->created_at->diffForHumans() }}</p>
+                  </div>
+                  @if(!$notification->read_at)
+                    <button
+                      class="text-sm text-primary hover:underline mark-as-read"
+                      data-id="{{ $notification->id }}"
+                    >
+                      Mark as Read
+                    </button>
+                  @endif
+                </li>
+              @endforeach
+            </ul>
+            @if(auth()->user()->unreadNotifications->count() > 0)
+              <div class="p-4 border-t">
+                <button id="mark-all-read" class="w-full py-2 text-sm font-medium text-white bg-primary hover:bg-primary/90 rounded-lg">
+                  Mark All as Read
+                </button>
+              </div>
+            @endif
+          </div>
+        </div>
+        
+        <!-- Profile Dropdown -->
+        <div class="relative inline-block text-left">
+          <button id="profileBtn" class="w-12 h-12 rounded-full overflow-hidden focus:outline-none">
+            <img src="{{ $user->profile_picture ? asset('storage/' . $user->profile_picture) : asset('images/defaultprofile.png') }}" alt="User" class="w-full h-full object-cover" />
+          </button>
+
+          <div id="dropdownMenu" class="hidden absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg z-50">
+            <div class="flex items-center gap-3 p-4 border-b">
+              <img src="{{ $user->profile_picture ? asset('storage/' . $user->profile_picture) : asset('images/defaultprofile.png') }}" alt="User" class="w-12 h-12 rounded-full object-cover" />
+              <div>
+                <p class="font-bold leading-tight">{{ $user->firstname }} {{ $user->lastname }}</p>
+              </div>
+            </div>
+
+            <!-- Menu Items -->
+            <ul class="py-2 text-sm text-gray-700">
+              <li>
+                <a href="{{ route('customer.profile') }}" class="flex items-center px-4 py-2 hover:bg-gray-100">
+                  <!-- Profile Icon -->
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-3 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A4 4 0 017 16h10a4 4 0 011.879.804M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  Profile
+                </a>
+              </li>
+              
+              <li>
+                <a href="{{ route('customer.appointments.view') }}" class="flex items-center px-4 py-2 hover:bg-gray-100">
+                  <!-- Appointment Icon -->
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-3 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10m-13 5h16a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v7a2 2 0 002 2z" />
+                  </svg>
+                  Appointment
+                </a>
+              </li>
+              
+              <li>
+                <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+                  @csrf
+                </form>
+                <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="flex items-center px-4 py-2 text-red-600 hover:bg-gray-100">
+                  <!-- Logout Icon -->
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-3 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7" />
+                  </svg>
+                  Logout
+                </a>
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>

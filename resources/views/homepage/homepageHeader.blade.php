@@ -1,13 +1,16 @@
  <header class="header">
     <div class="logo-header">
       <a href="{{ route('homepage') }}" >
-      <span class="mingla-part">Mingla</span><span class="gawa-part">Gawa</span>
-    </a>
+        <span class="mingla-part">Mingla</span><span class="gawa-part">Gawa</span>
+      </a>
     </div>
+    
     <!-- Mobile menu toggle button -->
     <button class="menu-toggle" id="menu-toggle" aria-label="Toggle navigation menu">
       <i class="fas fa-bars"></i>
     </button>
+    
+    <!-- Center navigation links -->
     <nav class="navbar" id="navbar">
       <!-- Get the current route name -->
       @php
@@ -15,21 +18,24 @@
         $isHomepage = $currentRoute == 'homepage';
       @endphp
       
-      <!-- Dynamic links based on current page -->
-      <a href="{{ $isHomepage ? '#home' : route('homepage') . '#home' }}" 
-         class="{{ $isHomepage ? 'active' : '' }}">Home</a>
-      <a href="{{ $isHomepage ? '#category' : route('homepage') . '#category' }}">Categories</a>
-      <a href="{{ $isHomepage ? '#how-it-works' : route('homepage') . '#how-it-works' }}">How It Works</a>
-      <a href="{{ $isHomepage ? '#footer' : route('homepage') . '#footer' }}">Contact</a>
+      <div class="nav-links">
+        <a href="{{ $isHomepage ? '#home' : route('homepage') . '#home' }}" 
+           class="{{ $isHomepage ? 'active' : '' }}">Home</a>
+        <a href="{{ $isHomepage ? '#category' : route('homepage') . '#category' }}">Categories</a>
+        <a href="{{ $isHomepage ? '#how-it-works' : route('homepage') . '#how-it-works' }}">How It Works</a>
+        <a href="{{ $isHomepage ? '#footer' : route('homepage') . '#footer' }}">Contact</a>
+      </div>
       
-      <a href="{{ route('login') }}">
-        <button class="logbtn {{ $currentRoute == 'login' ? 'active-btn' : '' }}">Login</button>
-      </a>
-      <a href="{{ route('register.form') }}">
-        <button class="regisbtn {{ $currentRoute == 'register.form' ? 'active-btn' : '' }}">Register</button>
-      </a>
+      <div class="auth-buttons">
+        <a href="{{ route('login') }}">
+          <button class="logbtn {{ $currentRoute == 'login' ? 'active-btn' : '' }}">Login</button>
+        </a>
+        <a href="{{ route('register.form') }}">
+          <button class="regisbtn {{ $currentRoute == 'register.form' ? 'active-btn' : '' }}">Register</button>
+        </a>
+      </div>
     </nav>
-  </header>
+</header>
   <script>
         document.addEventListener('DOMContentLoaded', function() {
       const menuToggle = document.getElementById('menu-toggle');

@@ -15,7 +15,7 @@ class HomepageController extends Controller
             'subServices',
             'pictures',
             'freelancer',
-            
+            'appointments'
         ])
         ->where('status', 'approved')
         ->whereHas('freelancer', function($q){
@@ -23,7 +23,24 @@ class HomepageController extends Controller
         })
         ->latest()
         ->take(10)
-        ->get();
+        ->get()  // This was missing a closing parenthesis
+      ->map(function ($post) {
+            // Get only appointments with ratings
+            $ratedAppointments = $post->appointments->whereNotNull('rating');
+            $reviewCount = $ratedAppointments->count();
+            $averageRating = $reviewCount > 0 
+                ? $ratedAppointments->avg('rating') 
+                : 0;
+                
+            // Add these as attributes to the post
+            $post->average_rating = $averageRating;
+            $post->review_count = $reviewCount;
+            
+            return $post;
+        });
+
+        // Sort posts by rating for "Top-Rated Professionals" section
+        $topRatedPosts = $posts->sortByDesc('average_rating');
 
          $categories =Category::all();
            $ipGeoApiKey = env('IPGEOLOCATION_API_KEY');

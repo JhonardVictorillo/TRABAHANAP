@@ -54,17 +54,19 @@
             <th>Email</th>
             <th>Service Category</th>
             <th>Status</th>
-            <th>Actions</th>
+           
           </tr>
         </thead>
         <tbody>
         @forelse($freelancers as $freelancer)
           <tr>
             <td>
-                 <img src="{{ asset('storage/' . $freelancer->profile_picture) ?? asset('defaultprofile.jpg') }}" 
-                             alt="Profile Picture" 
-                             class="profile-pic"  >
-                        </td>
+                 @if($freelancer->profile_picture)
+                    <img src="{{ asset('storage/' . $freelancer->profile_picture) }}" alt="Profile Picture" class="profile-pic" style="width:50px; height:50px; object-fit:cover;">
+                    @else
+                    <img src="{{ asset('images/defaultprofile.jpg') }}" alt="Default Profile" class="profile-pic" style="width:50px; height:50px; object-fit:cover;">
+                    @endif
+            </td>
             <td>{{ $freelancer->lastname }} ,{{ $freelancer->firstname }}</td>
             <td>{{ $freelancer->email }}</td>
             <td> 
@@ -81,19 +83,7 @@
                 @endif</td>
 
                  <!-- Ban/Unban Button Column -->
-                <td>
-                    @if(!$freelancer->is_banned)
-                        <form action="{{ route('admin.user.ban', $freelancer->id) }}" method="POST" style="display:inline;">
-                            @csrf
-                            <button type="submit" class="decline-btn" onclick="return confirm('Ban this user?')">Ban</button>
-                        </form>
-                    @else
-                        <form action="{{ route('admin.user.unban', $freelancer->id) }}" method="POST" style="display:inline;">
-                            @csrf
-                            <button type="submit" class="accept-btn" onclick="return confirm('Unban this user?')">Unban</button>
-                        </form>
-                    @endif
-                </td>
+             
           </tr>
           @empty
                 <tr>
@@ -104,6 +94,9 @@
         </tbody>
       </table>
       </div>
+       <div class="category-pagination-container">
+        {{ $freelancers->appends(request()->except('freelancersPage'))->links() }}
+    </div>
     </div>
 
     <!-- Total Clients Section -->
@@ -117,106 +110,93 @@
             <th>Name</th>
             <th>Email</th>
             <th>Role</th>
-            <th>Actions</th>
+           
           </tr>
         </thead>
         <tbody>
         @foreach($customer as $client)
           <tr>
             <td>  @if($client->profile_picture)
-          <img src="{{ asset('storage/' . $client->profile_picture) }}" alt="Profile Picture" class="profile-pic" style="width:50px; height:50px; object-fit:cover;">
-        @else
-          <img src="{{ asset('images/defaultprofile.png') }}" alt="Default Profile" class="profile-pic" style="width:50px; height:50px; object-fit:cover;">
-        @endif</td>
+                <img src="{{ asset('storage/' . $client->profile_picture) }}" alt="Profile Picture" class="profile-pic" style="width:50px; height:50px; object-fit:cover;">
+                @else
+                <img src="{{ asset('images/defaultprofile.jpg') }}" alt="Default Profile" class="profile-pic" style="width:50px; height:50px; object-fit:cover;">
+                @endif
+            </td>
             <td>{{ $client->firstname }} {{ $client->lastname }}</td>
             <td>{{ $client->email }}</td>
             <td>{{ $client->role }} </td>
-             <!-- Ban/Unban Button Column -->
-             <td>
-                    @if(!$freelancer->is_banned)
-                        <form action="{{ route('admin.user.ban', $freelancer->id) }}" method="POST" style="display:inline;">
-                            @csrf
-                            <button type="submit" class="decline-btn" onclick="return confirm('Ban this user?')">Ban</button>
-                        </form>
-                    @else
-                        <form action="{{ route('admin.user.unban', $freelancer->id) }}" method="POST" style="display:inline;">
-                            @csrf
-                            <button type="submit" class="accept-btn" onclick="return confirm('Unban this user?')">Unban</button>
-                        </form>
-                    @endif
-                </td>
+           
           </tr>
           @endforeach
         </tbody>
       </table>
     </div>
+    <div class="category-pagination-container">
+        {{ $customer->appends(request()->except('customersPage'))->links() }}
+    </div>
     </div>
 
     <!-- Pending Accounts Section -->
     <div class="details-section" id="pendingAccountsSection" style="display: none;">
-      <h2>Pending Accounts</h2>
-      <div class="admin-table-container">
-      <table class="admin-table">
-        <thead>
-          <tr>
-            <th>Profile</th>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Role</th>
-            <th>Status</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-        @foreach($freelancers as $freelancer)
-                 
-            <tr>
-                <td><img src="{{ asset('storage/' . $freelancer->profile_picture) }}" alt="Profile Picture" class="profile-pic"></td>
-                <td>{{ $freelancer->firstname }} {{ $freelancer->lastname }}</td>
-                <td>{{ $freelancer->email }}</td>
-                <td>{{ $freelancer->role ?? 'N/A' }}</td> 
-                <td>
-                  @if($freelancer->is_verified)
-                ✅ Verified
+  <h2>Pending Accounts</h2>
+  <div class="admin-table-container">
+  <table class="admin-table">
+    <thead>
+      <tr>
+        <th>Profile</th>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Role</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+    @forelse($freelancers->where('is_verified', 0) as $freelancer)
+        <tr>
+            <td>
+                @if($freelancer->profile_picture)
+                <img src="{{ asset('storage/' . $freelancer->profile_picture) }}" alt="Profile Picture" class="profile-pic" style="width:50px; height:50px; object-fit:cover;">
                 @else
+                <img src="{{ asset('images/defaultprofile.jpg') }}" alt="Default Profile" class="profile-pic" style="width:50px; height:50px; object-fit:cover;">
+                @endif
+            </td>
+            <td>{{ $freelancer->firstname }} {{ $freelancer->lastname }}</td>
+            <td>{{ $freelancer->email }}</td>
+            <td>{{ $freelancer->role ?? 'N/A' }}</td> 
+            <td>
+              @if($freelancer->is_verified)
+                ✅ Verified
+              @else
                 🕒 Pending
               @endif
-              </td>
-                <td>
+            </td>
+            <td>
                 @if(!$freelancer->is_verified)
-                    <!-- Accept Button -->
-                    <form action="{{ route('admin.verifyFreelancer', $freelancer->id) }}" method="POST" style="display:inline;">
-                        @csrf
-                        <button type="submit" class="accept-btn">
-                        <span class="btn-text">Accept</span>
-                        <span class="btn-spinner" style="display:none;">
-                          <i class="fas fa-spinner fa-spin"></i>
-                        </span>
-                        </button>
-                    </form>
+                    <!-- Review Button -->
+                    <button class="review-btn" onclick="openReviewModal({{ $freelancer->id }})">
+                        <i class="fas fa-eye"></i> Review
+                    </button>
 
-                    <!-- Decline Button -->
-                    <form action="{{ route('admin.rejectFreelancer', $freelancer->id) }}" method="POST" style="display:inline;">
-                        @csrf
-                        <button type="submit" class="decline-btn">
-                          <span class="btn-text">Decline</span>
-                          <span class="btn-spinner" style="display:none;">
-                            <i class="fas fa-spinner fa-spin"></i>
-                          </span>
-                        </button>
-                    </form>
-                    @else
-                <!-- Optional: Display additional action for verified users if needed -->
-                <button class="verified-btn">Verified</button>
-              @endif
-                </td>
-            </tr>
                   
-                @endforeach
-        </tbody>
-      </table>
-     </div>
-    </div>
+                @else
+                    <button class="verified-btn">Verified</button>
+                @endif
+            </td>
+        </tr>
+        @empty
+        <tr>
+            <td colspan="6">No pending accounts found.</td>
+        </tr>      
+        @endforelse
+    </tbody>
+  </table>
+ </div>
+  <!-- Add Pagination -->
+<div class="category-pagination-container">
+    {{ $freelancers->appends(request()->except('freelancersPage'))->links() }}
+</div>
+</div>
 
     <!-- Pending Posts Section -->
     <div class="details-section" id="pendingPostsSection" style="display: none;">
@@ -291,8 +271,141 @@
           </tbody>
         </table>
       </div>
+      <!-- Add Pagination -->
+    <div class="category-pagination-container">
+        {{ $pendingPosts->appends(request()->except('pendingPostsPage'))->links() }}
+    </div>
       </div>
-  </div> 
+  </div>
+  
+  
+
+  <!-- Freelancer Review Modal -->
+<div id="freelancerReviewModal" class="modal" style="display: none;">
+    <div class="modal-content simple-review-modal">
+        <!-- Modal Header -->
+        <div class="simple-review-header">
+            <div class="simple-header-content">
+                <span class="material-symbols-outlined">person_check</span>
+                <div>
+                    <h3>Freelancer Application Review</h3>
+                    <p>Review freelancer details before approval</p>
+                </div>
+            </div>
+            <button class="simple-modal-close" onclick="closeReviewModal()">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+
+        <!-- Modal Body -->
+        <div class="simple-review-body">
+            <!-- Freelancer Overview -->
+            <div class="simple-freelancer-overview">
+                <div class="simple-profile-section">
+                    <img id="modalProfilePicture" src="" alt="Profile" class="simple-profile-pic">
+                    <div class="simple-profile-details">
+                        <h4 id="modalFullName"></h4>
+                        <p id="modalEmail"></p>
+                        <div class="simple-badges">
+                            <span class="simple-badge" id="verificationBadge">
+                                <span class="material-symbols-outlined" id="verificationIcon">schedule</span>
+                                <span id="verificationText">Pending</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="simple-info-grid">
+    <!-- Personal & Location Info Combined -->
+    <div class="simple-info-card">
+        <h5><span class="material-symbols-outlined">person</span> Personal & Location Information</h5>
+        <div class="simple-info-item">
+            <span class="simple-label">Contact:</span>
+            <span id="modalContactNumber">N/A</span>
+        </div>
+        <div class="simple-info-item">
+            <span class="simple-label">Province:</span>
+            <span id="modalProvince">N/A</span>
+        </div>
+        <div class="simple-info-item">
+            <span class="simple-label">City:</span>
+            <span id="modalCity">N/A</span>
+        </div>
+        <div class="simple-info-item">
+            <span class="simple-label">Barangay:</span>
+            <span id="modalBarangay">N/A</span>
+        </div>
+    </div>
+
+    <!-- Professional Info -->
+    <div class="simple-info-card">
+        <h5><span class="material-symbols-outlined">work</span> Professional Information</h5>
+        <div class="simple-info-item">
+            <span class="simple-label">Experience:</span>
+            <span id="modalExperienceYears">N/A</span>
+        </div>
+        <div class="simple-info-item">
+            <span class="simple-label">Specialization:</span>
+            <span id="modalSpecialization">N/A</span>
+        </div>
+        <div class="simple-info-item">
+            <span class="simple-label">Categories:</span>
+            <span id="modalCategories">N/A</span>
+        </div>
+    </div>
+</div>
+
+            <!-- ID Verification Section -->
+            <div class="simple-id-section">
+                <h5><span class="material-symbols-outlined">badge</span> ID Verification</h5>
+                <div class="simple-id-container">
+                    <div class="simple-id-item">
+                        <span class="simple-id-label">ID Front</span>
+                        <img id="modalIdFront" src="" alt="ID Front" class="simple-id-image" onclick="enlargeImage(this)">
+                    </div>
+                    <div class="simple-id-item">
+                        <span class="simple-id-label">ID Back</span>
+                        <img id="modalIdBack" src="" alt="ID Back" class="simple-id-image" onclick="enlargeImage(this)">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Footer -->
+        <div class="simple-review-footer">
+            <div class="simple-footer-note">
+                <span class="material-symbols-outlined">info</span>
+                <span>Review all information before making a decision</span>
+            </div>
+            <div class="simple-footer-actions">
+                <button type="button" class="simple-btn simple-btn-cancel" onclick="closeReviewModal()">
+                    <span class="material-symbols-outlined">close</span>
+                    Cancel
+                </button>
+                <button type="button" class="simple-btn simple-btn-decline" onclick="declineFromModal()">
+                    <span class="material-symbols-outlined">cancel</span>
+                    Decline
+                </button>
+                <button type="button" class="simple-btn simple-btn-approve" onclick="acceptFromModal()">
+                    <span class="material-symbols-outlined">check_circle</span>
+                    Approve
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Simplified Image Enlargement -->
+<div id="imageEnlargeOverlay" class="simple-image-overlay" onclick="closeEnlargedImage()">
+    <div class="simple-enlarged-container">
+        <img id="enlargedImage" src="" alt="Enlarged ID">
+        <button class="simple-enlarge-close" onclick="closeEnlargedImage()">
+            <span class="material-symbols-outlined">close</span>
+        </button>
+    </div>
+</div>
+
 
   <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -373,5 +486,268 @@
         }
     }
 });
+
+// =======================
+// FREELANCER REVIEW MODAL FUNCTIONS
+// =======================
+
+let currentFreelancerId = null;
+
+// Open review modal
+function openReviewModal(freelancerId) {
+    currentFreelancerId = freelancerId;
+    
+    // Show modal
+    document.getElementById('freelancerReviewModal').style.display = 'block';
+    
+    // Add loading state to modal
+    const modalBody = document.querySelector('.simple-review-body');
+    const originalContent = modalBody.innerHTML;
+    modalBody.innerHTML = `
+        <div style="text-align: center; padding: 40px;">
+            <span class="material-symbols-outlined" style="font-size: 48px; color: #2563eb; animation: spin 1s linear infinite;">refresh</span>
+            <p style="margin-top: 16px; color: #6b7280;">Loading freelancer details...</p>
+        </div>
+    `;
+    
+    // Fetch freelancer details
+    fetch(`/admin/freelancer/${freelancerId}/details`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Restore original content first
+                modalBody.innerHTML = originalContent;
+                // Then populate with data
+                populateModal(data.freelancer);
+            } else {
+                alert('Failed to load freelancer details');
+                closeReviewModal();
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error loading freelancer details');
+            closeReviewModal();
+        });
+}
+
+// Populate modal with freelancer data
+function populateModal(freelancer) {
+    // Profile picture
+    const profilePic = document.getElementById('modalProfilePicture');
+    if (profilePic) {
+        profilePic.src = freelancer.profile_picture ? 
+            `/storage/${freelancer.profile_picture}` : '/defaultprofile.jpg';
+    }
+    
+    // Basic information
+    const fullNameEl = document.getElementById('modalFullName');
+    if (fullNameEl) {
+        fullNameEl.textContent = `${freelancer.firstname} ${freelancer.lastname}`;
+    }
+    
+    const emailEl = document.getElementById('modalEmail');
+    if (emailEl) {
+        emailEl.textContent = freelancer.email || 'N/A';
+    }
+    
+    // Contact information
+    const contactEl = document.getElementById('modalContactNumber');
+    if (contactEl) {
+        contactEl.textContent = freelancer.contact_number || 'N/A';
+    }
+    
+    // Location information
+    const provinceEl = document.getElementById('modalProvince');
+    if (provinceEl) {
+        provinceEl.textContent = freelancer.province || 'N/A';
+    }
+    
+    const cityEl = document.getElementById('modalCity');
+    if (cityEl) {
+        cityEl.textContent = freelancer.city || 'N/A';
+    }
+    
+    const barangayEl = document.getElementById('modalBarangay');
+    if (barangayEl) {
+        barangayEl.textContent = freelancer.barangay || 'N/A';
+    }
+    
+    // Professional information
+    const experienceEl = document.getElementById('modalExperienceYears');
+    if (experienceEl) {
+        experienceEl.textContent = freelancer.experience_years ? 
+            `${freelancer.experience_years} years` : 'N/A';
+    }
+    
+    const specializationEl = document.getElementById('modalSpecialization');
+    if (specializationEl) {
+        specializationEl.textContent = freelancer.specialization || 'N/A';
+    }
+    
+    // Categories
+    const categoriesEl = document.getElementById('modalCategories');
+    if (categoriesEl) {
+        if (freelancer.categories && freelancer.categories.length > 0) {
+            categoriesEl.textContent = freelancer.categories.map(cat => cat.name).join(', ');
+        } else {
+            categoriesEl.textContent = 'No categories assigned';
+        }
+    }
+    
+    // ID Images
+    const idFrontEl = document.getElementById('modalIdFront');
+    if (idFrontEl) {
+        idFrontEl.src = freelancer.id_front ? 
+            `/storage/${freelancer.id_front}` : '/placeholder-id.png';
+    }
+    
+    const idBackEl = document.getElementById('modalIdBack');
+    if (idBackEl) {
+        idBackEl.src = freelancer.id_back ? 
+            `/storage/${freelancer.id_back}` : '/placeholder-id.png';
+    }
+    
+    // Update verification badge
+    const verificationIcon = document.getElementById('verificationIcon');
+    const verificationText = document.getElementById('verificationText');
+    const verificationBadge = document.getElementById('verificationBadge');
+    
+    if (verificationIcon && verificationText && verificationBadge) {
+        if (freelancer.is_verified) {
+            verificationIcon.textContent = 'check_circle';
+            verificationText.textContent = 'Verified';
+            verificationBadge.classList.add('verified');
+            verificationBadge.style.background = '#10b981';
+        } else {
+            verificationIcon.textContent = 'schedule';
+            verificationText.textContent = 'Pending';
+            verificationBadge.classList.remove('verified');
+            verificationBadge.style.background = '#f59e0b';
+        }
+    }
+}
+
+// Close review modal
+function closeReviewModal() {
+    document.getElementById('freelancerReviewModal').style.display = 'none';
+    currentFreelancerId = null;
+}
+
+// Enlarge image function
+function enlargeImage(imgElement) {
+    const overlay = document.getElementById('imageEnlargeOverlay');
+    const enlargedImg = document.getElementById('enlargedImage');
+    if (overlay && enlargedImg) {
+        enlargedImg.src = imgElement.src;
+        overlay.style.display = 'block';
+    }
+}
+
+// Close enlarged image
+function closeEnlargedImage() {
+    const overlay = document.getElementById('imageEnlargeOverlay');
+    if (overlay) {
+        overlay.style.display = 'none';
+    }
+}
+
+// Accept from modal
+function acceptFromModal() {
+    if (!currentFreelancerId) return;
+    
+    if (confirm('Are you sure you want to approve this freelancer? This action will grant them access to the platform.')) {
+        // Show loading state on button
+        const approveBtn = document.querySelector('.simple-btn-approve');
+        if (approveBtn) {
+            const originalHTML = approveBtn.innerHTML;
+            approveBtn.innerHTML = '<span class="material-symbols-outlined">refresh</span> Processing...';
+            approveBtn.disabled = true;
+            
+            // Create and submit form
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = `/admin/freelancer/${currentFreelancerId}/verify`;
+            
+            const csrfToken = document.createElement('input');
+            csrfToken.type = 'hidden';
+            csrfToken.name = '_token';
+            csrfToken.value = document.querySelector('input[name="_token"]').value;
+            
+            form.appendChild(csrfToken);
+            document.body.appendChild(form);
+            form.submit();
+        }
+    }
+}
+
+// Decline from modal
+function declineFromModal() {
+    if (!currentFreelancerId) return;
+    
+    if (confirm('Are you sure you want to decline this freelancer application? This action cannot be undone.')) {
+        // Show loading state on button
+        const declineBtn = document.querySelector('.simple-btn-decline');
+        if (declineBtn) {
+            const originalHTML = declineBtn.innerHTML;
+            declineBtn.innerHTML = '<span class="material-symbols-outlined">refresh</span> Processing...';
+            declineBtn.disabled = true;
+            
+            // Create and submit form
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = `/admin/freelancer/${currentFreelancerId}/reject`;
+            
+            const csrfToken = document.createElement('input');
+            csrfToken.type = 'hidden';
+            csrfToken.name = '_token';
+            csrfToken.value = document.querySelector('input[name="_token"]').value;
+            
+            form.appendChild(csrfToken);
+            document.body.appendChild(form);
+            form.submit();
+        }
+    }
+}
+
+// Event listeners for modal interactions
+document.addEventListener('DOMContentLoaded', function() {
+    // Close modal when clicking outside
+    window.addEventListener('click', function(event) {
+        const reviewModal = document.getElementById('freelancerReviewModal');
+        const imageOverlay = document.getElementById('imageEnlargeOverlay');
+        
+        if (event.target === reviewModal) {
+            closeReviewModal();
+        }
+        if (event.target === imageOverlay) {
+            closeEnlargedImage();
+        }
+    });
+
+    // Keyboard navigation
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            const imageOverlay = document.getElementById('imageEnlargeOverlay');
+            const reviewModal = document.getElementById('freelancerReviewModal');
+            
+            if (imageOverlay && imageOverlay.style.display === 'block') {
+                closeEnlargedImage();
+            } else if (reviewModal && reviewModal.style.display === 'block') {
+                closeReviewModal();
+            }
+        }
+    });
+});
+
+// Add CSS for loading animation
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+`;
+document.head.appendChild(style);
 
   </script>
