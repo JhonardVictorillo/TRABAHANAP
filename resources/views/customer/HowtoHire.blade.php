@@ -92,12 +92,6 @@
             </div>
           </div>
         </div>
-        <div class="text-center">
-          <button
-            class="px-6 py-2 text-sm font-medium text-white bg-primary hover:bg-primary/90 !rounded-button"
-          >
-            Get Started Now
-          </button>
-        </div>
+      
       </div>
     </section>

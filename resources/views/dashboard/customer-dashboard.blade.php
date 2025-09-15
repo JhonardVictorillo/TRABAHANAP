@@ -5,7 +5,7 @@
   @endif
 
   @include('customer.maincontent')
-  @include('customer.HowItWorks')
+  @include('customer.HowtoHire')
   @include('customer.footer')
   
    @include('successMessage')
