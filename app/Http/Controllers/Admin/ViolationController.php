@@ -165,7 +165,7 @@ class ViolationController extends Controller
     }
 }
     
-      public function applyAction(Request $request)
+public function applyAction(Request $request)
 {
     $this->checkAdminAccess();
 
@@ -191,6 +191,17 @@ class ViolationController extends Controller
     $user->no_show_count = ($user->no_show_count ?? 0) + 1;
     $user->last_violation_at = now();
     
+    if ($user->role === 'freelancer') {
+    $freelancerSettings = \App\Models\ViolationSetting::where('user_role', 'freelancer')->first();
+    if (
+        $freelancerSettings &&
+        $user->violation_count >= $freelancerSettings->restriction_threshold &&
+        !$user->is_restricted
+    ) {
+        $user->applyRestrictions($freelancerSettings->restriction_days ?? 7);
+    }
+}
+
     // Prepare action data
     $actionData = [];
     
@@ -219,11 +230,11 @@ class ViolationController extends Controller
             $user->is_banned = true;
             break;
             
-        case 'restrict':
-            $actionData['restrictions'] = ['booking_limit' => true];
+       case 'restrict':
+            $days = 7; // Or get from request if you want it configurable
+            $user->applyRestrictions($days);
             $violation->status = 'restricted';
-            $user->is_restricted = true;
-            $user->restriction_end = now()->addDays(7);
+            $actionData['restrictions'] = ['booking_limit' => true];
             $user->restriction_reason = $notes;
             break;
             
@@ -257,7 +268,7 @@ class ViolationController extends Controller
     return response()->json(['success' => true, 'message' => 'Action applied successfully']);
 }
     
-    public function saveSettings(Request $request)
+public function saveSettings(Request $request)
 {
     $this->checkAdminAccess();
 
@@ -276,8 +287,8 @@ class ViolationController extends Controller
     
     $freelancerSettings->no_show_penalties = $request->freelancer['no_show_penalties'] ?? false;
     $freelancerSettings->auto_warning = $request->freelancer['auto_warning'] ?? false;
-    $freelancerSettings->rating_penalty = $request->freelancer['rating_penalty'] ?? false;
-    $freelancerSettings->booking_restrictions = false; // Not applicable for freelancers
+    $freelancerSettings->booking_restrictions = $request->freelancer['booking_restrictions'] ?? false;
+    $freelancerSettings->rating_penalty = false; // Not applicable for freelancers
     $freelancerSettings->auto_suspension = $request->freelancer['auto_suspension'] ?? false;
     $freelancerSettings->suspension_days = $request->freelancer['suspension_days'] ?? 7;
     $freelancerSettings->warning_threshold = $request->freelancer['warning_threshold'] ?? 2;

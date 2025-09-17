@@ -247,7 +247,7 @@ if (!$freelancerSettings) {
         'user_role' => 'freelancer',
         'no_show_penalties' => true,
         'auto_warning' => true,
-        'rating_penalty' => true,
+        'booking_restrictions' => true,
         'auto_suspension' => true,
         'suspension_days' => 7,
         'warning_threshold' => 2,

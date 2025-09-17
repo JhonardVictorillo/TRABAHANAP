@@ -19,8 +19,6 @@ use App\Models\ViolationAction;
 
 
 
-
-
 class CustomerController extends Controller
 {
     /**
@@ -36,7 +34,12 @@ class CustomerController extends Controller
     // Start with base query
     $query = Post::where('status', 'approved')
         ->whereHas('freelancer', function ($query) {
-            $query->where('is_verified', true);
+            $query->where('is_verified', true)
+                  ->where(function($q) {
+                      $q->where('is_restricted', false)
+                        ->orWhereNull('restriction_end')
+                        ->orWhere('restriction_end', '<', now());
+                  });
         })
         ->with(['freelancer', 'freelancer.categories'])
         ->withCount(['appointments as review_count' => function ($query) {
@@ -583,7 +586,8 @@ public function search(Request $request)
         });
     }
 
-    $posts = $posts->with(['freelancer', 'freelancer.categories'])->get();
+  
+    $posts = $posts->with(['freelancer', 'freelancer.categories'])->paginate(12);
     $notifications = $user->unreadNotifications;
 
     // If your view expects popularCategories, fetch and pass it as well

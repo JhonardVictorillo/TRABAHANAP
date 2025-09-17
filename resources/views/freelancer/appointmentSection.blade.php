@@ -772,8 +772,12 @@
             })
             .then(data => {
                 restoreButton(this, 'Accept');
-                if (appointmentModal) appointmentModal.style.display = 'none';
-                window.location.reload();
+               if (data.success) {
+                    if (appointmentModal) appointmentModal.style.display = 'none';
+                    window.location.reload();
+                } else {
+                    alert(data.message || 'Error accepting appointment.');
+                }
             })
             .catch(error => {
                 console.error(error);

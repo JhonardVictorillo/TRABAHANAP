@@ -191,15 +191,15 @@
                         </label>
                     </div>
                     <div class="setting-item">
-                        <span>Rating Penalty</span>
+                        <span>Booking Restrictions</span>
                         <label class="switch">
-                            <input type="checkbox" id="freelancer-rating-toggle" 
-                                {{ $freelancerSettings->rating_penalty ? 'checked' : '' }}>
+                            <input type="checkbox" id="freelancer-booking-toggle" 
+                                {{ $freelancerSettings->booking_restrictions ? 'checked' : '' }}>
                             <span class="slider round"></span>
                         </label>
                     </div>
                     <div class="setting-item">
-                        <span>Auto-Suspension (3+ violations)</span>
+                        <span>Auto-Suspension (5+ violations)</span>
                         <label class="switch">
                             <input type="checkbox" id="freelancer-suspension-toggle" 
                                 {{ $freelancerSettings->auto_suspension ? 'checked' : '' }}>
@@ -272,7 +272,7 @@
                         </label>
                     </div>
                     <div class="setting-item">
-                        <span>Auto-Suspension (3+ violations)</span>
+                        <span>Auto-Suspension (5+ violations)</span>
                         <label class="switch">
                             <input type="checkbox" id="customer-suspension-toggle" 
                                 {{ $customerSettings->auto_suspension ? 'checked' : '' }}>
@@ -703,7 +703,7 @@ window.toggleSuspension = function(violationId, role, button) {
         freelancer: {
             no_show_penalties: document.getElementById('freelancer-noshow-toggle').checked,
             auto_warning: document.getElementById('freelancer-warning-toggle').checked,
-            rating_penalty: document.getElementById('freelancer-rating-toggle').checked,
+             booking_restrictions: document.getElementById('freelancer-booking-toggle').checked,
             auto_suspension: document.getElementById('freelancer-suspension-toggle').checked,
             suspension_days: document.getElementById('freelancer-suspension-days').value,
             warning_threshold: document.getElementById('freelancer-warning-threshold').value,
@@ -753,7 +753,7 @@ if (resetBtn) {
         // Reset to default values (adjust as needed)
         document.getElementById('freelancer-noshow-toggle').checked = true;
         document.getElementById('freelancer-warning-toggle').checked = true;
-        document.getElementById('freelancer-rating-toggle').checked = true;
+      document.getElementById('freelancer-booking-toggle').checked = true;
         document.getElementById('freelancer-suspension-toggle').checked = true;
         document.getElementById('freelancer-suspension-days').value = 7;
         document.getElementById('freelancer-warning-threshold').value = 2;

@@ -228,7 +228,18 @@ public function showSelectedCategories()
 }
     
 public function acceptAppointment($id)
-{
+{   
+
+     $user = Auth::user();
+
+    // Check if freelancer is restricted
+    if ($user->hasRestrictions()) {
+        return response()->json([
+            'success' => false,
+            'message' => 'You are temporarily restricted from accepting new appointments due to policy violations.'
+        ], 403);
+    }
+    
     $appointment = Appointment::findOrFail($id);
     $appointment->status = 'accepted';
     $appointment->save();

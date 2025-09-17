@@ -40,11 +40,19 @@ class HomepageController extends Controller
         });
 
         // Sort posts by rating for "Top-Rated Professionals" section
-        $topRatedPosts = $posts->sortByDesc('average_rating');
+            $topPostsPerFreelancer = $posts
+            ->where('average_rating', '>', 0)
+            ->where('review_count', '>', 0)
+            ->groupBy('freelancer_id')
+            ->map(function ($group) {
+                return $group->sortByDesc('average_rating')->first();
+            })
+            ->sortByDesc('average_rating')
+            ->take(10);
 
-         $categories =Category::all();
-           $ipGeoApiKey = env('IPGEOLOCATION_API_KEY');
+        $categories = Category::all();
+        $ipGeoApiKey = env('IPGEOLOCATION_API_KEY');
 
-    return view('homepage', compact('posts', 'categories', 'ipGeoApiKey'));
+        return view('homepage', compact('posts', 'categories', 'ipGeoApiKey', 'topPostsPerFreelancer'));
     }
 }
