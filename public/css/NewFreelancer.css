@@ -1128,7 +1128,7 @@
 .dashboard-subtitle {
   color: #6b7280;
   font-size: 16px;
-  margin: 0;
+  margin-right: 50px;
   font-weight: 400;
 }
 
@@ -2141,6 +2141,7 @@
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     overflow: hidden;
   }
+  
   
   #calendar {
     border: 1px solid #ddd;
@@ -7627,7 +7628,7 @@ body.sidebar-active .sidebar-overlay {
 }
 
 .appointment-calendar .fc .fc-event[data-status="declined"] {
-    background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%) !important;
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
     color: white !important;
 }
 

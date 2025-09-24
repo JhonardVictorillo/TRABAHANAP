@@ -52,24 +52,17 @@
                 targetSection.style.display = 'block';
                 localStorage.setItem('activeSection', this.getAttribute('href'));
 
-                // Calendar specific render fix (if applicable)
-               
-              if (this.getAttribute('href') === '#appointmentCalendar') {
-    setTimeout(() => {
-        // Check if calendar exists and is properly initialized
-        if (typeof window.calendar !== 'undefined' && window.calendar && typeof window.calendar.render === 'function') {
-            window.calendar.render();
-            window.calendar.updateSize();
-        } else {
-            // Try to initialize calendar if it doesn't exist
-            if (typeof initializeCalendar === 'function') {
-                initializeCalendar();
-            } else {
-                console.log('Calendar not yet initialized - will initialize when appointmentSection loads');
-            }
-        }
-    }, 100); // Increased timeout to give more time for initialization
-}
+               if (this.getAttribute('href') === '#appointmentCalendar') {
+                  setTimeout(() => {
+                      if (typeof window.calendar !== 'undefined' && window.calendar && typeof window.calendar.render === 'function') {
+                          window.calendar.render();
+                          window.calendar.updateSize();
+                      } else if (typeof initializeCalendar === 'function') {
+                          initializeCalendar();
+                      }
+                  }, 100);
+              }
+              
             }
         });
     });
@@ -81,8 +74,22 @@
     links.forEach(link => link.classList.remove('active'));
     sections.forEach(section => section.style.display = 'none');
 
-    const sectionToShow = document.querySelector(activeSectionId);
-    if (sectionToShow) sectionToShow.style.display = 'block';
+  const sectionToShow = document.querySelector(activeSectionId);
+if (sectionToShow) {
+    sectionToShow.style.display = 'block';
+
+    // If appointment section, initialize calendar after showing it
+    if (activeSectionId === '#appointmentCalendar') {
+        setTimeout(() => {
+            if (typeof window.calendar !== 'undefined' && window.calendar && typeof window.calendar.render === 'function') {
+                window.calendar.render();
+                window.calendar.updateSize();
+            } else if (typeof initializeCalendar === 'function') {
+                initializeCalendar();
+            }
+        }, 100);
+    }
+}
 
     if (activeLink) {
         activeLink.classList.add('active');

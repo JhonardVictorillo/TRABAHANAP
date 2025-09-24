@@ -243,6 +243,7 @@ private function getStatusColor($status)
         'declined'           => '#6b7280', // Gray
         'no_show_freelancer' => '#eab308', // Amber/Orange
         'no_show_customer'   => '#a21caf', // Purple
+         'expired'   => '#9ca3af',
         default              => '#6b7280', // Default Gray
     };
 }
@@ -272,6 +273,7 @@ public function getAppointments(Request $request)
             'title' => $appointment->freelancer->firstname . ' ' . $appointment->freelancer->lastname . ' (' . ucfirst($appointment->status) . ')', 
             'start' => $appointment->date,
             'color' => $this->getStatusColor($appointment->status), 
+            'status' => strtolower($appointment->status),
         ];
     });
 
@@ -280,6 +282,19 @@ public function getAppointments(Request $request)
 
     public function getAppointmentDetails($id)
     {
+
+         $now = now();
+    Appointment::where('customer_id', auth()->id())
+        ->where('status', 'pending')
+        ->where(function($q) use ($now) {
+            $q->where('date', '<', $now->toDateString())
+              ->orWhere(function($q2) use ($now) {
+                  $q2->where('date', $now->toDateString())
+                     ->where('time', '<', $now->format('H:i:s'));
+              });
+        })
+        ->update(['status' => 'expired']);
+
           $appointment = Appointment::with([
         'freelancer',
         'post',
@@ -313,6 +328,7 @@ public function getAppointments(Request $request)
           'duration' => $appointment->duration ?? ($appointment->post ? $appointment->post->service_duration : 60),
         'buffer_time' => $appointment->post ? $appointment->post->buffer_time : 0,
     ];
+    
 
     // Add subservices as a simple concatenated string
     if ($appointment->post && $appointment->post->subServices && $appointment->post->subServices->count() > 0) {

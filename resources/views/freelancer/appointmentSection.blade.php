@@ -162,6 +162,10 @@
                                     <span>Current Status:</span>
                                     <span id="appointmentStatus" class="font-medium">Loading...</span>
                                 </div>
+                                  <!-- Place the expired info message here -->
+                                <div id="expiredInfo" class="bg-gray-100 text-gray-700 p-3 rounded mb-3" style="display:none;">
+                                    This appointment expired because it was not accepted before the scheduled time.
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -254,6 +258,7 @@
 <script>
  document.addEventListener('DOMContentLoaded', function() {
     let calendar;
+    window.calendar = null;
     let calendarInitialized = false;
     
 
@@ -361,43 +366,33 @@
     // Initialize FullCalendar
   // Expose the initializeCalendar function globally
     window.initializeCalendar = function() {
-        if (calendarInitialized && window.calendar) {
-            console.log('Calendar already initialized, just rendering...');
-            window.calendar.render();
-            window.calendar.updateSize();
-            return;
-        }
-
         const calendarEl = document.getElementById('calendar');
-        if (!calendarEl) {
-            console.error('Calendar element not found');
-            return;
-        }
+    if (!calendarEl) {
+        console.error('Calendar element not found');
+        return;
+    }
 
-        // Check if FullCalendar is loaded
-        if (typeof FullCalendar === 'undefined') {
-            console.error('FullCalendar library not loaded');
-            return;
-        }
-
-        console.log('Initializing calendar...');
+    // Destroy previous instance if exists
+    if (window.calendar) {
+        window.calendar.destroy();
+        window.calendar = null;
+    }
         
-        calendar = new FullCalendar.Calendar(calendarEl, {
-            initialView: 'dayGridMonth',
-            locale: 'en',
-            height: 600,
-            selectable: true,
-            headerToolbar: {
-                left: 'prev,next today',
-                center: 'title',
-                right: 'dayGridMonth,timeGridWeek'
-            },
-            events: '/freelancer/appointments',
-            // Updated eventContent for better presentation
-   eventContent: function(arg) {
-   const event = arg.event;
-    const status = event.extendedProps.status ? event.extendedProps.status.toLowerCase() : 'pending';
-    const customerName = event.title || 'Unknown Customer';
+         window.calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        locale: 'en',
+        height: 600,
+        selectable: true,
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek'
+        },
+        events: '/freelancer/appointments',
+        eventContent: function(arg) {
+        const event = arg.event;
+            const status = event.extendedProps.status ? event.extendedProps.status.toLowerCase() : 'pending';
+            const customerName = event.title || 'Unknown Customer';
 
     // Get the proper time range instead of abbreviated time
     let timeDisplay = 'No time';
@@ -434,8 +429,7 @@
                 color: white !important;
                 border-radius: 8px !important;
                 padding: 8px !important;
-                border-left: 4px solid ${borderColor} !important;
-                box-shadow: 0 1px 3px rgba(0,0,0,0.12) !important;
+                
                 cursor: pointer !important;
                 overflow: hidden !important;
                 transition: all 0.2s ease !important;
@@ -511,41 +505,34 @@
             },
              // Responsive handling
             windowResize: function(view) {
-                if (window.innerWidth < 768) {
-                    if (calendar.view.type === 'dayGridMonth') {
-                        calendar.changeView('listWeek');
-                    }
-                    calendar.setOption('height', 'auto');
-                } else {
-                    calendar.setOption('height', 600);
+                 if (window.innerWidth < 768) {
+                if (window.calendar.view.type === 'dayGridMonth') {
+                    window.calendar.changeView('listWeek');
                 }
-            },
-            
-            // Loading state
-            loading: function(bool) {
-                const calendarEl = document.getElementById('calendar');
-                if (bool) {
-                    calendarEl.classList.add('fc-loading');
-                } else {
-                    calendarEl.classList.remove('fc-loading');
-                }
+                window.calendar.setOption('height', 'auto');
+            } else {
+                window.calendar.setOption('height', 600);
             }
+        },
+        loading: function(bool) {
+            const calendarEl = document.getElementById('calendar');
+            if (bool) {
+                calendarEl.classList.add('fc-loading');
+            } else {
+                calendarEl.classList.remove('fc-loading');
+            }
+         }
         });
 
-        calendar.render();
-        calendarInitialized = true;
+        window.calendar.render();
+        window.calendar.updateSize();
         console.log('Calendar initialized successfully');
     }
 
     // Listen for calendar initialization event
     window.addEventListener('initializeCalendar', initializeCalendar);
-
-    // Initialize calendar if appointment section is visible on page load
-    const appointmentSection = document.getElementById('appointmentCalendar');
-    if (appointmentSection && appointmentSection.style.display !== 'none') {
-        setTimeout(initializeCalendar, 100);
-    }
-
+    
+     
     // Modal elements
     const appointmentModal = document.getElementById('appointmentModal');
     const closeAppointmentModal = document.getElementById('closeAppointmentModal');
@@ -693,6 +680,10 @@
             if (acceptBtn) acceptBtn.style.display = 'none';
             if (declineBtn) declineBtn.style.display = 'none';
             if (completeBtn) completeBtn.style.display = 'inline-block';
+        } else if (status === 'expired') {
+            if (acceptBtn) acceptBtn.style.display = 'none';
+            if (declineBtn) declineBtn.style.display = 'none';
+            if (completeBtn) completeBtn.style.display = 'none';
         } else {
             // declined / completed
             if (acceptBtn) acceptBtn.style.display = 'none';
@@ -700,7 +691,12 @@
             if (completeBtn) completeBtn.style.display = 'none';
         }
 
-        
+         const expiredInfo = document.getElementById('expiredInfo');
+            if (status === 'expired' && expiredInfo) {
+                expiredInfo.style.display = 'block';
+            } else if (expiredInfo) {
+                expiredInfo.style.display = 'none';
+            }
 
         // Handle no-show form
         const noShowForm = document.getElementById('noShowForm');
@@ -748,6 +744,8 @@
             resetModalState();
         });
     }
+
+      
 
     // Accept Appointment
     if (acceptBtn) {

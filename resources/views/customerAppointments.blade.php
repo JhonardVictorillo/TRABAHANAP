@@ -90,6 +90,7 @@
                     <i class="ri-close-line text-2xl"></i>
                 </button>
             </div>
+            
         </div>
 
         <!-- Modal Body -->
@@ -156,6 +157,9 @@
                                         <span class="text-sm font-medium text-gray-700">Location:</span>
                                         <p class="text-sm text-gray-600 mt-1" id="appointmentAddress">Loading...</p>
                                     </div>
+                                </div>
+                                <div id="expiredInfo" class="bg-gray-100 text-red-700 p-3 text-sm rounded mb-3" style="display:none;">
+                                    This appointment expired because it was not accepted before the scheduled time.
                                 </div>
                             </div>
                         </div>
@@ -470,6 +474,8 @@
     // Just add the data attribute for CSS styling and tooltip
     info.el.setAttribute('data-status', status.toLowerCase());
     info.el.title = `${info.event.title} - ${status}`;
+
+    
   },
         // Responsive options
         windowResize: function(view) {
@@ -526,10 +532,17 @@ function handleButtonVisibility(status) {
     } else if (status.toLowerCase() === 'accepted') {
         rescheduleButton.style.display = 'none'; // Hide reschedule button
         cancelButton.style.display = 'inline-block'; // Hide cancel button
-     } else if (status.toLowerCase() === 'canceled') {
-        // Hide both buttons if status is canceled
+     } else if (status.toLowerCase() === 'cancelled') {
+        // Hide both buttons if status is cancelled
         rescheduleButton.style.display = 'none';
         cancelButton.style.display = 'none';
+      } else if (status.toLowerCase() === 'expired') {
+      
+        rescheduleButton.style.display = 'none';
+        cancelButton.style.display = 'none';
+        rateButton.style.display = 'none';
+        payButton.style.display = 'none';
+        document.getElementById('payCashButton').style.display = 'none';
     } else {
         // Default to showing both reschedule and cancel buttons for other statuses
         rescheduleButton.style.display = 'inline-block';
@@ -565,7 +578,8 @@ function getStatusColorFromBackend(status) {
         'declined': '#6b7280',          // Gray
         'no_show_freelancer': '#eab308', // Amber/Orange
         'no_show_customer': '#a21caf',   // Purple
-        'rescheduled': '#8b5cf6'        // Purple for rescheduled status
+        'rescheduled': '#8b5cf6',        // Purple for rescheduled status
+           'expired': '#9ca3af'
     };
     
     return colorMap[status] || '#6b7280'; // Default Gray
@@ -631,13 +645,18 @@ function openAppointmentModal(data) {
     const statusElement = document.getElementById('appointmentStatus');
     const status = data.status || 'N/A';
     statusElement.textContent = status;
-    
-    // Remove any existing background color classes
     statusElement.className = 'inline-flex items-center px-3 py-1 rounded-full text-xs font-medium text-white';
-    
-    // Use the color from your existing getStatusColor function
     const statusColor = getStatusColorFromBackend(status.toLowerCase());
     statusElement.style.backgroundColor = statusColor;
+
+    const expiredInfo = document.getElementById('expiredInfo');
+        if (data.status && data.status.toLowerCase() === 'expired') {
+            expiredInfo.style.display = 'block';
+        } else {
+            expiredInfo.style.display = 'none';
+        }
+
+
 
     document.getElementById('appointmentNotes').textContent = data.notes || 'No additional notes';
     document.getElementById('feeStatus').textContent = data.fee_status || 'N/A';

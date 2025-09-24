@@ -292,6 +292,19 @@ public function declineAppointment(Request $request, $id)
 
 public function getAppointments(Request $request)
 {
+
+     $now = now();
+    Appointment::where('freelancer_id', auth()->id())
+        ->where('status', 'pending')
+        ->where(function($q) use ($now) {
+            $q->where('date', '<', $now->toDateString())
+              ->orWhere(function($q2) use ($now) {
+                  $q2->where('date', $now->toDateString())
+                     ->where('time', '<', $now->format('H:i:s'));
+              });
+        })
+        ->update(['status' => 'expired']);
+
     // Get the current freelancer's appointments (adjust this as needed)
     $appointments = Appointment::where('freelancer_id', auth()->id())
         ->with('customer') // Load the related customer data
@@ -353,6 +366,7 @@ private function getStatusColor($status)
         'scheduled' => '#3b82f6', // blue
         'completed' => '#10b981', // green
         'declined'  => '#ef4444', // red
+         'expired'   => '#9ca3af',
         default     => '#6b7280', // gray
     };
 }

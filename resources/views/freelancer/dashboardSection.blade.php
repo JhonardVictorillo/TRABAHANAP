@@ -162,9 +162,7 @@
             <div class="empty-portfolio">
               <i class='bx bx-image-add'></i>
               <p>No portfolio items yet</p>
-              <button class="add-work-btn" onclick="showAddPortfolioModal()">
-                <i class='bx bx-plus'></i> Add Work
-              </button>
+             
             </div>
           @else
             <div class="works-grid">
