@@ -186,7 +186,7 @@
             <!-- Client Reviews Section -->
             <div class="bg-white rounded-lg p-8">
                 <h3 class="text-lg font-semibold mb-6">Client Reviews</h3>
-                <div class="space-y-6">
+               <div class="space-y-6 max-h-80 overflow-y-auto pr-2 border border-gray-100 rounded-lg bg-gray-50">
                     @if ($reviews->isNotEmpty())
                         @foreach ($reviews as $review)
                             <div class="pb-6 border-b">
