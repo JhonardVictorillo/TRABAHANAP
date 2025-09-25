@@ -164,6 +164,7 @@
                 <!-- Portfolio Section -->
                 <div class="border-t pt-8">
                     <h3 class="text-lg font-semibold mb-6">Recent works</h3>
+                 <div class="max-h-96 overflow-y-auto pr-2">
                     <div class="grid grid-cols-2 gap-6">
                         @forelse ($freelancer->posts as $portfolioPost)
                             @forelse ($portfolioPost->pictures as $picture)
@@ -183,6 +184,7 @@
                     </div>
                 </div>
             </div>
+         </div>
             <!-- Client Reviews Section -->
             <div class="bg-white rounded-lg p-8">
                 <h3 class="text-lg font-semibold mb-6">Client Reviews</h3>
