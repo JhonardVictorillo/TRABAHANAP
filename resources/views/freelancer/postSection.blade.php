@@ -220,11 +220,7 @@
                 
                 <!-- Service Information -->
                 <div class="service-details-view">
-                    <div class="detail-group">
-                        <label>Service Title:</label>
-                        <span id="viewTitle"></span>
-                    </div>
-                    
+        
                     <div class="detail-group">
                         <label>Category:</label>
                         <span id="viewCategory"></span>
@@ -492,25 +488,26 @@
                         </div>
                     </div>
                 </div>
+                    <!-- Modal Footer -->
+                <div class="modern-modal-footer">
+                    <button type="button" class="btn-secondary close-modal">
+                        <i class='bx bx-x'></i>
+                        Cancel
+                    </button>
+                    <button type="submit" form="create-post-form" class="btn-primary">
+                        <span class="btn-text">
+                            <i class='bx bx-check'></i>
+                            Create Service
+                        </span>
+                        <span class="btn-spinner" style="display:none;">
+                            <i class='bx bx-loader-alt bx-spin'></i>
+                        </span>
+                    </button>
+                </div>
             </form>
         </div>
 
-        <!-- Modal Footer -->
-        <div class="modern-modal-footer">
-            <button type="button" class="btn-secondary close-modal">
-                <i class='bx bx-x'></i>
-                Cancel
-            </button>
-            <button type="submit" form="create-post-form" class="btn-primary">
-                <span class="btn-text">
-                    <i class='bx bx-check'></i>
-                    Create Service
-                </span>
-                <span class="btn-spinner" style="display:none;">
-                    <i class='bx bx-loader-alt bx-spin'></i>
-                </span>
-            </button>
-        </div>
+    
     </div>
 </div>
 
@@ -699,25 +696,26 @@
                         </div>
                     </div>
                 </div>
+                <!-- Modal Footer -->
+                <div class="modern-modal-footer">
+                    <button type="button" class="btn-secondary" id="cancelEditBtn">
+                        <i class='bx bx-x'></i>
+                        Cancel
+                    </button>
+                    <button type="submit" form="edit-post-form" class="btn-primary">
+                        <span class="btn-text">
+                            <i class='bx bx-check'></i>
+                            Save Changes
+                        </span>
+                        <span class="btn-spinner" style="display:none;">
+                            <i class='bx bx-loader-alt bx-spin'></i>
+                        </span>
+                    </button>
+                </div>
             </form>
         </div>
 
-        <!-- Modal Footer -->
-        <div class="modern-modal-footer">
-            <button type="button" class="btn-secondary" id="cancelEditBtn">
-                <i class='bx bx-x'></i>
-                Cancel
-            </button>
-            <button type="submit" form="edit-post-form" class="btn-primary">
-                <span class="btn-text">
-                    <i class='bx bx-check'></i>
-                    Save Changes
-                </span>
-                <span class="btn-spinner" style="display:none;">
-                    <i class='bx bx-loader-alt bx-spin'></i>
-                </span>
-            </button>
-        </div>
+        
     </div>
 </div>
 
@@ -740,6 +738,19 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error(`Modal with ID "${modalId}" not found.`);
         }
     }
+
+     setupSchedulingModeAutoUpdate(
+        document.getElementById('service_duration'),
+        document.getElementById('buffer_time'),
+        document.getElementById('scheduling_mode')
+    );
+
+    // For edit post modal
+    setupSchedulingModeAutoUpdate(
+        document.getElementById('edit-service-duration'),
+        document.getElementById('edit-buffer-time'),
+        document.getElementById('edit-scheduling-mode')
+    );
 
     // ===============================================
     // VIEW POST FUNCTIONALITY
@@ -786,10 +797,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             <!-- Service Information -->
             <div class="service-details-view">
-                <div class="detail-group">
-                    <label>Service Title:</label>
-                    <span id="viewTitle"></span>
-                </div>
+                
                 
                 <div class="detail-group">
                     <label>Category:</label>
@@ -877,7 +885,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         // Populate details
-        document.getElementById('viewTitle').textContent = post.title || 'Service Title';
+      
         document.getElementById('viewCategory').textContent = data.category || 'Not assigned';
         document.getElementById('viewDescription').textContent = post.description || 'No description';
         
@@ -1177,8 +1185,11 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         if (!validatePostForm(this)) return;
         
-        const submitBtn = this.querySelector('button[type="submit"]');
-        showSpinnerOnButton(submitBtn);
+         const form = this; 
+        const submitBtn = form.querySelector('button[type="submit"]');
+        if (submitBtn) {
+            showSpinnerOnButton(submitBtn);
+        }
         
         const formData = new FormData(this);
         formData.append('_method', 'PUT'); 
@@ -1205,7 +1216,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return response.json();
         })
         .then(data => {
-            restoreButton(this, 'Save Changes');
+            restoreButton(form, 'Save Changes');
             if (data.success) {
                 alert('Post updated successfully!');
                 location.reload();
@@ -1221,9 +1232,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // Handle Create Post Form Submission
     document.getElementById('create-post-form')?.addEventListener('submit', function (e) {
         e.preventDefault();
-        if (!validatePostForm(this)) return;
+       
+        const form = this;
+        const submitBtn = form.querySelector('button[type="submit"]');
         
-        const submitBtn = this.querySelector('button[type="submit"]');
+         if (!validatePostForm(form)) {
+            
+        return;
+    }
+        
         showSpinnerOnButton(submitBtn);
         
         const formData = new FormData(this);
@@ -1236,7 +1253,7 @@ document.addEventListener('DOMContentLoaded', () => {
         })
         .then(response => response.json())
         .then(data => {
-            restoreButton(this, 'Create Post');
+            restoreButton(form, 'Create Post');
             if (data.success) {
                 alert('Post created successfully!');
                 location.reload();
@@ -1305,7 +1322,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 })
                 .then(response => {
-                    restoreButton(button, 'Delete Post');
+                    restoreButton(deleteButton, 'Delete Post');
                     if (!response.ok) {
                         throw new Error(`Server returned ${response.status}: ${response.statusText}`);
                     }
@@ -1313,7 +1330,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 })
                 .then(data => {
                     if (data.success) {
-                        const postRow = button.closest('.post-row');
+                        const postRow = deleteButton.closest('.post-row');
                         if (postRow) {
                             postRow.remove();
                             alert(data.message || 'Post deleted successfully!');
@@ -1334,7 +1351,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     
     // Character counter for description fields
-document.addEventListener('DOMContentLoaded', function() {
+ document.addEventListener('DOMContentLoaded', function() {
     // Create post description counter
     const createDesc = document.getElementById('description');
     const createCounter = document.getElementById('descCharCount');
@@ -1409,16 +1426,45 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function restoreButton(form, originalText) {
-        const button = form.querySelector('button[type="submit"]');
-        const btnText = button.querySelector('.btn-text');
-        const btnSpinner = button.querySelector('.btn-spinner');
-        if (btnText && btnSpinner) {
-            btnText.style.display = 'inline-block';
-            btnSpinner.style.display = 'none';
-            btnText.textContent = originalText;
+            if (!form) return;
+            const button = form.querySelector('button[type="submit"]');
+            if (!button) return;
+            const btnText = button.querySelector('.btn-text');
+            const btnSpinner = button.querySelector('.btn-spinner');
+            if (btnText && btnSpinner) {
+                btnText.style.display = 'inline-block';
+                btnSpinner.style.display = 'none';
+                btnText.textContent = originalText;
+            }
+            button.disabled = false;
         }
-        button.disabled = false;
+
+    // Auto-update scheduling mode in create post modal
+    const durationSelect = document.getElementById('service_duration');
+    const bufferSelect = document.getElementById('buffer_time');
+    const schedulingModeSelect = document.getElementById('scheduling_mode');
+
+    function setupSchedulingModeAutoUpdate(durationSelect, bufferSelect, schedulingModeSelect) {
+    function updateSchedulingMode() {
+        const duration = parseInt(durationSelect.value) || 0;
+
+        if (duration <= 180) { // 3 hours or less
+            schedulingModeSelect.value = 'hourly';
+        } else if (duration === 240) { // exactly 4 hours
+            schedulingModeSelect.value = 'half_day';
+        } else if (duration >= 360) { // 6 hours or more
+            schedulingModeSelect.value = 'full_day';
+        } else {
+            schedulingModeSelect.value = 'hourly'; // fallback
+        }
     }
+
+    if (durationSelect && bufferSelect && schedulingModeSelect) {
+        durationSelect.addEventListener('change', updateSchedulingMode);
+        bufferSelect.addEventListener('change', updateSchedulingMode);
+        updateSchedulingMode();
+    }
+  }
 });
 
 // Helper functions outside DOMContentLoaded

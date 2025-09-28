@@ -50,6 +50,8 @@ class HomepageController extends Controller
             ->sortByDesc('average_rating')
             ->take(10);
 
+            $topPostsPerFreelancer = $topPostsPerFreelancer->shuffle();
+            
         $categories = Category::all();
         $ipGeoApiKey = env('IPGEOLOCATION_API_KEY');
 

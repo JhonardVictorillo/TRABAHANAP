@@ -73,7 +73,7 @@
  <section class="post-services-section" id="post-services">
   <div class="section-header">
      <div>
-      <h2>Featured Service Providers</h2>
+      <h2>Top-Rated Freelancers</h2>
       <p style="color: #6b7280; font-size: 1rem; max-width: 600px;">
         Discover top-rated service providers in Minglanilla ready to help with your projects
       </p>
