@@ -47,8 +47,9 @@
           <div class="form-group">
             <div class="input-field">
               <i class='bx bx-envelope'></i>
-              <input type="email" name="email" placeholder="Email Address" required>
+            <input type="email" name="email" placeholder="Email Address" required pattern="^[A-Za-z0-9._%+-]+@gmail\.com$">
             </div>
+            <div class="error" id="loginEmailError" style="display:none;"></div>
             @error('email')
                 <div class="error">{{ $message }}</div>
                     @enderror
@@ -195,6 +196,27 @@
         signinBtn.classList.add('disabled');
         btnText.style.display = 'none';
         btnSpinner.style.display = 'inline-block';
+    });
+});
+
+document.addEventListener('DOMContentLoaded', function () {
+    const emailInput = document.querySelector('input[name="email"]');
+    const signinBtn = document.querySelector('.signin-btn');
+    const loginEmailError = document.getElementById('loginEmailError');
+    const gmailPattern = /^[A-Za-z0-9._%+-]+@gmail\.com$/;
+
+    emailInput.addEventListener('input', function () {
+        if (!gmailPattern.test(emailInput.value)) {
+            loginEmailError.textContent = 'Only Gmail addresses are allowed (e.g. yourname@gmail.com)';
+            loginEmailError.style.display = 'block';
+            signinBtn.disabled = true;
+            signinBtn.classList.add('disabled');
+        } else {
+            loginEmailError.textContent = '';
+            loginEmailError.style.display = 'none';
+            signinBtn.disabled = false;
+            signinBtn.classList.remove('disabled');
+        }
     });
 });
   </script>

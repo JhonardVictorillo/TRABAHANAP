@@ -5,12 +5,7 @@
       </a>
     </div>
     
-    <!-- Mobile menu toggle button -->
-    <button class="menu-toggle" id="menu-toggle" aria-label="Toggle navigation menu">
-      <i class="fas fa-bars"></i>
-    </button>
-    
-    <!-- Center navigation links -->
+            <!-- Center navigation links -->
     <nav class="navbar" id="navbar">
       <!-- Get the current route name -->
       @php
@@ -35,6 +30,11 @@
         </a>
       </div>
     </nav>
+    
+    <!-- Mobile menu toggle button -->
+    <button class="menu-toggle" id="menu-toggle" aria-label="Toggle navigation menu">
+      <i class="fas fa-bars"></i>
+    </button>
 </header>
   <script>
         document.addEventListener('DOMContentLoaded', function() {

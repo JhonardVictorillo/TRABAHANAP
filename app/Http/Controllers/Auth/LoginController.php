@@ -19,8 +19,14 @@ class LoginController extends Controller
     public function login(Request $request)
     {
          // Validate the login form data
-        $request->validate([
-            'email' => 'required|email',
+                $request->validate([
+                    'email' => [
+                'required',
+                'string',
+                'email',
+                'max:255',
+                'regex:/^[A-Za-z0-9._%+-]+@gmail\.com$/'
+            ],
             'password' => 'required',
         ]);
             // Throttle key based on the user's email and IP address

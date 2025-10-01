@@ -29,9 +29,13 @@
         <div class="status-section">
           <span class="status-label">Status:</span>
           @if($user->is_verified)
-            <span class="status-value verified"><i class='bx bxs-check-circle'></i> Verified</span>
+            <span class="status-value verified status-tooltip" data-tooltip="Your profile is verified. Clients are more likely to trust verified freelancers.">
+              <i class='bx bxs-check-circle'></i> Verified
+            </span>
           @else
-            <span class="status-value not-verified"><i class='bx bxs-time-five'></i> Pending Verification</span>
+            <span class="status-value not-verified status-tooltip" data-tooltip="Your profile is pending verification. Please complete all requirements or wait for admin approval.">
+              <i class='bx bxs-time-five'></i> Pending Verification
+            </span>
           @endif
         </div>
         
@@ -530,7 +534,22 @@
           <div class="table-controls">
             <div class="search-container">
               <i class='bx bx-search'></i>
-              <input type="text" placeholder="Search clients..." class="search-input" id="clientSearch">
+           <form method="GET" action="{{ route('freelancer.dashboard') }}#clientsTable" class="search-form" style="display: flex; align-items: center;">
+                <input type="hidden" name="active_tab" value="clients">
+                @if(request('client_filter'))
+                  <input type="hidden" name="client_filter" value="{{ request('client_filter') }}">
+                @endif
+                <i class='bx bx-search'></i>
+                <input
+                  type="text"
+                  name="client_search"
+                  placeholder="Search clients..."
+                  class="search-input"
+                  value="{{ request('client_search') }}"
+                  style="margin-left: 0.5em;"
+                >
+                <button type="submit" style="display:none"></button>
+              </form>
             </div>
           </div>
         </div>
@@ -661,17 +680,41 @@
           </div>
           <div class="table-controls">
             <div class="search-container">
-              <i class='bx bx-search'></i>
-              <input type="text" placeholder="Search appointments..." class="search-input" id="appointmentSearch">
-            </div>
+            
+              <form method="GET" action="{{ route('freelancer.dashboard') }}#appointmentsTable" class="search-form" style="display: flex; align-items: center;">
+                <input type="hidden" name="active_tab" value="appointments">
+                @if(request('status_filter'))
+                  <input type="hidden" name="status_filter" value="{{ request('status_filter') }}">
+                @endif
+                <i class='bx bx-search'></i>
+                <input
+                  type="text"
+                  name="appointment_search"
+                  placeholder="Search appointments..."
+                  class="search-input"
+                  value="{{ request('appointment_search') }}"
+                  style="margin-left: 0.5em;"
+                >
+                <button type="submit" style="display:none"></button>
+              </form>
+              </div>
             <div class="filter-container">
-              <select class="filter-select" id="statusFilter">
-                <option value="">All Status</option>
-                <option value="pending">Pending</option>
-                <option value="accepted">Accepted</option>
-                <option value="completed">Completed</option>
-                <option value="declined">Declined</option>
-              </select>
+            <form method="GET" action="{{ route('freelancer.dashboard') }}#appointmentsTable" class="filter-form" style="display: flex; align-items: center;">
+                <input type="hidden" name="active_tab" value="appointments">
+                @if(request('appointment_search'))
+                  <input type="hidden" name="appointment_search" value="{{ request('appointment_search') }}">
+                @endif
+                <select name="status_filter" class="filter-select" onchange="this.form.submit()">
+                  <option value="">All Status</option>
+                  <option value="pending" {{ request('status_filter') == 'pending' ? 'selected' : '' }}>Pending</option>
+                  <option value="accepted" {{ request('status_filter') == 'accepted' ? 'selected' : '' }}>Accepted</option>
+                  <option value="completed" {{ request('status_filter') == 'completed' ? 'selected' : '' }}>Completed</option>
+                  <option value="declined" {{ request('status_filter') == 'declined' ? 'selected' : '' }}>Declined</option>
+                   <option value="cancelled" {{ request('status_filter') == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
+                   <option value="expired" {{ request('status_filter') == 'expired' ? 'selected' : '' }}>Expired</option>
+                </select>
+                <button type="submit" style="display:none"></button>
+              </form>
             </div>
           </div>
         </div>
@@ -812,18 +855,39 @@
           </div>
           <div class="table-controls">
             <div class="search-container">
-              <i class='bx bx-search'></i>
-              <input type="text" placeholder="Search reviews..." class="search-input" id="reviewSearch">
+             <form method="GET" action="{{ route('freelancer.dashboard') }}#reviewsTable" class="search-form" style="display: flex; align-items: center;">
+                  <input type="hidden" name="active_tab" value="reviews">
+                  @if(request('rating_filter'))
+                    <input type="hidden" name="rating_filter" value="{{ request('rating_filter') }}">
+                  @endif
+                  <i class='bx bx-search'></i>
+                  <input
+                    type="text"
+                    name="review_search"
+                    placeholder="Search reviews..."
+                    class="search-input"
+                    value="{{ request('review_search') }}"
+                    style="margin-left: 0.5em;"
+                  >
+                  <button type="submit" style="display:none"></button>
+                </form>
             </div>
             <div class="filter-container">
-              <select class="filter-select" id="ratingFilter">
-                <option value="">All Ratings</option>
-                <option value="5">5 Stars</option>
-                <option value="4">4 Stars</option>
-                <option value="3">3 Stars</option>
-                <option value="2">2 Stars</option>
-                <option value="1">1 Star</option>
-              </select>
+             <form method="GET" action="{{ route('freelancer.dashboard') }}#reviewsTable" class="filter-form" style="display: flex; align-items: center;">
+                <input type="hidden" name="active_tab" value="reviews">
+                @if(request('review_search'))
+                  <input type="hidden" name="review_search" value="{{ request('review_search') }}">
+                @endif
+                <select name="rating_filter" class="filter-select" onchange="this.form.submit()">
+                  <option value="">All Ratings</option>
+                  <option value="5" {{ request('rating_filter') == '5' ? 'selected' : '' }}>5 Stars</option>
+                  <option value="4" {{ request('rating_filter') == '4' ? 'selected' : '' }}>4 Stars</option>
+                  <option value="3" {{ request('rating_filter') == '3' ? 'selected' : '' }}>3 Stars</option>
+                  <option value="2" {{ request('rating_filter') == '2' ? 'selected' : '' }}>2 Stars</option>
+                  <option value="1" {{ request('rating_filter') == '1' ? 'selected' : '' }}>1 Star</option>
+                </select>
+                <button type="submit" style="display:none"></button>
+              </form>
             </div>
           </div>
         </div>

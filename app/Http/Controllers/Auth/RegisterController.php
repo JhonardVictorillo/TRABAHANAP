@@ -23,7 +23,14 @@ class RegisterController extends Controller
         $request->validate([
             'firstname' => 'required|string|max:255',
             'lastname' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
+           'email' => [
+                        'required',
+                        'string',
+                        'email',
+                        'max:255',
+                        'unique:users',
+                        'regex:/^[A-Za-z0-9._%+-]+@gmail\.com$/'
+                    ],
             'password' => 'required|string|min:8|confirmed',
             'contact_number' => 'required|string|regex:/^[0-9]{10}$/',
             'role' => 'required|string|in:customer,freelancer', // Add this line

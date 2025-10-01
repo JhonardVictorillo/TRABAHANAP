@@ -47,11 +47,33 @@ class FreelancerController extends Controller
      $notifications = auth()->user()->notifications;
      $unreadCount = auth()->user()->unreadNotifications->count();  
       
-     // Fetch appointments related to the freelancer
-      $appointments = Appointment::where('freelancer_id', $user->id)
-      ->with('customer') // Load related customer data
-      ->orderBy('created_at', 'desc')
-        ->paginate(6, ['*'], 'appointments_page');
+        // Get search/filter params from request
+            $clientSearch = request('client_search');
+            $appointmentSearch = request('appointment_search');
+            $appointmentStatus = request('status_filter');
+            $reviewSearch = request('review_search');
+            $ratingFilter = request('rating_filter');
+
+
+    // APPOINTMENTS
+            $appointmentsQuery = Appointment::where('freelancer_id', $user->id)
+                ->with('customer')
+                ->orderBy('created_at', 'desc');
+
+            if ($appointmentSearch) {
+                $appointmentsQuery->whereHas('customer', function($q) use ($appointmentSearch) {
+                    $q->where('firstname', 'like', "%$appointmentSearch%")
+                    ->orWhere('lastname', 'like', "%$appointmentSearch%")
+                    ->orWhere('email', 'like', "%$appointmentSearch%");
+                });
+            }
+            if ($appointmentStatus) {
+                $appointmentsQuery->where('status', $appointmentStatus);
+            }
+
+            $appointments = $appointmentsQuery->paginate(6, ['*'], 'appointments_page')->appends(request()->except('appointments_page'));
+
+    
 
       $clientAppointments = Appointment::where('freelancer_id', $user->id)
             ->whereIn('status', ['accepted', 'completed'])
@@ -60,19 +82,41 @@ class FreelancerController extends Controller
     
             // Collect unique customers from these appointments
         $uniqueClientIds = $clientAppointments->pluck('customer_id')->unique();
-        $clients = User::whereIn('id', $uniqueClientIds)
-            ->orderBy('created_at', 'desc')
-            ->paginate(6, ['*'], 'clients_page');
+        $clientsQuery = User::whereIn('id', $uniqueClientIds)
+        ->orderBy('created_at', 'desc');
 
+        if ($clientSearch) {
+            $clientsQuery->where(function($q) use ($clientSearch) {
+                $q->where('firstname', 'like', "%$clientSearch%")
+                ->orWhere('lastname', 'like', "%$clientSearch%")
+                ->orWhere('email', 'like', "%$clientSearch%");
+            });
+        }
+       
+        $clients = $clientsQuery->paginate(6, ['*'], 'clients_page')->appends(request()->except('clients_page'));
         $totalClients = $uniqueClientIds->count();
 
-     
-         $reviews = Appointment::where('freelancer_id', $user->id)
-        ->whereNotNull('rating')
-        ->whereNotNull('review') // Also ensure there's a review text
-        ->with('customer')
-        ->orderBy('created_at', 'desc')
-        ->paginate(6, ['*'], 'reviews_page');
+
+
+        // REVIEWS
+        $reviewsQuery = Appointment::where('freelancer_id', $user->id)
+            ->whereNotNull('rating')
+            ->whereNotNull('review')
+            ->with('customer')
+            ->orderBy('created_at', 'desc');
+
+        if ($reviewSearch) {
+            $reviewsQuery->whereHas('customer', function($q) use ($reviewSearch) {
+                $q->where('firstname', 'like', "%$reviewSearch%")
+                ->orWhere('lastname', 'like', "%$reviewSearch%")
+                ->orWhere('email', 'like', "%$reviewSearch%");
+            });
+        }
+        if ($ratingFilter) {
+            $reviewsQuery->where('rating', $ratingFilter);
+        }
+
+        $reviews = $reviewsQuery->paginate(6, ['*'], 'reviews_page')->appends(request()->except('reviews_page'));
 
       $averageRating = $this->calculateAverageRating($user->id);
 

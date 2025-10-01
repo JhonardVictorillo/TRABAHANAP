@@ -49,7 +49,7 @@
         <!-- Posts Table -->
         <div class="posts-table-container">
             @if($posts->isNotEmpty())
-                <div class="table-wrapper">
+                <div class="table-wrapper"  style="width: 100%; max-width: 1100px;">
                     <table class="posts-table">
                         <thead>
                             <tr>
@@ -81,8 +81,6 @@
                                             @endif
                                         </div>
                                         <div class="service-content">
-                                            <h4 class="service-title">{{ Str::limit($post->title ?? 'Service Title', 30) }}</h4>
-                                            <p class="service-description">{{ Str::limit($post->description, 60) }}</p>
                                             <div class="service-subservices">
                                                 @if($post->subServices->isNotEmpty())
                                                     @foreach($post->subServices->take(2) as $subService)
@@ -204,86 +202,146 @@
 <div id="viewPostModal" class="post-modal" style="display: none;">
     <div class="modal-overlay"></div>
     <div class="modal-content view-modal">
+        <!-- Enhanced Header -->
         <div class="modal-header">
-            <h3><i class='bx bx-show'></i> Service Details</h3>
+            <div class="header-content">
+                <div class="header-icon">
+                    <i class='bx bx-show'></i>
+                </div>
+                <div class="header-text">
+                    <h3>Service Details</h3>
+                    <p>Complete overview of your service offering</p>
+                </div>
+            </div>
             <button class="modal-close" onclick="closeViewModal()">
                 <i class='bx bx-x'></i>
             </button>
         </div>
         
+        <!-- Enhanced Body -->
         <div class="modal-body">
             <div class="view-content">
-                <!-- Service Images -->
-                <div class="service-gallery" id="serviceGallery">
-                    <!-- Images will be populated here -->
-                </div>
-                
-                <!-- Service Information -->
-                <div class="service-details-view">
-        
-                    <div class="detail-group">
-                        <label>Category:</label>
-                        <span id="viewCategory"></span>
-                    </div>
-                    
-                    <div class="detail-group">
-                        <label>Description:</label>
-                        <p id="viewDescription"></p>
-                    </div>
-                    
-                    <div class="detail-group">
-                        <label>Sub-services:</label>
-                        <div id="viewSubservices" class="subservices-list"></div>
-                    </div>
-                    
-                    <div class="detail-row">
-                        <div class="detail-group">
-                            <label>Rate:</label>
-                            <span id="viewRate"></span>
+                <!-- Left Column - Images & Performance -->
+                <div class="view-left-column">
+                    <!-- Service Gallery -->
+                    <div class="gallery-section">
+                        <div class="section-title">
+                            <i class='bx bx-images'></i>
+                            <span>Portfolio Images</span>
                         </div>
-                        
-                        <div class="detail-group">
-                            <label>Duration:</label>
-                            <span id="viewDuration"></span>
+                        <div class="service-gallery" id="serviceGallery">
+                            <!-- Images will be populated here -->
                         </div>
-                    </div>
-                    
-                    <div class="detail-row">
-                        <div class="detail-group">
-                            <label>Buffer Time:</label>
-                            <span id="viewBufferTime"></span>
-                        </div>
-                        
-                        <div class="detail-group">
-                            <label>Scheduling Mode:</label>
-                            <span id="viewSchedulingMode"></span>
-                        </div>
-                    </div>
-                    
-                    <div class="detail-group">
-                        <label>Location Restriction:</label>
-                        <span id="viewLocationRestriction"></span>
-                    </div>
-                    
-                    <div class="detail-group">
-                        <label>Status:</label>
-                        <span id="viewStatus" class="status-badge"></span>
                     </div>
                     
                     <!-- Performance Section -->
                     <div class="performance-section">
-                        <h4>Performance</h4>
-                        <div class="performance-stats">
-                            <div class="stat-item">
-                                <span class="stat-label">Rating:</span>
-                                <div class="rating-display">
-                                    <div id="viewRatingStars" class="stars"></div>
-                                    <span id="viewRatingText"></span>
+                        <div class="section-title">
+                            <i class='bx bx-chart-line'></i>
+                            <span>Performance Overview</span>
+                        </div>
+                        <div class="performance-grid">
+                            <div class="performance-card">
+                                <div class="performance-icon rating-icon">
+                                    <i class='bx bx-star'></i>
+                                </div>
+                                <div class="performance-content">
+                                    <div class="performance-label">Average Rating</div>
+                                    <div class="rating-display">
+                                        <div id="viewRatingStars" class="stars"></div>
+                                        <span id="viewRatingText" class="rating-text">0.0 (0 reviews)</span>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="stat-item">
-                                <span class="stat-label">Total Bookings:</span>
-                                <span id="viewBookings">0</span>
+                            <div class="performance-card">
+                                <div class="performance-icon bookings-icon">
+                                    <i class='bx bx-calendar-check'></i>
+                                </div>
+                                <div class="performance-content">
+                                    <div class="performance-label">Total Bookings</div>
+                                    <div class="performance-value" id="viewBookings">0</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Right Column - Service Details -->
+                <div class="view-right-column">
+                    <!-- Service Information -->
+                    <div class="details-section">
+                        <div class="section-title">
+                            <i class='bx bx-info-circle'></i>
+                            <span>Service Information</span>
+                        </div>
+                        
+                        <div class="detail-card">
+                            <div class="detail-group">
+                                <label><i class='bx bx-category'></i> Category</label>
+                                <span id="viewCategory" class="detail-value">-</span>
+                            </div>
+                            
+                            <div class="detail-group full-width">
+                                <label><i class='bx bx-text'></i> Description</label>
+                                <p id="viewDescription" class="detail-description">-</p>
+                            </div>
+                            
+                            <div class="detail-group full-width">
+                                <label><i class='bx bx-list-ul'></i> Sub-services</label>
+                                <div id="viewSubservices" class="subservices-list">-</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Pricing & Schedule Section -->
+                    <div class="details-section">
+                        <div class="section-title">
+                            <i class='bx bx-money'></i>
+                            <span>Pricing & Schedule</span>
+                        </div>
+                        
+                        <div class="detail-card">
+                            <div class="detail-row">
+                                <div class="detail-group">
+                                    <label><i class='bx bx-peso'></i> Rate</label>
+                                    <span id="viewRate" class="detail-value price">-</span>
+                                </div>
+                                <div class="detail-group">
+                                    <label><i class='bx bx-time'></i> Duration</label>
+                                    <span id="viewDuration" class="detail-value">-</span>
+                                </div>
+                            </div>
+                            
+                            <div class="detail-row">
+                                <div class="detail-group">
+                                    <label><i class='bx bx-timer'></i> Buffer Time</label>
+                                    <span id="viewBufferTime" class="detail-value">-</span>
+                                </div>
+                                <div class="detail-group">
+                                    <label><i class='bx bx-calendar'></i> Scheduling Mode</label>
+                                    <span id="viewSchedulingMode" class="detail-value">-</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Service Settings Section -->
+                    <div class="details-section">
+                        <div class="section-title">
+                            <i class='bx bx-cog'></i>
+                            <span>Service Settings</span>
+                        </div>
+                        
+                        <div class="detail-card">
+                            <div class="detail-row">
+                                <div class="detail-group">
+                                    <label><i class='bx bx-map'></i> Location Restriction</label>
+                                    <span id="viewLocationRestriction" class="detail-value">-</span>
+                                </div>
+                                <div class="detail-group">
+                                    <label><i class='bx bx-check-shield'></i> Status</label>
+                                    <span id="viewStatus" class="status-badge">-</span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -291,11 +349,16 @@
             </div>
         </div>
         
+        <!-- Enhanced Footer -->
         <div class="modal-footer">
+            <div class="footer-info">
+                <i class='bx bx-info-circle'></i>
+                <span>Service details and performance metrics</span>
+            </div>
             <button class="btn-secondary" onclick="closeViewModal()">
-                <i class='bx bx-x'></i> Close
+                <i class='bx bx-x'></i>
+                Close
             </button>
-           
         </div>
     </div>
 </div>

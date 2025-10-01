@@ -156,7 +156,7 @@ Route::post('/appointments/{appointmentId}/complete', [FreelancerController::cla
 Route::post('/customer/appointments/review/{id}', [CustomerController::class, 'rateAppointment'])->name('customer.appointments.review');
 //search routes
 Route::get('/search', [CustomerController::class, 'search'])->name('search');
-Route::get('/freelancer/dashboard', [FreelancerController::class, 'dashboard'])->name('freelancer.dashboard');
+// Route::get('/freelancer/dashboard', [FreelancerController::class, 'dashboard'])->name('freelancer.dashboard');
 //edit category part
 Route::post('/categories', [CategoryController::class, 'store'])->name('categories.store');
 Route::get('/categories/{id}/edit', [CategoryController::class, 'edit'])->name('categories.edit');

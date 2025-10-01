@@ -61,33 +61,30 @@
                         <div class="form-group">
                             <div class="input-field">
                                 <i class='bx bx-user' aria-hidden="true"></i>
-                                <input type="text" name="firstname" id="firstname" placeholder="First Name" value="{{ old('firstname') }}" required autocomplete="given-name">
+                                <input type="text" name="firstname" id="firstname" placeholder="First Name" value="{{ old('firstname') }}" required autocomplete="given-name" pattern="[A-Za-z\s'-]+" ...>
                               
                             </div>
-                              @error('firstname')
-                                    <div class="error" role="alert">{{ $message }}</div>
-                                @enderror
+                            <div class="error" id="error-firstname"></div>
                         </div>
                         <div class="form-group">
                             <div class="input-field">
                                 <i class='bx bx-user' aria-hidden="true"></i>
-                                <input type="text" name="lastname" id="lastname" placeholder="Last Name" value="{{ old('lastname') }}" required autocomplete="family-name">
+                                <input type="text" name="lastname" id="lastname" placeholder="Last Name" value="{{ old('lastname') }}" required autocomplete="family-name" pattern="[A-Za-z\s'-]+" ...>
                                 
                             </div>
-                            @error('lastname')
-                                    <div class="error" role="alert">{{ $message }}</div>
-                                @enderror
+                            <div class="error" id="error-lastname"></div>
                         </div>
                     </div>
 
                     <div class="form-group">
                         <div class="input-field">
                             <i class='bx bx-envelope' aria-hidden="true"></i>
-                            <input type="email" name="email" id="email" placeholder="Email Address" value="{{ old('email') }}" required autocomplete="email"> 
+                           <input type="email" name="email" id="email" placeholder="Email Address"
+                                value="{{ old('email') }}" required autocomplete="email"
+                                pattern="^[A-Za-z0-9._%+-]+@gmail\.com$"
+                                title="Only Gmail addresses are allowed (e.g. yourname@gmail.com)">
                         </div>
-                         @error('email')
-                            <div class="error" role="alert">{{ $message }}</div>
-                            @enderror
+                        <div class="error" id="error-email"></div>
                     </div>
 
                  <div class="form-group">
@@ -95,16 +92,14 @@
                             <i class='bx bx-id-card' aria-hidden="true" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: #666;"></i>
                             <span class="contact-prefix" style="position: absolute; left: 2.5rem; top: 50%; transform: translateY(-50%); font-weight: 500; color: #333;">+63</span>
                             <input type="tel" name="contact_number" id="contact_number"
-                                placeholder="9123456789"
+                             
                                 maxlength="10"
                                 pattern="[0-9]{10}"
                                 value="{{ old('contact_number') }}"
                                 required autocomplete="tel"
                                 style="padding-left: 4.5rem;">
                         </div>
-                        @error('contact_number')
-                            <div class="error" role="alert">{{ $message }}</div>
-                        @enderror
+                        <div class="error" id="error-contact_number"></div>
                     </div>
                     <div class="form-group">
                         <div class="input-field">
@@ -112,9 +107,7 @@
                             <input type="password" name="password" id="passwordField" placeholder="Password" required autocomplete="new-password">
                             <span id="togglePassword" class="password-toggle-text" tabindex="0" role="button" aria-label="Show password">Show</span>
                         </div>
-                        @error('password')
-                            <div class="error" role="alert">{{ $message }}</div>
-                        @enderror
+                        <div class="error" id="error-password"></div>
                     </div>
 
                     <div class="form-group">
@@ -161,7 +154,7 @@
 <div id="termsModal" class="modal" style="display:none;">
     <div class="modal-content">
         <span class="close" id="closeTerms">&times;</span>
-       <h2>Terms of Service</h2>
+        <h2 style="border: none; border-top: 2px solid #2563eb22; margin: 0.7rem 0 1.2rem 0;">Terms of Service</h2>
             <p>
                 Welcome to MinglaGawa! By creating an account and using our platform, you agree to the following terms:
             </p>
@@ -185,7 +178,7 @@
 <div id="privacyModal" class="modal" style="display:none;">
     <div class="modal-content">
         <span class="close" id="closePrivacy">&times;</span>
-        <h2>Privacy Policy</h2>
+        <h2 style="border: none; border-top: 2px solid #2563eb22; margin: 0.7rem 0 1.2rem 0;">Privacy Policy</h2>
         <p>
             MinglaGawa values your privacy. This policy explains how we collect, use, and protect your information:
         </p>
@@ -211,7 +204,98 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-   
+              const signupForm = document.getElementById('signupForm');
+    const signupBtn = document.querySelector('.signup-btn');
+    const btnText = signupBtn.querySelector('.btn-text');
+    const btnSpinner = signupBtn.querySelector('.btn-spinner');
+
+    // Field references
+    const fields = {
+        firstname: document.getElementById('firstname'),
+        lastname: document.getElementById('lastname'),
+        email: document.getElementById('email'),
+        contact_number: document.getElementById('contact_number'),
+        password: document.getElementById('passwordField'),
+        password_confirmation: document.getElementById('passwordConfirmField')
+    };
+
+    // Validation rules
+        function validateField(name, value) {
+        switch(name) {
+            case 'firstname':
+            case 'lastname':
+                if (!value.trim()) return 'This field is required.';
+                if (value.length > 255) return 'Maximum 255 characters.';
+                if (!/^[A-Za-z\s'-]+$/.test(value)) return 'Only letters, apostrophes, and hyphens are allowed.';
+                break;
+            case 'email':
+                if (!value.trim()) return 'Email is required.';
+                if (!/^[A-Za-z0-9._%+-]+@gmail\.com$/.test(value)) return 'Only Gmail addresses are allowed (e.g. yourname@gmail.com)';
+                break;
+            case 'contact_number':
+                if (!value.trim()) return 'Contact number is required.';
+                if (!/^[0-9]{10}$/.test(value)) return 'Enter a valid 10-digit number.';
+                break;
+            case 'password':
+                if (!value) return 'Password is required.';
+                if (value.length < 8) return 'Password must be at least 8 characters.';
+                break;
+            case 'password_confirmation':
+                if (value !== fields.password.value) return 'Passwords do not match.';
+                break;
+        }
+        return '';
+    }
+
+    // Live validation
+    Object.keys(fields).forEach(function(field) {
+        fields[field].addEventListener('input', function() {
+            const errorDiv = document.getElementById('error-' + field);
+            const errorMsg = validateField(field, this.value);
+            errorDiv.textContent = errorMsg;
+            errorDiv.style.display = errorMsg ? 'block' : 'none';
+            checkFormValidity();
+        });
+    });
+
+    // Disable submit if any error
+    function checkFormValidity() {
+        let hasError = false;
+        Object.keys(fields).forEach(function(field) {
+            const errorDiv = document.getElementById('error-' + field);
+            if (errorDiv.textContent) hasError = true;
+        });
+        signupBtn.disabled = hasError;
+        if (hasError) {
+            signupBtn.classList.add('disabled');
+        } else {
+            signupBtn.classList.remove('disabled');
+        }
+    }
+
+    // On submit, show all errors if any
+    signupForm.addEventListener('submit', function(e) {
+        let hasError = false;
+        Object.keys(fields).forEach(function(field) {
+            const errorDiv = document.getElementById('error-' + field);
+            const errorMsg = validateField(field, fields[field].value);
+            errorDiv.textContent = errorMsg;
+            errorDiv.style.display = errorMsg ? 'block' : 'none';
+            if (errorMsg) hasError = true;
+        });
+        if (hasError) {
+            e.preventDefault();
+            signupBtn.disabled = false;
+            signupBtn.classList.remove('disabled');
+            btnText.style.display = 'inline-block';
+            btnSpinner.style.display = 'none';
+        } else {
+            signupBtn.disabled = true;
+            signupBtn.classList.add('disabled');
+            btnText.style.display = 'none';
+            btnSpinner.style.display = 'inline-block';
+        }
+    });
     
 
             // Password toggle functionality
