@@ -2422,10 +2422,6 @@
     vertical-align: top;
 }
 
-.post-row:hover {
-    background: #f8fafc;
-    transition: background-color 0.2s ease;
-}
 
 /* Service Details Cell */
 .service-info {

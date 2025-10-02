@@ -85,7 +85,7 @@
                      <div class="flex-1 text-center sm:text-left">
                         <div class="flex items-start justify-between mb-4">
                             <div>
-                                <h2 class="text-2xl font-semibold mb-1">{{ $freelancer->firstname }} {{ $freelancer->lastname }}</h2>
+                                <h2 class="text-2xl font-semibold mb-1">{{ Str::title($freelancer->firstname) }} {{ Str::title($freelancer->lastname) }}</h2>
                                 @if($freelancer->categories->isEmpty())
                                     <p class="text-gray-600">No categories selected</p>
                                 @else
@@ -188,7 +188,7 @@
             <!-- Client Reviews Section -->
             <div class="bg-white rounded-lg p-8">
                 <h3 class="text-lg font-semibold mb-6">Client Reviews</h3>
-               <div class="space-y-6 max-h-80 overflow-y-auto pr-2 border border-gray-100 rounded-lg bg-gray-50">
+               <div class="space-y-6 max-h-80 overflow-y-auto pr-2 border border-gray-100 rounded-lg bg-gray-50 p-6">
                     @if ($reviews->isNotEmpty())
                         @foreach ($reviews as $review)
                             <div class="pb-6 border-b">

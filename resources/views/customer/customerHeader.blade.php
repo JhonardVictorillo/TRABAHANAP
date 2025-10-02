@@ -87,7 +87,7 @@
             <div class="flex items-center gap-3 p-4 border-b">
               <img src="{{ $user->profile_picture ? asset('storage/' . $user->profile_picture) : asset('images/defaultprofile.png') }}" alt="User" class="w-12 h-12 rounded-full object-cover" />
               <div>
-                <p class="font-bold leading-tight">{{ $user->firstname }} {{ $user->lastname }}</p>
+                <p class="font-bold leading-tight">{{ Str::title($user->firstname) }} {{ Str::title($user->lastname) }}</p>
               </div>
             </div>
 

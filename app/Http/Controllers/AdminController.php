@@ -149,28 +149,49 @@ $violations = DB::table('violations as v')
         })
         ->simplePaginate(10, ['*'], 'userStatsPage');
 
+     $totalRevenue = PlatformRevenue::whereIn('source', [
+        'final_payment_commission',      // Only actual earnings
+        'late_cancellation_commission',  
+        'no_show_commission'
+    ])->sum('amount') ?? 0;
 
-
-      $totalRevenue = PlatformRevenue::sum('amount') ?? 0;
-    
-    $currentMonthRevenue = PlatformRevenue::whereMonth('date', now()->month)
-        ->whereYear('date', now()->year)
-        ->sum('amount') ?? 0;
+     $currentMonthRevenue = PlatformRevenue::whereIn('source', [
+        'final_payment_commission',
+        'late_cancellation_commission', 
+        'no_show_commission'
+    ])
+    ->whereMonth('date', now()->month)
+    ->whereYear('date', now()->year)
+    ->sum('amount') ?? 0;
         
-    $revenueFromCompletions = PlatformRevenue::where('source', 'commitment_fee')
-        ->sum('amount') ?? 0;
+        // Add Average Monthly Revenue calculation
+     $totalMonths = PlatformRevenue::whereIn('source', [
+        'final_payment_commission',
+        'late_cancellation_commission',
+        'no_show_commission'
+    ])
+    ->selectRaw('COUNT(DISTINCT YEAR(date), MONTH(date)) as month_count')
+    ->value('month_count') ?: 1;
+    $averageMonthlyRevenue = $totalRevenue / $totalMonths;
         
     // Get recent transactions
-    $revenueTransactions = PlatformRevenue::with(['appointment.freelancer', 'user'])
+      $revenueTransactions = PlatformRevenue::with(['appointment.freelancer', 'user'])
+        ->whereIn('source', [
+            'final_payment_commission',      // Service completion commission
+            'late_cancellation_commission',  // Penalty fees
+            'no_show_commission'            // Penalty fees
+        ])
         ->orderBy('date', 'desc')
-       ->simplePaginate(10, ['*'], 'revenuePage');
+        ->simplePaginate(10, ['*'], 'revenuePage');
 
-         // Calculate available platform revenue
-       $totalPlatformRevenue = PlatformRevenue::where('amount', '>', 0)->sum('amount'); // Only positive entries
+       
+       
+     // Only positive entries
         $totalWithdrawals = PlatformRevenue::where('source', 'platform_withdrawal')->sum('amount'); // Should be negative
-        $pendingWithdrawals = PlatformWithdrawal::where('status', 'processing')->sum('amount');
+       $pendingPlatformWithdrawals = PlatformWithdrawal::where('status', 'processing')->sum('amount');
 
-        $availableRevenue = $totalPlatformRevenue + $totalWithdrawals - $pendingWithdrawals;
+        // Update the available revenue calculation:
+        $availableRevenue = $totalRevenue + $totalWithdrawals - $pendingPlatformWithdrawals;
 
         $platformWithdrawals = PlatformWithdrawal::with('admin')
             ->when($request->has('withdrawal_search'), function($query) use ($request) {
@@ -291,7 +312,7 @@ if (!$customerSettings) {
            // Revenue data
             'totalRevenue' => $totalRevenue,
             'currentMonthRevenue' => $currentMonthRevenue,
-            'revenueFromCompletions' => $revenueFromCompletions,
+            'averageMonthlyRevenue' => $averageMonthlyRevenue,
             'revenueTransactions' => $revenueTransactions,
             'categoryRequestsCount' => $categoryRequestsCount,
             'pendingCount' => $pendingCount,
@@ -302,6 +323,7 @@ if (!$customerSettings) {
              'stats' => $stats,
             'status' => $status,
             'withdrawals' => $withdrawals,
+               'pendingPlatformWithdrawals' => $pendingPlatformWithdrawals,
             'pendingWithdrawals' => $pendingWithdrawals,
             'processingWithdrawals' => $processingWithdrawals,
             'completedWithdrawals' => $completedWithdrawals,

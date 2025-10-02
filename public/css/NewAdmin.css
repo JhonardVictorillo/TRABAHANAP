@@ -1133,7 +1133,7 @@ button {
 .admin-table th,
 .admin-table td {
     padding: 14px 16px;
-    text-align: left;
+    text-align: center;
     border-bottom: 1px solid #e3e6f0;
     font-size: 15px;
     color: #333;
@@ -1373,7 +1373,7 @@ button {
   }
   
   #revenueSection table th {
-    text-align: left;
+    text-align: center;
     padding: 12px 15px;
     border-bottom: 1px solid #e2e8f0;
     color: #64748b;
@@ -2482,6 +2482,8 @@ button {
     transition: all 0.3s;
     white-space: nowrap;
     position: relative;
+    margin-right: 8px;
+    
 }
 
 .withdrawal-tab-btn:hover {
@@ -2492,22 +2494,41 @@ button {
     background-color: #2563eb;
     color: white;
 }
-
 .withdrawal-tab-btn .withdrawal-badge {
     position: absolute;
-    top: -8px;
+    top:-1px;
     right: -8px;
     background-color: #ef4444;
     color: white;
     border-radius: 50%;
-    width: 20px;
-    height: 20px;
+    min-width: 22px;
+    height: 22px;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 12px;
     font-weight: 700;
+    line-height: 1;
+    padding: 0 6px;
+    box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
+    border: 2px solid #fff;
+    z-index: 10;
 }
+
+/* Enhanced pill style for better visibility */
+.withdrawal-tab-btn .withdrawal-badge.pill {
+    border-radius: 12px;
+    min-width: 24px;
+    height: 20px;
+    padding: 0 8px;
+    font-size: 12px;
+    background-color: #ef4444;
+    color: white;
+    font-weight: 700;
+    box-shadow: 0 2px 6px rgba(239, 68, 68, 0.4);
+    border: 2px solid #fff;
+}
+
 
 /* Tab Content */
 .withdrawal-tab-content {

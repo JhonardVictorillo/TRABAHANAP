@@ -34,9 +34,7 @@
     </div>
     <ul class="sidebar-links">
     
-      <li>
-        <a href="#homeSection" id="homeLink" class="active"><span class="material-symbols-outlined">home</span>Home</a>
-      </li>
+   
       <li>
         <a href="#dashboardSection" id="dashboardLink"><span class="material-symbols-outlined">dashboard</span>Dashboard</a>
       </li>
@@ -69,3 +67,5 @@
       </li>
     </ul>
   </aside>
+
+  <main class="main-content">

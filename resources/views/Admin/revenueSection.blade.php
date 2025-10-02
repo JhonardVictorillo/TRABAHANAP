@@ -6,23 +6,23 @@
 
   <!-- Revenue Summary Cards -->
   <div class="dashboard-cards">
-    <div class="card">
-      <div class="icon">
-        <span class="material-symbols-outlined">payments</span>
+      <div class="card">
+        <div class="icon">
+          <span class="material-symbols-outlined">account_balance_wallet</span>
+        </div>
+        <div>
+          <p>Available Balance</p>
+          <h3>Php.{{ number_format($availableRevenue ?? 0, 2) }}</h3>
+        </div>
       </div>
-      <div>
-        <p>Total Revenue</p>
-        <h3>Php.{{ number_format($totalRevenue ?? 0, 2) }}</h3>
-      </div>
-    </div>
     
-    <div class="card">
+     <div class="card">
       <div class="icon">
-        <span class="material-symbols-outlined">check_circle</span>
+        <span class="material-symbols-outlined">trending_up</span>
       </div>
       <div>
-        <p>From Service Fees</p>
-        <h3>Php.{{ number_format($revenueFromCompletions ?? 0, 2) }}</h3>
+        <p>Average Monthly Revenue</p>
+        <h3>Php.{{ number_format($averageMonthlyRevenue ?? 0, 2) }}</h3>
       </div>
     </div>
     
@@ -97,24 +97,28 @@
                 <td>{{ \Carbon\Carbon::parse($transaction->date)->format('M d, Y') }}</td>
                 <td>Php.{{ number_format($transaction->amount, 2) }}</td>
                 <td>
-                  @if($transaction->source == 'commitment_fee_commission')
-                    <span class="status" style="background-color: {{ getStatusColor('completed') }};">
+                 @if($transaction->source == 'commitment_fee_commission')
+                    <span class="status" style="background-color: #10b981; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">
                       Commitment Fee
                     </span>
                   @elseif($transaction->source == 'final_payment_commission')
-                    <span class="status" style="background-color: #3B82F6;">
-                      Service Fee
+                    <span class="status" style="background-color: #3B82F6; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">
+                      Service Fee Commission
                     </span>
                   @elseif($transaction->source == 'late_cancellation_commission')
-                    <span class="status" style="background-color: {{ getStatusColor('canceled') }};">
+                    <span class="status" style="background-color: #ef4444; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">
                       Cancellation Fee
                     </span>
                   @elseif($transaction->source == 'no_show_commission')
-                    <span class="status" style="background-color: #EF4444;">
+                    <span class="status" style="background-color: #f59e0b; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">
                       No-Show Fee
                     </span>
+                  @elseif($transaction->source == 'platform_withdrawal')
+                    <span class="status" style="background-color: #6b7280; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">
+                      Platform Withdrawal
+                    </span>
                   @else
-                    <span class="status">
+                    <span class="status" style="background-color: #8b5cf6; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">
                       {{ ucfirst(str_replace('_', ' ', $transaction->source)) }}
                     </span>
                   @endif

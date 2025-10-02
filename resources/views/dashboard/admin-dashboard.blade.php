@@ -14,7 +14,7 @@ function getStatusColor($status) {
 @endphp
 
 @include("admin.header")
-@include("admin.homeSection")
+
 @include('admin.sidebar&Header')
 @include('admin.dashboard-admin')
 @include('admin.booking')  
@@ -70,10 +70,7 @@ links.forEach(link => {
   });
 });
 
-// Home Link
-document.getElementById('homeLink').addEventListener('click', function () {
-  setActiveSection('#homeSection');
-});
+
 
 document.getElementById('revenueLink').addEventListener('click', function () {
   setActiveSection('#revenueSection');
@@ -136,8 +133,12 @@ function toggleDashboardCards(activeCard) {
 
 // On Page Load: Restore active section
 window.addEventListener('DOMContentLoaded', () => {
-  const savedSection = localStorage.getItem('activeSection') || '#homeSection';
+  const savedSection = localStorage.getItem('activeSection') || '#dashboardSection';
   setActiveSection(savedSection);
+  
+  if (savedSection === '#dashboardSection') {
+    toggleDashboardCards('totalFreelancers');
+  }
 });
 
 

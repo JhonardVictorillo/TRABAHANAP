@@ -18,7 +18,7 @@
           </div>
           
           <div class="profile-header-info">
-            <h2 class="profile-name">{{ $user->firstname }} {{ $user->lastname }}</h2>
+           <h2 class="profile-name">{{ Str::title($user->firstname) }} {{ Str::title($user->lastname) }}</h2>
             <p class="profile-role">{{ ucfirst(Auth::user()->role) }}</p>
             
            

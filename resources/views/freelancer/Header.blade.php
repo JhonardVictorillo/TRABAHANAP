@@ -211,8 +211,8 @@
       <!-- Profile Picture in Header -->
        <img src="{{ Auth::user()->profile_picture ? asset('storage/' . Auth::user()->profile_picture) : asset('images/defaultprofile.jpg') }}"  alt="User Avatar" class="avatar cursor-pointer" id="profilePic" />
       <div class="user-info">
-        <span class="user-name">{{ Auth::user()->firstname }}</span>
-        <p class="freelancer">{{ Auth::user()->role }}</p>
+        <span class="user-name">{{ Str::title(Auth::user()->firstname) }}</span>
+        <p class="freelancer">{{ Str::title(Auth::user()->role) }}</p>
     </div>
       
     </div>
