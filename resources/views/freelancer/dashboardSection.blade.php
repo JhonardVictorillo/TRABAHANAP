@@ -166,28 +166,38 @@
             <div class="empty-portfolio">
               <i class='bx bx-image-add'></i>
               <p>No portfolio items yet</p>
-             
             </div>
           @else
             <div class="works-grid">
+              @php
+                $imageCount = 0;
+                $maxImages = 6; // Limit to 6 images maximum
+              @endphp
+              
               @foreach ($user->posts as $post)
                 @foreach ($post->pictures as $index => $picture)
-                  @if($index < 6) <!-- Limit to 6 images for cleaner display -->
+                  @if($imageCount < $maxImages)
                     <div class="work-item" onclick="openPortfolioModal('{{ asset('storage/' . $picture->image_path) }}', '{{ $post->title ?? 'Portfolio Item' }}', '{{ $post->description ?? '' }}')">
                       <img src="{{ asset('storage/' . $picture->image_path) }}" alt="{{ $post->title ?? 'Work Image' }}" />
                       <div class="work-overlay">
                         <span class="work-title">{{ $post->title ?? 'View' }}</span>
                       </div>
                     </div>
+                    @php $imageCount++; @endphp
                   @endif
                 @endforeach
               @endforeach
             </div>
             
-            @if(count($user->posts) > 2) <!-- Show view all button if more than 2 posts -->
+            <!-- View All Portfolio Button - Same format as View All Reviews -->
+            @php
+              $totalImages = $user->posts->sum(function($post) { return count($post->pictures); });
+            @endphp
+            
+            @if($totalImages > $maxImages)
               <div class="view-all-works">
-                <button class="view-all-btn" onclick="showPortfolioPage()">
-                  <i class='bx bx-images'></i> View All Works
+                <button class="view-reviews-btn" onclick="showPortfolioPage()">
+                  <i class='bx bx-images'></i> View All {{ $totalImages }} Works
                 </button>
               </div>
             @endif
@@ -1643,6 +1653,146 @@ function debugDashboard() {
 document.addEventListener('DOMContentLoaded', function() {
     setTimeout(debugDashboard, 1000);
 });
+// ===============================================
+// PORTFOLIO FUNCTIONS - FINAL VERSION
+// ===============================================
+
+function showPortfolioPage() {
+    console.log('Opening full portfolio view...');
+    
+    // Get all portfolio images from the current page
+    const workItems = document.querySelectorAll('.work-item:not(.view-more-item)');
+    
+    // Get total images from the view-more card or calculate from DOM
+    const viewMoreCard = document.querySelector('.view-more-item .more-count');
+    const visibleImages = workItems.length;
+    let totalImages = visibleImages;
+    
+    if (viewMoreCard) {
+        const moreCount = viewMoreCard.textContent.match(/\+(\d+)/);
+        if (moreCount) {
+            totalImages = visibleImages + parseInt(moreCount[1]);
+        }
+    }
+    
+    if (workItems.length === 0) {
+        alert('No portfolio items found to display');
+        return;
+    }
+    
+    // Create modal HTML
+    const modalHTML = `
+        <div id="fullPortfolioModal" class="full-portfolio-modal">
+            <div class="full-portfolio-content">
+                <div class="full-portfolio-header">
+                    <h2><i class='bx bx-images'></i> Complete Portfolio (${totalImages} images)</h2>
+                    <button class="close-full-portfolio" onclick="closeFullPortfolio()">×</button>
+                </div>
+                <div class="full-portfolio-grid" id="fullPortfolioGrid">
+                    <!-- Images will be loaded here -->
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Remove existing modal if any
+    const existingModal = document.getElementById('fullPortfolioModal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+    
+    // Add modal to body
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    
+    // Load ALL portfolio images directly from the page data
+    loadAllPortfolioImagesFromBlade();
+    
+    // Prevent body scroll
+    document.body.style.overflow = 'hidden';
+    
+    // Close on outside click
+    document.getElementById('fullPortfolioModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeFullPortfolio();
+        }
+    });
+    
+    // Close on escape key
+    const escapeHandler = function(e) {
+        if (e.key === 'Escape') {
+            closeFullPortfolio();
+            document.removeEventListener('keydown', escapeHandler);
+        }
+    };
+    document.addEventListener('keydown', escapeHandler);
+}
+
+function loadAllPortfolioImagesFromBlade() {
+    const grid = document.getElementById('fullPortfolioGrid');
+    if (!grid) return;
+    
+    // Get all portfolio data from PHP variables
+    const portfolioData = {!! json_encode($user->posts->map(function($post) {
+        return $post->pictures->map(function($picture) use ($post) {
+            return [
+                'path' => asset('storage/' . $picture->image_path),
+                'title' => $post->title ?? 'Portfolio Item',
+                'description' => $post->description ?? '',
+                'post_id' => $post->id
+            ];
+        });
+    })->flatten(1)) !!};
+    
+    console.log('Loading portfolio data:', portfolioData);
+    
+    // Check if no portfolio items
+    if (portfolioData.length === 0) {
+        grid.innerHTML = `
+            <div style="
+                grid-column: 1 / -1;
+                text-align: center;
+                padding: 40px;
+                color: #666;
+            ">
+                <i class='bx bx-image-add' style="font-size: 3rem; margin-bottom: 1rem; display: block;"></i>
+                <h3>No Portfolio Items</h3>
+                <p>Your portfolio items will appear here once you start adding them.</p>
+            </div>
+        `;
+        return;
+    }
+    
+    // Add all images to the grid
+    portfolioData.forEach((image, index) => {
+        const imageElement = document.createElement('div');
+        imageElement.className = 'full-portfolio-item';
+        imageElement.innerHTML = `
+            <img src="${image.path}" 
+                 alt="${image.title}" 
+                 onclick="openPortfolioModal('${image.path}', '${image.title}', '${image.description}')"
+                 loading="${index < 12 ? 'eager' : 'lazy'}" />
+            <div class="work-overlay">
+                <span class="work-title">${image.title.substring(0, 20)}${image.title.length > 20 ? '...' : ''}</span>
+            </div>
+        `;
+        grid.appendChild(imageElement);
+    });
+    
+   
+}
+
+function closeFullPortfolio() {
+    const modal = document.getElementById('fullPortfolioModal');
+    if (modal) {
+        // Add fade out animation
+        modal.style.animation = 'fadeOut 0.3s ease';
+        setTimeout(() => {
+            modal.remove();
+            document.body.style.overflow = 'auto';
+        }, 300);
+    }
+}
+
 
 
 

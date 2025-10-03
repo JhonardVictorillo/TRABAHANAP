@@ -70,12 +70,12 @@
                             @endif
                         </td>
                         <td>
-                            <span class="user-count" style="background-color: #e5e7eb; color: #4b5563; padding: 2px 6px; border-radius: 9999px; font-size: 0.75rem;">
+                             <span class="user-count" style="background-color: #e5e7eb; color: #4b5563; padding: 4px 8px; border-radius: 9999px; font-size: 0.75rem; font-weight: 500;">
                                 {{ $category->users_count ?? 0 }}
                             </span>
                             <button class="view-users" data-id="{{ $category->id }}" data-name="{{ $category->name }}" 
-                                    style="background: #2563eb; color: white; border: none; width: 22px; height: 22px; border-radius: 50%; font-size: 0.7rem; cursor: pointer; margin-left: 5px;">
-                                <i class="fas fa-users"></i>
+                                    style="background: #2563eb; color: white; border: none; width: 28px; height: 28px; border-radius: 50%; font-size: 0.75rem; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: all 0.2s ease;">
+                                <i class="fas fa-users" style="font-size: 12px; line-height: 1;"></i>
                             </button>
                         </td>
                         <td>{{ $category->created_at->format('M d, Y') }}</td>
