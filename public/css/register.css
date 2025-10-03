@@ -455,24 +455,50 @@ text-align: center; /* Center the heading */
         padding-top: 70px; /* Further reduce padding on mobile */
     }
     
-    .welcome-section {
-        display: block; /* Don't hide it completely */
-        margin-top: 0; /* Reset negative margin */
-        padding: 1.5rem;
-        text-align: center;
+  .welcome-section {
+        display: block;
+        padding: 2rem 1.5rem;
+        text-align: center; /* This centers the content */
+        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+        color: white;
+        margin-top: 0;
+        /* Add these properties for better centering */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: auto;
     }
     
     .welcome-content {
-        text-align: center;
+        text-align: center; /* Center all text */
         margin: 0 auto;
+        color: white;
+        max-width: 100%;
+        width: 100%; /* Take full width for proper centering */
     }
     
     .welcome-content h2 {
-        font-size: 2rem; /* Smaller on mobile */
+        font-size: 2.2rem;
+        color: white;
+        margin-bottom: 1rem;
+        line-height: 1.2;
+        text-align: center; /* Explicitly center the heading */
     }
     
     .welcome-content p {
-        font-size: 1.1rem; /* Smaller on mobile */
+        font-size: 1.1rem;
+        opacity: 0.95;
+        margin-bottom: 0.8rem;
+        text-align: center; /* Center the paragraph */
+    }
+    
+    .welcome-content .highlight {
+        font-size: 1.3rem;
+        margin-top: 1rem;
+        font-weight: 600;
+        opacity: 1;
+        text-align: center; /* Center the highlight text */
+        display: block; /* Ensure it's a block element */
     }
     
     .signup-box {
@@ -540,16 +566,33 @@ text-align: center; /* Center the heading */
 /* Small mobile improvements */
 @media (max-width: 480px) {
     .welcome-section {
-        padding: 1rem 0.5rem;
+        padding: 1.5rem 1rem;
+        display: flex; /* Keep flex display */
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .welcome-content {
+        text-align: center; /* Ensure centering on small screens */
+        width: 100%;
     }
     
     .welcome-content h2 {
-        font-size: 1.6rem;
-        margin-bottom: 1rem;
+        font-size: 1.8rem;
+        margin-bottom: 0.8rem;
+        text-align: center;
     }
     
     .welcome-content p {
         font-size: 1rem;
+        margin-bottom: 0.6rem;
+        text-align: center;
+    }
+    
+    .welcome-content .highlight {
+        font-size: 1.1rem;
+        margin-top: 0.8rem;
+        text-align: center;
     }
     
     .signup-content {
@@ -569,6 +612,19 @@ text-align: center; /* Center the heading */
     .alert-success {
         padding: 10px 15px;
         font-size: 0.9rem;
+    }
+}
+@media (max-width: 360px) {
+    .welcome-content h2 {
+        font-size: 1.6rem;
+    }
+    
+    .welcome-content p {
+        font-size: 0.95rem;
+    }
+    
+    .welcome-content .highlight {
+        font-size: 1rem;
     }
 }
 

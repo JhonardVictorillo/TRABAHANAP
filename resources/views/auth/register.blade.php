@@ -115,7 +115,9 @@
                             <i class='bx bx-lock-alt' aria-hidden="true"></i>
                             <input type="password" name="password_confirmation" id="passwordConfirmField" placeholder="Confirm Password" required autocomplete="new-password">
                             <span id="togglePasswordConfirm" class="password-toggle-text" tabindex="0" role="button" aria-label="Show confirm password">Show</span>
+                        
                         </div>
+                         <div class="error" id="error-password_confirmation"></div>
                     </div>
 
                     <div class="terms">
@@ -202,12 +204,13 @@
 
     @include('successMessage')
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-              const signupForm = document.getElementById('signupForm');
+   <script>
+document.addEventListener('DOMContentLoaded', function () {
+    const signupForm = document.getElementById('signupForm');
     const signupBtn = document.querySelector('.signup-btn');
     const btnText = signupBtn.querySelector('.btn-text');
     const btnSpinner = signupBtn.querySelector('.btn-spinner');
+    const termsCheckbox = document.getElementById('terms');
 
     // Field references
     const fields = {
@@ -220,7 +223,7 @@
     };
 
     // Validation rules
-        function validateField(name, value) {
+    function validateField(name, value) {
         switch(name) {
             case 'firstname':
             case 'lastname':
@@ -247,7 +250,18 @@
         return '';
     }
 
-    // Live validation
+    // NEW: Validate role selection
+    function validateRole() {
+        const roleSelected = document.querySelector('input[name="role"]:checked');
+        return roleSelected ? '' : 'Please select your role (Customer or Freelancer).';
+    }
+
+    // NEW: Validate terms checkbox
+    function validateTerms() {
+        return termsCheckbox.checked ? '' : 'You must agree to the Terms of Service and Privacy Policy.';
+    }
+
+    // Live validation for fields
     Object.keys(fields).forEach(function(field) {
         fields[field].addEventListener('input', function() {
             const errorDiv = document.getElementById('error-' + field);
@@ -258,13 +272,31 @@
         });
     });
 
-    // Disable submit if any error
+    // NEW: Live validation for role selection
+    document.querySelectorAll('input[name="role"]').forEach(function(radio) {
+        radio.addEventListener('change', function() {
+            checkFormValidity();
+        });
+    });
+
+    // NEW: Live validation for terms checkbox
+    termsCheckbox.addEventListener('change', function() {
+        checkFormValidity();
+    });
+
+    // Updated: Check overall form validity including role and terms
     function checkFormValidity() {
         let hasError = false;
+        
+        // Check field errors
         Object.keys(fields).forEach(function(field) {
             const errorDiv = document.getElementById('error-' + field);
-            if (errorDiv.textContent) hasError = true;
+            if (errorDiv && errorDiv.textContent) hasError = true;
         });
+        
+        // NEW: Check role and terms
+        if (validateRole() || validateTerms()) hasError = true;
+        
         signupBtn.disabled = hasError;
         if (hasError) {
             signupBtn.classList.add('disabled');
@@ -273,9 +305,11 @@
         }
     }
 
-    // On submit, show all errors if any
+    // Updated: On submit validation including role and terms
     signupForm.addEventListener('submit', function(e) {
         let hasError = false;
+        
+        // Validate all fields
         Object.keys(fields).forEach(function(field) {
             const errorDiv = document.getElementById('error-' + field);
             const errorMsg = validateField(field, fields[field].value);
@@ -283,6 +317,21 @@
             errorDiv.style.display = errorMsg ? 'block' : 'none';
             if (errorMsg) hasError = true;
         });
+        
+        // NEW: Validate role selection
+        const roleError = validateRole();
+        if (roleError) {
+            hasError = true;
+            alert(roleError); // Show alert for role error
+        }
+        
+        // NEW: Validate terms agreement
+        const termsError = validateTerms();
+        if (termsError) {
+            hasError = true;
+            alert(termsError); // Show alert for terms error
+        }
+        
         if (hasError) {
             e.preventDefault();
             signupBtn.disabled = false;
@@ -290,35 +339,38 @@
             btnText.style.display = 'inline-block';
             btnSpinner.style.display = 'none';
         } else {
+            // Form is valid, show loading state
             signupBtn.disabled = true;
             signupBtn.classList.add('disabled');
             btnText.style.display = 'none';
             btnSpinner.style.display = 'inline-block';
         }
     });
-    
 
-            // Password toggle functionality
-            const passwordField = document.getElementById('passwordField');
-            const togglePassword = document.getElementById('togglePassword');
+    // Password toggle functionality
+    const passwordField = document.getElementById('passwordField');
+    const togglePassword = document.getElementById('togglePassword');
 
-            togglePassword.addEventListener('click', function () {
-                const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
-                passwordField.setAttribute('type', type);
-                this.textContent = type === 'password' ? 'Show' : 'Hide';
-            });
+    togglePassword.addEventListener('click', function () {
+        const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
+        passwordField.setAttribute('type', type);
+        this.textContent = type === 'password' ? 'Show' : 'Hide';
+    });
 
-            const passwordConfirmField = document.getElementById('passwordConfirmField');
-            const togglePasswordConfirm = document.getElementById('togglePasswordConfirm');
+    const passwordConfirmField = document.getElementById('passwordConfirmField');
+    const togglePasswordConfirm = document.getElementById('togglePasswordConfirm');
 
-            togglePasswordConfirm.addEventListener('click', function () {
-                const type = passwordConfirmField.getAttribute('type') === 'password' ? 'text' : 'password';
-                passwordConfirmField.setAttribute('type', type);
-                this.textContent = type === 'password' ? 'Show' : 'Hide';
-            });
-        });
+    togglePasswordConfirm.addEventListener('click', function () {
+        const type = passwordConfirmField.getAttribute('type') === 'password' ? 'text' : 'password';
+        passwordConfirmField.setAttribute('type', type);
+        this.textContent = type === 'password' ? 'Show' : 'Hide';
+    });
 
-        
+    // Initial form validity check
+    checkFormValidity();
+});
+
+// Modal functionality (keep as separate DOMContentLoaded)
 document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('showTerms').onclick = function(e) {
         e.preventDefault();
@@ -334,7 +386,8 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('closePrivacy').onclick = function() {
         document.getElementById('privacyModal').style.display = 'none';
     };
-    // Optional: close modal when clicking outside content
+    
+    // Close modal when clicking outside content
     window.onclick = function(event) {
         if (event.target == document.getElementById('termsModal')) {
             document.getElementById('termsModal').style.display = 'none';
@@ -343,21 +396,6 @@ document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('privacyModal').style.display = 'none';
         }
     };
-});
-
-
-document.addEventListener('DOMContentLoaded', function () {
-    const signupForm = document.getElementById('signupForm');
-    const signupBtn = document.querySelector('.signup-btn');
-    const btnText = signupBtn.querySelector('.btn-text');
-    const btnSpinner = signupBtn.querySelector('.btn-spinner');
-
-    signupForm.addEventListener('submit', function(e) {
-        signupBtn.disabled = true;
-        signupBtn.classList.add('disabled');
-        btnText.style.display = 'none';
-        btnSpinner.style.display = 'inline-block';
-    });
 });
 </script>
 </body>

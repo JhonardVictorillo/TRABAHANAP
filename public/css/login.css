@@ -363,8 +363,46 @@ body {
     padding-top: 70px; /* Smaller header on mobile */
   }
   
-  .welcome-section {
-    display: none; /* Hide on mobile */
+   .welcome-section {
+    display: flex; /* Change from block to flex for better centering */
+    align-items: center; /* Center content vertically */
+    justify-content: center; /* Center content horizontally */
+    padding: 2rem 1.5rem;
+    text-align: center;
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    color: white;
+    min-height: 200px; /* Ensure adequate height */
+  }
+
+  .welcome-content {
+    text-align: center;
+    color: white;
+    max-width: 100%;
+    width: 100%; /* Ensure full width for proper centering */
+  }
+  
+  .welcome-content h2 {
+    font-size: 2.2rem;
+    margin-bottom: 1rem;
+    color: white;
+    line-height: 1.2;
+    text-align: center; /* Explicitly center */
+  }
+  
+  .welcome-content p {
+    font-size: 1.1rem;
+    opacity: 0.95;
+    margin-bottom: 0.8rem;
+    text-align: center; /* Center paragraph text */
+  }
+  
+  .welcome-content .highlight {
+    font-size: 1.3rem;
+    margin-top: 1rem;
+    font-weight: 600;
+    opacity: 1;
+    text-align: center; /* Center highlight text */
+    display: block; /* Ensure block display */
   }
   
   .signin-box {
@@ -383,6 +421,38 @@ body {
 
 /* Mobile phones */
 @media (max-width: 576px) {
+
+   .welcome-section {
+    padding: 1.5rem 1rem;
+    min-height: 180px; /* Slightly smaller on mobile */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .welcome-content {
+    text-align: center;
+    width: 100%;
+  }
+  
+  .welcome-content h2 {
+    font-size: 1.8rem;
+    margin-bottom: 0.8rem;
+    text-align: center;
+  }
+  
+  .welcome-content p {
+    font-size: 1rem;
+    margin-bottom: 0.6rem;
+    text-align: center;
+  }
+  
+  .welcome-content .highlight {
+    font-size: 1.1rem;
+    margin-top: 0.8rem;
+    text-align: center;
+  }
+
   .signin-content h1 {
     font-size: 2rem;
     text-align: center;
@@ -431,6 +501,26 @@ body {
 
 /* Very small phones */
 @media (max-width: 360px) {
+
+    .welcome-section {
+    min-height: 160px; /* Even smaller for very small screens */
+  }
+  
+  .welcome-content h2 {
+    font-size: 1.6rem;
+    text-align: center;
+  }
+  
+  .welcome-content p {
+    font-size: 0.95rem;
+    text-align: center;
+  }
+  
+  .welcome-content .highlight {
+    font-size: 1rem;
+    text-align: center;
+  }
+
   .signin-content h1 {
     font-size: 1.8rem;
   }
@@ -463,6 +553,37 @@ body {
 
 /* Landscape mode on mobile */
 @media (max-height: 500px) and (orientation: landscape) {
+
+   .welcome-section {
+    padding: 1rem;
+    min-height: 120px; /* Smaller height in landscape */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .welcome-content {
+    text-align: center;
+  }
+  
+  .welcome-content h2 {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    text-align: center;
+  }
+  
+  .welcome-content p {
+    font-size: 0.9rem;
+    margin-bottom: 0.3rem;
+    text-align: center;
+  }
+  
+  .welcome-content .highlight {
+    font-size: 1rem;
+    margin-top: 0.5rem;
+    text-align: center;
+  }
+
   .auth-container {
     padding-top: 65px;
   }
