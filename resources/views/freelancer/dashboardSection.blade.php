@@ -353,15 +353,15 @@
         <div class="p-form-group">
           <label class="p-label">Service Categories</label>
           
-          <!-- Multi-select for existing categories -->
+          <!-- single-select for existing categories -->
           <div class="p-categories-select">
-            <select multiple name="categories[]" class="p-select-multiple">
+            <select name="category_id" class="p-select-single" required>
               @foreach($categories as $category)
-                <option value="{{ $category->id }}" {{ $user->categories->contains($category->id) ? 'selected' : '' }}>
-                  {{ $category->name }}
-                </option>
+              <option value="{{ $category->id }}" {{ $user->categories->contains($category->id) ? 'selected' : '' }}>
+              {{ $category->name }}
+              </option>
               @endforeach
-            </select>
+              </select>
           </div>
           
           <!-- Category request section -->

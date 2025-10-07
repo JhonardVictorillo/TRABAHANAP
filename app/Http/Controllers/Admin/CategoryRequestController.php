@@ -117,9 +117,7 @@ class CategoryRequestController extends Controller
         // Add the category to the user's selected categories
         $user = User::find($categoryRequest->user_id);
         if ($user) {
-            $user->categories()->syncWithoutDetaching([$category->id]);
-            
-            // Notify the user (wrapped in try-catch to prevent notification failures from breaking the process)
+        
             try {
                 $user->notify(new CategoryRequestProcessedNotification($categoryRequest, true));
             } catch (\Exception $e) {

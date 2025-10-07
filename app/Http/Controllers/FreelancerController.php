@@ -634,9 +634,9 @@ public function update(Request $request)
     }
     
     // Handle categories relationship if present
-    if ($request->has('categories')) {
-        $user->categories()->sync($request->categories);
-    }
+        if ($request->has('category_id')) {
+            $user->categories()->sync([$request->category_id]);
+        }
 
     // Update user attributes
     $user->fill(array_diff_key($validated, array_flip(['profile_picture', 'skills', 'categories'])));
