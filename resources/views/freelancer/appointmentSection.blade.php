@@ -168,6 +168,34 @@
                                 </div>
                             </div>
                         </div>
+                        <!-- Decline Reason Container -->
+                        <div id="declineReasonContainer" style="display:none;" class="px-6 py-4 border-t border-gray-200 bg-red-50">
+                            <div class="mb-4">
+                                <label for="declineReason" class="block text-sm font-medium text-red-700 mb-2 flex items-center gap-2">
+                                    <i class="fas fa-exclamation-triangle text-red-600"></i>
+                                    Reason for Declining:
+                                </label>
+                                <textarea 
+                                    id="declineReason" 
+                                    placeholder="Please provide a reason for declining this appointment..." 
+                                    rows="3" 
+                                    class="w-full px-3 py-2 border border-red-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                                ></textarea>
+                            </div>
+                            <div class="flex justify-end gap-3">
+                                <button id="confirmDeclineBtn" class="btn bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-all duration-200">
+                                    <i class="fas fa-check"></i>
+                                    <span class="btn-text">Confirm Decline</span>
+                                    <span class="btn-spinner" style="display:none;">
+                                        <i class="fas fa-spinner fa-spin"></i>
+                                    </span>
+                                </button>
+                                <button id="cancelDeclineBtn" class="btn bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-all duration-200">
+                                    <i class="fas fa-arrow-left"></i>
+                                    Cancel
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -205,34 +233,7 @@
             </div>
         </div>
 
-        <!-- Decline Reason Container -->
-        <div id="declineReasonContainer" style="display:none;" class="px-6 py-4 border-t border-gray-200 bg-red-50">
-            <div class="mb-4">
-                <label for="declineReason" class="block text-sm font-medium text-red-700 mb-2 flex items-center gap-2">
-                    <i class="fas fa-exclamation-triangle text-red-600"></i>
-                    Reason for Declining:
-                </label>
-                <textarea 
-                    id="declineReason" 
-                    placeholder="Please provide a reason for declining this appointment..." 
-                    rows="3" 
-                    class="w-full px-3 py-2 border border-red-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
-                ></textarea>
-            </div>
-            <div class="flex justify-end gap-3">
-                <button id="confirmDeclineBtn" class="btn bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-all duration-200">
-                    <i class="fas fa-check"></i>
-                    <span class="btn-text">Confirm Decline</span>
-                    <span class="btn-spinner" style="display:none;">
-                        <i class="fas fa-spinner fa-spin"></i>
-                    </span>
-                </button>
-                <button id="cancelDeclineBtn" class="btn bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-all duration-200">
-                    <i class="fas fa-arrow-left"></i>
-                    Cancel
-                </button>
-            </div>
-        </div>
+        
 
         <!-- No-Show Form -->
         <form id="noShowForm" method="POST" action="{{ route('appointments.no_show', 0) }}" style="display:none;" class="px-6 py-4 border-t border-gray-200 bg-yellow-50">

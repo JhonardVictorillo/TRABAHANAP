@@ -95,7 +95,7 @@
       </table>
       </div>
        <div class="category-pagination-container">
-        {{ $freelancers->appends(request()->except('freelancersPage'))->links() }}
+          {{ $freelancers->appends(array_merge(request()->except('freelancers_page'), ['active_section' => 'totalFreelancers']))->links() }}
     </div>
     </div>
 
@@ -132,7 +132,7 @@
       </table>
     </div>
     <div class="category-pagination-container">
-        {{ $customer->appends(request()->except('customersPage'))->links() }}
+      {{ $customer->appends(array_merge(request()->except('customers_page'), ['active_section' => 'totalClients']))->links() }}
     </div>
     </div>
 
@@ -152,7 +152,7 @@
       </tr>
     </thead>
     <tbody>
-    @forelse($freelancers->where('is_verified', 0) as $freelancer)
+  @forelse($pendingAccounts as $freelancer)
         <tr>
             <td>
                 @if($freelancer->profile_picture)
@@ -194,7 +194,7 @@
  </div>
   <!-- Add Pagination -->
 <div class="category-pagination-container">
-    {{ $freelancers->appends(request()->except('freelancersPage'))->links() }}
+{{ $pendingAccounts->appends(array_merge(request()->except('pending_accounts_page'), ['active_section' => 'pendingAccounts']))->links() }}
 </div>
 </div>
 
@@ -215,7 +215,7 @@
             </tr>
           </thead>
           <tbody>
-          @foreach($posts as $post)
+        @foreach($pendingPosts as $post)
             <tr>
             <td>{{ $post->freelancer->firstname }} {{ $post->freelancer->lastname }}</td>
             @foreach($post->freelancer->categories as $category)  
@@ -273,7 +273,7 @@
       </div>
       <!-- Add Pagination -->
     <div class="category-pagination-container">
-        {{ $pendingPosts->appends(request()->except('pendingPostsPage'))->links() }}
+         {{ $pendingPosts->appends(array_merge(request()->except('pending_posts_page'), ['active_section' => 'pendingPosts']))->links() }}
     </div>
       </div>
   </div>
@@ -409,8 +409,98 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', function() {
-    const pendingPostsSection = document.querySelector('#pendingPostsSection');
+     // Get active section from URL parameters or server
+    const urlParams = new URLSearchParams(window.location.search);
+    const activeSection = urlParams.get('active_section') || '{{ $activeSection ?? "totalFreelancers" }}';
 
+    // Function to preserve active section in pagination and navigation
+    function preserveActiveSection() {
+        document.querySelectorAll('.category-pagination-container a').forEach(link => {
+            const url = new URL(link.href, window.location.origin);
+            url.searchParams.set('active_section', getCurrentActiveSection());
+            link.href = url.toString();
+        });
+    }
+
+    // Function to get current active section
+    function getCurrentActiveSection() {
+        const sections = ['totalFreelancers', 'totalClients', 'pendingAccounts', 'pendingPosts'];
+        for (let section of sections) {
+            const sectionElement = document.getElementById(`${section}Section`);
+            if (sectionElement && sectionElement.style.display !== 'none') {
+                return section;
+            }
+        }
+        return 'totalFreelancers'; // default
+    }
+
+    // Toggle dashboard cards and show correct section
+    function toggleDashboardCards(activeCard) {
+        const cards = ['totalFreelancers', 'totalClients', 'pendingAccounts', 'pendingPosts'];
+        cards.forEach(card => {
+            const cardElement = document.getElementById(`${card}Card`);
+            const sectionElement = document.getElementById(`${card}Section`);
+            if (card === activeCard) {
+                if (cardElement) cardElement.classList.add('active');
+                if (sectionElement) sectionElement.style.display = 'block';
+            } else {
+                if (cardElement) cardElement.classList.remove('active');
+                if (sectionElement) sectionElement.style.display = 'none';
+            }
+        });
+
+        // Update URL with active section
+        const url = new URL(window.location);
+        url.searchParams.set('active_section', activeCard);
+        history.replaceState(null, '', url.toString());
+
+        setTimeout(preserveActiveSection, 100);
+    }
+
+    // Set active section (for sidebar, if you have one)
+    function setActiveSection(selector) {
+        const sections = document.querySelectorAll('.dashboard-section, .details-section');
+        const links = document.querySelectorAll('.sidebar a');
+        sections.forEach(section => section.style.display = 'none');
+        links.forEach(link => link.classList.remove('active'));
+
+        const targetSection = document.querySelector(selector);
+        if (targetSection) {
+            targetSection.style.display = 'block';
+            if (selector === '#dashboardSection') {
+                setTimeout(() => toggleDashboardCards(activeSection), 50);
+            }
+        }
+        const correspondingLink = document.querySelector(`a[href="${selector}"]`);
+        if (correspondingLink) correspondingLink.classList.add('active');
+    }
+
+    // --- Initialization ---
+    setActiveSection('#dashboardSection');
+    setTimeout(() => toggleDashboardCards(activeSection), 100);
+    setTimeout(preserveActiveSection, 200);
+
+    // Card click events
+    document.getElementById('totalFreelancersCard').addEventListener('click', () => toggleDashboardCards('totalFreelancers'));
+    document.getElementById('totalClientsCard').addEventListener('click', () => toggleDashboardCards('totalClients'));
+    document.getElementById('pendingAccountsCard').addEventListener('click', () => toggleDashboardCards('pendingAccounts'));
+    document.getElementById('pendingPostsCard').addEventListener('click', () => toggleDashboardCards('pendingPosts'));
+
+    // Dashboard Link (if you have a sidebar/dashboard link)
+    const dashboardLink = document.getElementById('dashboardLink');
+    if (dashboardLink) {
+        dashboardLink.addEventListener('click', function () {
+            setActiveSection('#dashboardSection');
+            toggleDashboardCards(activeSection);
+        });
+    }
+
+
+    // =======================
+    // PENDING POSTS APPROVE/REJECT FUNCTIONS
+        const pendingPostsSection = document.querySelector('#pendingPostsSection');
+
+    
     // Approve button click
     pendingPostsSection.addEventListener('click', function(e) {
         if (e.target.classList.contains('approve-btn')) {
@@ -426,6 +516,7 @@
             rejectPost(postId, e.target);
         }
     });
+    
 
     function approvePost(postId, button) {
         if (!confirm("Are you sure you want to approve this post?")) return;

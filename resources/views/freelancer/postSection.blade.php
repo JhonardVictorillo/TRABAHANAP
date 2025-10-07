@@ -646,6 +646,8 @@
                         <label>Current Portfolio Images</label>
                         <div id="currentImageWrapper" class="current-images-grid"></div>
                         <input type="hidden" name="delete_images" id="delete_images" value="[]">
+                       <!-- Move the new images preview container here -->
+                       <div id="newImagePreviewContainer" class="image-preview-grid" style="margin-top: 16px;"></div>
                     </div>
                 </div>
 
@@ -668,7 +670,7 @@
                                 <span class="file-info">PNG, JPG up to 10MB each</span>
                             </div>
                         </div>
-                        <div id="newImagePreviewContainer" class="image-preview-grid"></div>
+                       
                     </div>
                 </div>
 
@@ -1169,7 +1171,103 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // editpost image preview
+  
+
+    // Image preview for edit modal - new images
+       document.getElementById('edit-post-picture')?.addEventListener('change', function(event) {
+    const previewContainer = document.getElementById('newImagePreviewContainer');
+    previewContainer.innerHTML = ''; // Clear existing previews
+    
+    const files = event.target.files;
+    
+    if (files.length > 0) {
+        Array.from(files).forEach((file, index) => {
+            if (file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    // Create the same structure as current images
+                    const previewDiv = document.createElement('div');
+                    previewDiv.className = 'image-preview'; // Same class as current images
+                    
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.alt = `New Image ${index + 1}`;
+                    
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.textContent = '×';
+                    deleteBtn.className = 'delete-image'; // Same class as current images
+                    deleteBtn.setAttribute('data-index', index);
+                    deleteBtn.setAttribute('data-type', 'new'); // Identify as new image
+                    deleteBtn.type = 'button';
+                    
+                    // Add click handler for new image deletion
+                    deleteBtn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        removeNewImagePreview(index);
+                    });
+                    
+                    previewDiv.appendChild(img);
+                    previewDiv.appendChild(deleteBtn);
+                    previewContainer.appendChild(previewDiv);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+});
+
+// Function to handle new image preview removal
+function removeNewImagePreview(indexToRemove) {
+    const fileInput = document.getElementById('edit-post-picture');
+    const previewContainer = document.getElementById('newImagePreviewContainer');
+    
+    // Create a new FileList without the deleted file
+    const dt = new DataTransfer();
+    const files = fileInput.files;
+    
+    Array.from(files).forEach((file, i) => {
+        if (i !== indexToRemove) {
+            dt.items.add(file);
+        }
+    });
+    
+    fileInput.files = dt.files;
+    
+    // Re-render all previews with updated indices
+    previewContainer.innerHTML = '';
+    Array.from(fileInput.files).forEach((file, newIndex) => {
+        if (file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const previewDiv = document.createElement('div');
+                previewDiv.className = 'image-preview';
+                
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.alt = `New Image ${newIndex + 1}`;
+                
+                const deleteBtn = document.createElement('button');
+                deleteBtn.textContent = '×';
+                deleteBtn.className = 'delete-image';
+                deleteBtn.setAttribute('data-index', newIndex);
+                deleteBtn.setAttribute('data-type', 'new');
+                deleteBtn.type = 'button';
+                
+                deleteBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    removeNewImagePreview(newIndex);
+                });
+                
+                previewDiv.appendChild(img);
+                previewDiv.appendChild(deleteBtn);
+                previewContainer.appendChild(previewDiv);
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+}
+
+    // image deletion in edit post modal
     function handleImageDeletion(imageToDelete) {
         let deleteInput = document.querySelector('input[name="delete_images"]');
         
@@ -1208,6 +1306,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (modalId === 'createPostModal') {
                 resetCreatePostModal();
+             } else if (modalId === 'editPostModal') {
+            // Clear new image previews when edit modal closes
+            document.getElementById('newImagePreviewContainer').innerHTML = '';
+            document.getElementById('edit-post-picture').value = '';
             }
 
             toggleModal(modalId, false);
@@ -1215,6 +1317,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     document.getElementById('cancelEditBtn')?.addEventListener('click', () => {
+         document.getElementById('newImagePreviewContainer').innerHTML = '';
+          document.getElementById('edit-post-picture').value = '';
         toggleModal('editPostModal', false);
     });
 

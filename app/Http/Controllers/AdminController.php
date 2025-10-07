@@ -44,31 +44,33 @@ class AdminController extends Controller
         $totalPendingPosts = Post::where('status', 'pending')->count();
       // ADD PAGINATION TO THESE QUERIES:
     
+      $activeSection = $request->get('active_section', 'totalFreelancers');  
     // Paginated freelancers for dashboard table
+ // Paginated freelancers for dashboard table
     $freelancers = User::with('categories')
-    ->where('role', 'freelancer')
-    ->where('profile_completed', 1)
-    ->orderBy('created_at', 'desc')
-    ->simplePaginate(10, ['*'], 'freelancersPage');
-    
+        ->where('role', 'freelancer')
+        ->where('profile_completed', 1)
+        ->orderBy('created_at', 'desc')
+        ->simplePaginate(6, ['*'], 'freelancers_page');
+
     // Paginated customers for dashboard table
     $customer = User::where('role', 'customer')
         ->where('profile_completed', 1)
         ->orderBy('created_at', 'desc')
-        ->simplePaginate(10, ['*'], 'customersPage');
+        ->simplePaginate(6, ['*'], 'customers_page'); // Changed from 'customersPage'
     
     // Paginated pending accounts for dashboard table
     $pendingAccounts = User::with('categories')
         ->where('role', 'freelancer')
         ->where('is_verified', 0)
         ->orderBy('created_at', 'desc')
-        ->simplePaginate(10, ['*'], 'pendingAccountsPage');
+        ->simplePaginate(6, ['*'], 'pending_accounts_page'); // Changed from 'pendingAccountsPage'
     
     // Paginated pending posts for dashboard table
     $pendingPosts = Post::with('freelancer', 'subServices', 'pictures')
         ->where('status', 'pending')
         ->orderBy('created_at', 'desc')
-        ->simplePaginate(10, ['*'], 'pendingPostsPage');
+        ->simplePaginate(6, ['*'], 'pending_posts_page');
 
     $users = User::all();
     
@@ -334,6 +336,7 @@ if (!$customerSettings) {
             'pendingPosts' => $pendingPosts,
             'freelancerSettings' => $freelancerSettings,
             'customerSettings' => $customerSettings,
+              'activeSection' => $activeSection, 
         ]);
     
    }
