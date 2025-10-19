@@ -288,31 +288,31 @@
     <div class="mt-8 flex flex-col items-center justify-center gap-2">
         <div class="flex w-full justify-between items-center">
             <div>
-            @if (!$posts->onFirstPage())
-                <a href="{{ $posts->previousPageUrl() }}" class="px-4 py-2 bg-white border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition flex items-center gap-2">
-                    <i class="ri-arrow-left-s-line"></i>
-                    Previous
-                </a>
-            @endif
+                @if (!$posts->onFirstPage())
+                    <a href="{{ $posts->previousPageUrl() }}" class="px-4 py-2 bg-white border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition flex items-center gap-2">
+                        <i class="ri-arrow-left-s-line"></i>
+                        Previous
+                    </a>
+                @endif
+            </div>
+            
+            <span class="text-sm text-gray-500">
+                Page {{ $posts->currentPage() }} of {{ $posts->lastPage() }}
+            </span>
+            
+            <div>
+                @if ($posts->hasMorePages())
+                    <a href="{{ $posts->nextPageUrl() }}" class="px-4 py-2 bg-white border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition flex items-center gap-2">
+                        Next
+                        <i class="ri-arrow-right-s-line"></i>
+                    </a>
+                @endif
+            </div>
         </div>
-        
-        <span class="text-sm text-gray-500">
-            Page {{ $posts->currentPage() }} of {{ $posts->lastPage() }}
-        </span>
-        
-        <div>
-            @if ($posts->hasMorePages())
-                <a href="{{ $posts->nextPageUrl() }}" class="px-4 py-2 bg-white border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition flex items-center gap-2">
-                    Next
-                    <i class="ri-arrow-right-s-line"></i>
-                </a>
-            @endif
+        <!-- Centered Results Summary -->
+        <div class="text-center text-sm text-gray-600 w-full">
+            Showing {{ $posts->firstItem() ?? 0 }} - {{ $posts->lastItem() ?? 0 }} of {{ $posts->total() }} services
         </div>
-    </div>
-
-    <!-- Results Summary -->
-    <div class="mt-2 text-center text-sm text-gray-600">
-        Showing {{ $posts->firstItem() ?? 0 }} - {{ $posts->lastItem() ?? 0 }} of {{ $posts->total() }} services
     </div>
 @endif
 
