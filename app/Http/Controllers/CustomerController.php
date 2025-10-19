@@ -125,7 +125,7 @@ if ($request->filled('offers_remote')) {
             // Default sort
             $query->orderBy(DB::raw('IFNULL(average_rating, 0)'), 'desc');
         }
-    $posts = $query->paginate(12);
+    $posts = $query->paginate(9);
     // dd(DB::getQueryLog());
 
         $notifications = auth()->user()->notifications; // Get all notifications
