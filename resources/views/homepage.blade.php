@@ -94,7 +94,7 @@
     <select id="categoryFilter" style="padding: 8px 40px 8px 15px; border-radius: 20px; border: 1px solid #e0e0e0; background: white; min-width: 180px; font-size: 14px; -webkit-appearance: none; -moz-appearance: none; appearance: none; background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIiIGhlaWdodD0iOCIgdmlld0JveD0iMCAwIDEyIDgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxwYXRoIGQ9Ik0xIDFMNiA2TDExIDEiIHN0cm9rZT0iIzY2NiIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4KPC9zdmc+'); background-repeat: no-repeat; background-position: right 15px center; background-size: 12px;">
     <option value="all">All Categories</option>
     @foreach($categories as $category)
-        <option value="{{ $category->id }}">{{ $category->name }}</option>
+        <option value="{{ $category->id }}">{{ Str::title($category->name) }}</option>
     @endforeach
 </select>
   </div>

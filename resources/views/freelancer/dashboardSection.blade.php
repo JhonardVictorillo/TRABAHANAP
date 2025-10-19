@@ -358,7 +358,7 @@
             <select name="category_id" class="p-select-single" required>
               @foreach($categories as $category)
               <option value="{{ $category->id }}" {{ $user->categories->contains($category->id) ? 'selected' : '' }}>
-              {{ $category->name }}
+              {{ Str::title($category->name) }}
               </option>
               @endforeach
               </select>
