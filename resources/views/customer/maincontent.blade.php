@@ -285,8 +285,9 @@
 <!-- Pagination Links -->
 <!-- Simplified Pagination Links for Post Services -->
 @if($posts->total() > $posts->perPage())
-    <div class="mt-8 flex justify-between items-center">
-        <div>
+    <div class="mt-8 flex flex-col items-center justify-center gap-2">
+        <div class="flex w-full justify-between items-center">
+            <div>
             @if (!$posts->onFirstPage())
                 <a href="{{ $posts->previousPageUrl() }}" class="px-4 py-2 bg-white border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition flex items-center gap-2">
                     <i class="ri-arrow-left-s-line"></i>
