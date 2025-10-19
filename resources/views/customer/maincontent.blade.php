@@ -309,10 +309,7 @@
                 @endif
             </div>
         </div>
-        <!-- Centered Results Summary -->
-        <div class="text-center text-sm text-gray-600 w-full">
-            Showing {{ $posts->firstItem() ?? 0 }} - {{ $posts->lastItem() ?? 0 }} of {{ $posts->total() }} services
-        </div>
+       
     </div>
 @endif
 
