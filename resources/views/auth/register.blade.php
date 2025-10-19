@@ -85,6 +85,9 @@
                                 title="Only Gmail addresses are allowed (e.g. yourname@gmail.com)">
                         </div>
                         <div class="error" id="error-email"></div>
+                         @error('email')
+                            <div class="error" role="alert">{{ $message }}</div>
+                        @enderror
                     </div>
 
                  <div class="form-group">

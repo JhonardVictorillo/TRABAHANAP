@@ -146,12 +146,12 @@
           </div>
         </div>
 
-        <div style="margin-top: 10px; display: flex; justify-content: space-between; font-size: 0.9rem; color: #555;">
-          <div style="display: flex; align-items: center; gap: 4px;">
+        <div style="margin-top: 10px; display: flex; flex-wrap: wrap; justify-content: space-between; font-size: 0.9rem; color: #555;">
+          <div style="display: flex; align-items: center; gap: 4px; margin-right: 10px;">
             <i class="fas fa-clock" style="color: #666;"></i>
             {{ $post->service_duration }} min
           </div>
-          <div style="display: flex; align-items: center; gap: 4px;">
+          <div style="display: flex; align-items: center; gap: 4px; margin-right: 10px;">
             <i class="fas fa-map-marker-alt" style="color: #666;"></i>
             @if($post->location_restriction == 'minglanilla_only')
               Minglanilla
