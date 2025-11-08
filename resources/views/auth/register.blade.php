@@ -155,50 +155,53 @@
         </div>
     </main>
 
-    <!-- Terms Modal -->
-<div id="termsModal" class="modal" style="display:none;">
-    <div class="modal-content">
-        <span class="close" id="closeTerms">&times;</span>
-        <h2 style="border: none; border-top: 2px solid #2563eb22; margin: 0.7rem 0 1.2rem 0;">Terms of Service</h2>
-            <p>
-                Welcome to MinglaGawa! By creating an account and using our platform, you agree to the following terms:
+   <div id="privacyModal" class="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); z-index: 1000; overflow-y: auto; padding: 20px;">
+    <div class="modal-content" style="background-color: white; max-width: 700px; margin: 40px auto; border-radius: 12px; position: relative; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);">
+        <span class="close" id="closePrivacyModal" style="position: absolute; right: 24px; top: 24px; font-size: 24px; color: #9ca3af; cursor: pointer; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 50%;">&times;</span>
+        <h2 style="color: #111827; font-size: 24px; padding: 24px 24px 16px; margin: 0; border-bottom: 1px solid #e5e7eb;">Privacy Policy</h2>
+        <div class="modal-body" style="padding: 24px; color: #4b5563; line-height: 1.6;">
+            <p style="margin-bottom: 16px;">
+                MinglaGawa values your privacy. This policy explains how we collect, use, and protect your information:
             </p>
-            <ul>
+            <ul style="list-style-type: disc; margin-left: 20px; margin-bottom: 16px;">
+                 <li><strong>Information Collection:</strong> We collect personal information such as your name, email, contact number, and payment details when you register or use our services.</li>
+                <li><strong>Use of Information:</strong> Your information is used to provide and improve our services, process payments, and communicate with you.</li>
+                <li><strong>Sharing:</strong> We do not sell your personal information. We may share it with trusted third parties only as necessary to operate the platform (e.g., payment processors).</li>
+                <li><strong>Security:</strong> We implement security measures to protect your data from unauthorized access.</li>
+                <li><strong>Cookies:</strong> MinglaGawa uses cookies to enhance your experience. You can disable cookies in your browser settings.</li>
+                <li><strong>Access & Correction:</strong> You may access and update your personal information in your account settings.</li>
+                <li><strong>Changes:</strong> We may update this policy. We will notify you of significant changes via email or platform notice.</li>
+            </ul>
+            <p style="margin-bottom: 16px;">
+                For privacy concerns, contact us at <a href="mailto:privacy@minglagawa.com" style="color: #2563eb; text-decoration: none;">privacy@minglagawa.com</a>
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- Terms of Service Modal -->
+<div id="termsModal" class="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); z-index: 1000; overflow-y: auto; padding: 20px;">
+    <div class="modal-content" style="background-color: white; max-width: 700px; margin: 40px auto; border-radius: 12px; position: relative; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);">
+        <span class="close" id="closeTermsModal" style="position: absolute; right: 24px; top: 24px; font-size: 24px; color: #9ca3af; cursor: pointer; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 50%;">&times;</span>
+        <h2 style="color: #111827; font-size: 24px; padding: 24px 24px 16px; margin: 0; border-bottom: 1px solid #e5e7eb;">Terms of Service</h2>
+        <div class="modal-body" style="padding: 24px; color: #4b5563; line-height: 1.6;">
+            <p style="margin-bottom: 16px;">
+                Welcome to MinglaGawa! By using our platform, you agree to the following terms:
+            </p>
+            <ul style="list-style-type: disc; margin-left: 20px; margin-bottom: 16px;">
                 <li><strong>Eligibility:</strong> You must be at least 18 years old to use our services.</li>
                 <li><strong>Account Responsibility:</strong> You are responsible for maintaining the confidentiality of your account and password.</li>
                 <li><strong>Service Use:</strong> You agree to use MinglaGawa only for lawful purposes and not to engage in any fraudulent or harmful activity.</li>
-                <li><strong>Payments:</strong> All payments and transactions must be made through the platform’s approved methods.</li>
-                <li><strong>Platform Commission:</strong> MinglaGawa charges a commission fee on each completed transaction. The commission is automatically deducted from the freelancer’s earnings before payout. The current commission rate is <strong>5%</strong> of the total service amount, but this may change with notice.</li>
+                <li><strong>Payments:</strong> All payments and transactions must be made through the platform's approved methods.</li>
+                <li><strong>Platform Commission:</strong> MinglaGawa charges a commission fee on each completed transaction. The commission is automatically deducted from the freelancer's earnings before payout.</li>
                 <li><strong>Content:</strong> You are responsible for any content you post. Do not post anything illegal, offensive, or infringing.</li>
                 <li><strong>Termination:</strong> We reserve the right to suspend or terminate your account for violations of these terms.</li>
                 <li><strong>Changes:</strong> MinglaGawa may update these terms at any time. Continued use of the platform means you accept the new terms.</li>
             </ul>
-            <p>
-                For questions, contact us at support@minglagawa.com.
+            <p style="margin-bottom: 16px;">
+                For questions, contact us at <a href="mailto:support@minglagawa.com" style="color: #2563eb; text-decoration: none;">support@minglagawa.com</a>
             </p>
-    </div>
-</div>
-
-<!-- Privacy Modal -->
-<div id="privacyModal" class="modal" style="display:none;">
-    <div class="modal-content">
-        <span class="close" id="closePrivacy">&times;</span>
-        <h2 style="border: none; border-top: 2px solid #2563eb22; margin: 0.7rem 0 1.2rem 0;">Privacy Policy</h2>
-        <p>
-            MinglaGawa values your privacy. This policy explains how we collect, use, and protect your information:
-        </p>
-        <ul>
-            <li><strong>Information Collection:</strong> We collect personal information such as your name, email, contact number, and payment details when you register or use our services.</li>
-            <li><strong>Use of Information:</strong> Your information is used to provide and improve our services, process payments, and communicate with you.</li>
-            <li><strong>Sharing:</strong> We do not sell your personal information. We may share it with trusted third parties only as necessary to operate the platform (e.g., payment processors).</li>
-            <li><strong>Security:</strong> We implement security measures to protect your data from unauthorized access.</li>
-            <li><strong>Cookies:</strong> MinglaGawa uses cookies to enhance your experience. You can disable cookies in your browser settings.</li>
-            <li><strong>Access & Correction:</strong> You may access and update your personal information in your account settings.</li>
-            <li><strong>Changes:</strong> We may update this policy. We will notify you of significant changes via email or platform notice.</li>
-        </ul>
-        <p>
-            For privacy concerns, contact us at privacy@minglagawa.com.
-        </p>
+        </div>
     </div>
 </div>
 

@@ -208,6 +208,7 @@
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
+
 }
 
 /* Profile Card (Sidebar) */
@@ -219,6 +220,7 @@
   position: relative;
   height: fit-content;
   transition: all 0.3s ease;
+  
 }
 
 .profile-image-container {
@@ -8910,3 +8912,5 @@ body.sidebar-active .sidebar-overlay {
         padding: 15px;
     }
 }
+
+

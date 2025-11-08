@@ -323,11 +323,6 @@
     </div>
 </div>
 
-<form id="payCashForm" method="POST" action="/customer/appointments/pay-cash" style="display:none;">
-    @csrf
-    <input type="hidden" name="appointment_id" id="payCashAppointmentId">
-    <input type="hidden" name="amount" id="payCashAmount">
-</form>
 
 <!-- Payment Modal -->
 <div id="paymentModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" style="display: none;">
@@ -382,13 +377,6 @@
                         </span>
                     </button>
                 </form>
-                <button id="payCashButton" class="w-full mt-2 py-2 text-white bg-green-600 hover:bg-green-700 rounded-lg flex items-center justify-center gap-2">
-                    <i class="ri-money-dollar-circle-line"></i> 
-                    <span class="btn-text">Pay Cash</span>
-                    <span class="btn-spinner" style="display:none;">
-                        <i class="ri-loader-4-line animate-spin"></i>
-                    </span>
-                </button>
             </div>
         </div>
     </div>
@@ -435,6 +423,10 @@
         </div>
     </div>
 </div>
+
+<!-- Simple Custom Alert Container -->
+<div id="customAlert" style="display:none;position:fixed;top:30px;right:30px;z-index:9999;min-width:260px;max-width:400px;"></div>
+
     </main>
 
     @include('customer.footer')
@@ -522,11 +514,8 @@ function handleButtonVisibility(status) {
             (!currentAppointmentData.final_payment_status || 
              currentAppointmentData.final_payment_status === 'pending')) {
             payButton.style.display = 'inline-block';
-          document.getElementById('payCashButton').style.display = 'block';
-        } else {
-            document.getElementById('payCashButton').style.display = 'none';
-        }
-
+         
+        } 
         rescheduleButton.style.display = 'none'; // Hide reschedule button
         cancelButton.style.display = 'none'; // Hide cancel button
     } else if (status.toLowerCase() === 'accepted') {
@@ -542,7 +531,7 @@ function handleButtonVisibility(status) {
         cancelButton.style.display = 'none';
         rateButton.style.display = 'none';
         payButton.style.display = 'none';
-        document.getElementById('payCashButton').style.display = 'none';
+     
     } else {
         // Default to showing both reschedule and cancel buttons for other statuses
         rescheduleButton.style.display = 'inline-block';
@@ -1135,13 +1124,13 @@ document.addEventListener('DOMContentLoaded', function () {
             .then(result => {
                 restoreButton(btn, 'Submit Review');
                 console.log(result);
-                alert(result.message || 'Review submitted successfully!');
+               showCustomAlert('Review submitted successfully!', 'success');
                 reviewModal.style.display = 'none'; // Close the review modal
                 location.reload(); // Refresh the page to reflect the review
             })
             .catch(error => {
                 console.error('Error submitting review:', error);
-                alert('Failed to submit review. Please try again.');
+                showCustomAlert('Failed to submit review. Please try again.', 'error');
             });
     };
 });
@@ -1253,7 +1242,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const amount = document.getElementById('paymentAmount').value;
             if (isNaN(parseFloat(amount)) || parseFloat(amount) <= 0) {
                 e.preventDefault();
-                alert('Please enter a valid payment amount greater than zero.');
+                showCustomAlert('Please enter a valid payment amount.', 'error');
                 return;
             }
             
@@ -1267,13 +1256,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 })  
 
-    payCashButton.onclick = function() {
-    if (confirm('Confirm you have paid the freelancer in cash for this service?')) {
-        document.getElementById('payCashAppointmentId').value = currentAppointmentData.id;
-        document.getElementById('payCashAmount').value = document.getElementById('paymentAmount').value;
-        document.getElementById('payCashForm').submit();
-    }
-};
+ 
 
 
 // Improve mobile modal handling
@@ -1325,7 +1308,67 @@ function restoreButton(button, text) {
     if (btnSpinner) btnSpinner.style.display = 'none';
     if (btnText && text) btnText.textContent = text;
 }
+function showCustomAlert(message, type = 'success', duration = 5000) {
+    const alertBox = document.getElementById('customAlert');
+    if (!alertBox) return;
 
+    // Use Boxicons and match session alert colors
+    let icon = '', borderColor = '', bgColor = '', textColor = '';
+    if (type === 'success') {
+        icon = "<i class='bx bx-check-circle'></i>";
+        borderColor = '#10b981';
+        bgColor = '#ecfdf5';
+        textColor = '#047857';
+    } else if (type === 'error') {
+        icon = "<i class='bx bx-error-circle'></i>";
+        borderColor = '#ef4444';
+        bgColor = '#fef2f2';
+        textColor = '#b91c1c';
+    } else if (type === 'warning') {
+        icon = "<i class='bx bx-error'></i>";
+        borderColor = '#f59e0b';
+        bgColor = '#fef9c3';
+        textColor = '#b45309';
+    } else {
+        icon = "<i class='bx bx-info-circle'></i>";
+        borderColor = '#2563eb';
+        bgColor = '#eff6ff';
+        textColor = '#2563eb';
+    }
+
+    alertBox.innerHTML = `
+        <div style="
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            padding: 15px 25px;
+            border-left: 4px solid ${borderColor};
+            background-color: ${bgColor};
+            color: ${textColor};
+            border-radius: 4px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            opacity: 1;
+            transition: opacity 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            max-width: 400px;
+        ">
+            <span style="display:flex;align-items:center;">
+                ${icon}
+                <span style="margin-left:8px;">${message}</span>
+            </span>
+            <button type="button" class="close-btn" onclick="document.getElementById('customAlert').style.display='none';"
+                style="background: transparent; border: none; color: ${textColor}; font-size: 1.2em; cursor: pointer; margin-left: 15px; padding: 0; line-height: 1;">&times;</button>
+        </div>
+    `;
+    alertBox.style.display = 'block';
+
+    setTimeout(() => {
+        alertBox.style.display = 'none';
+    }, duration);
+}
 
    
 

@@ -784,6 +784,8 @@
     </div>
 </div>
 
+<!-- Simple Custom Alert Container -->
+<div id="customAlert" style="display:none;position:fixed;top:30px;right:30px;z-index:9999;min-width:260px;max-width:400px;"></div>
 
     </section>
   </main>
@@ -1422,7 +1424,7 @@ function removeNewImagePreview(indexToRemove) {
         .then(data => {
             restoreButton(form, 'Create Post');
             if (data.success) {
-                alert('Post created successfully!');
+              showCustomAlert('Post created successfully!', 'success');
                 location.reload();
             } else {
                 showValidationErrors(data.errors, 'createPostErrors');
@@ -1477,7 +1479,6 @@ function removeNewImagePreview(indexToRemove) {
             return;
         }
 
-        if (confirm('Are you sure you want to delete this post? This action cannot be undone.')) {
             showSpinnerOnButton(deleteButton);
 
             const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
@@ -1500,20 +1501,20 @@ function removeNewImagePreview(indexToRemove) {
                         const postRow = deleteButton.closest('.post-row');
                         if (postRow) {
                             postRow.remove();
-                            alert(data.message || 'Post deleted successfully!');
+                            showCustomAlert('Post deleted successfully!', 'success');
                         } else {
                             console.warn('Post row parent element not found, refreshing page');
                             location.reload();
                         }
                     } else {
-                        alert(data.message || 'Failed to delete the post.');
+                       showCustomAlert('Failed to delete post. Please try again.', 'error');
                     }
                 })
                 .catch(error => {
                     console.error('Error deleting post:', error);
-                    alert('Failed to delete post. Please try again.');
+                    showCustomAlert('An error occurred while deleting the post. Please try again.', 'error');
                 });
-            }
+            
         }
     });
     
@@ -1697,4 +1698,67 @@ function validatePostForm(form) {
 
     return valid;
 }
+
+function showCustomAlert(message, type = 'success', duration = 5000) {
+    const alertBox = document.getElementById('customAlert');
+    if (!alertBox) return;
+
+    // Use Boxicons and match session alert colors
+    let icon = '', borderColor = '', bgColor = '', textColor = '';
+    if (type === 'success') {
+        icon = "<i class='bx bx-check-circle'></i>";
+        borderColor = '#10b981';
+        bgColor = '#ecfdf5';
+        textColor = '#047857';
+    } else if (type === 'error') {
+        icon = "<i class='bx bx-error-circle'></i>";
+        borderColor = '#ef4444';
+        bgColor = '#fef2f2';
+        textColor = '#b91c1c';
+    } else if (type === 'warning') {
+        icon = "<i class='bx bx-error'></i>";
+        borderColor = '#f59e0b';
+        bgColor = '#fef9c3';
+        textColor = '#b45309';
+    } else {
+        icon = "<i class='bx bx-info-circle'></i>";
+        borderColor = '#2563eb';
+        bgColor = '#eff6ff';
+        textColor = '#2563eb';
+    }
+
+    alertBox.innerHTML = `
+        <div style="
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            padding: 15px 25px;
+            border-left: 4px solid ${borderColor};
+            background-color: ${bgColor};
+            color: ${textColor};
+            border-radius: 4px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            opacity: 1;
+            transition: opacity 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            max-width: 400px;
+        ">
+            <span style="display:flex;align-items:center;">
+                ${icon}
+                <span style="margin-left:8px;">${message}</span>
+            </span>
+            <button type="button" class="close-btn" onclick="document.getElementById('customAlert').style.display='none';"
+                style="background: transparent; border: none; color: ${textColor}; font-size: 1.2em; cursor: pointer; margin-left: 15px; padding: 0; line-height: 1;">&times;</button>
+        </div>
+    `;
+    alertBox.style.display = 'block';
+
+    setTimeout(() => {
+        alertBox.style.display = 'none';
+    }, duration);
+}
+
 </script>

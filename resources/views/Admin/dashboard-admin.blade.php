@@ -53,6 +53,7 @@
             <th>Name</th>
             <th>Email</th>
             <th>Service Category</th>
+            <th>Commission Rate (%)</th>
             <th>Status</th>
            
           </tr>
@@ -76,6 +77,22 @@
                 N/A
             @endforelse
            </td>
+           <td>
+         <form action="{{ route('admin.freelancers.updateCommission', $freelancer->id) }}" method="POST" style="display: flex; align-items: center; gap: 8px;">
+        @csrf
+      
+        <input
+            type="number" step="0.01" min="0" max="100" name="commission_rate"
+            value="{{ old('commission_rate', $freelancer->commission_rate * 100) }}"
+            style="width: 70px; padding: 6px 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;"
+            required
+                    >
+                    <button type="submit" style="background: #2563eb; color: #fff; border: none; border-radius: 6px; padding: 6px 12px; font-size: 13px; cursor: pointer;">
+                        Save
+                    </button>
+                </form>
+                <span style="display:block; font-size: 12px; color: #6b7280; margin-top: 2px;">e.g. 5 for 5%</span>
+            </td>
             <td> @if($freelancer->is_verified)
                     <span style="color:green;">Verified</span>
                 @else

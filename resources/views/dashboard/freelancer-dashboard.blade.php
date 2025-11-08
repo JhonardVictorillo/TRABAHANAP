@@ -68,7 +68,7 @@
     });
 
     // Restore active section on page load
-    const activeSectionId = localStorage.getItem('activeSection') || '#profileSection';
+    const activeSectionId = localStorage.getItem('activeSection') || '#dashboardSection';
     const activeLink = document.querySelector(`.sidebar-links li a[href="${activeSectionId}"]`);
 
     links.forEach(link => link.classList.remove('active'));

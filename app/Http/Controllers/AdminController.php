@@ -153,13 +153,15 @@ $violations = DB::table('violations as v')
 
      $totalRevenue = PlatformRevenue::whereIn('source', [
         'final_payment_commission',      // Only actual earnings
+        'service_commission',   
         'late_cancellation_commission',  
         'no_show_commission'
     ])->sum('amount') ?? 0;
 
      $currentMonthRevenue = PlatformRevenue::whereIn('source', [
         'final_payment_commission',
-        'late_cancellation_commission', 
+        'service_commission',
+        'late_cancellation_commission',
         'no_show_commission'
     ])
     ->whereMonth('date', now()->month)
@@ -169,6 +171,7 @@ $violations = DB::table('violations as v')
         // Add Average Monthly Revenue calculation
      $totalMonths = PlatformRevenue::whereIn('source', [
         'final_payment_commission',
+        'service_commission',
         'late_cancellation_commission',
         'no_show_commission'
     ])
@@ -179,7 +182,8 @@ $violations = DB::table('violations as v')
     // Get recent transactions
       $revenueTransactions = PlatformRevenue::with(['appointment.freelancer', 'user'])
         ->whereIn('source', [
-            'final_payment_commission',      // Service completion commission
+            'final_payment_commission',     // Service completion commission
+            'service_commission',           // Service commission
             'late_cancellation_commission',  // Penalty fees
             'no_show_commission'            // Penalty fees
         ])
@@ -675,5 +679,17 @@ public function getFreelancerDetails($id)
             'message' => 'Error fetching freelancer details'
         ], 500);
     }
+}
+
+public function updateCommission(Request $request, $id)
+{
+    $request->validate([
+        'commission_rate' => 'required|numeric|min:0|max:100',
+    ]);
+    $freelancer = User::findOrFail($id);
+    $freelancer->commission_rate = $request->commission_rate / 100; // store as decimal
+    $freelancer->save();
+
+    return back()->with('success', 'Commission rate updated.');
 }
 }

@@ -58,7 +58,8 @@ class User extends Authenticatable
         'restriction_reason',
         'ban_reason',
         'auto_transfer_enabled',
-        'stripe_connect_id'
+        'stripe_connect_id',
+        'commission_rate',
 
 
     ];

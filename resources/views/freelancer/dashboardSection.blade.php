@@ -161,11 +161,11 @@
   
         <!-- Recent Works -->
         <div class="recent-works">
-          <h3><i class='bx bx-images'></i> Portfolio</h3>
+          <h3><i class='bx bx-images'></i> Proof of Works</h3>
           @if($user->posts->isEmpty())
             <div class="empty-portfolio">
               <i class='bx bx-image-add'></i>
-              <p>No portfolio items yet</p>
+              <p>No proof of work items yet</p>
             </div>
           @else
             <div class="works-grid">

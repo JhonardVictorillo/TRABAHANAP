@@ -41,11 +41,12 @@
         </h2>          
     </div>
     <ul class="sidebar-links">
-      <li>
-        <a href="#profileSection" id="profileLink" class="active"><span class="material-symbols-outlined">person</span>Profile</a>
-      </li>
+      
       <li>
         <a href="#dashboardSection" id="dashboardLink"><span class="material-symbols-outlined">dashboard</span>Dashboard</a>
+      </li>
+      <li>
+        <a href="#profileSection" id="profileLink" class="active"><span class="material-symbols-outlined">person</span>Profile</a>
       </li>
       <li>
         <a href="#appointmentCalendar" id="appointmentLink"><span class="material-symbols-outlined">calendar_today</span>Appointment</a>

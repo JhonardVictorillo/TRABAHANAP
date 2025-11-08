@@ -17,7 +17,7 @@ use App\Services\ServiceCompletionService;
 class PaymentController extends Controller
 {   
       private $commitmentFee = 30; // Fixed ₱30 (minimum for Stripe)
-    private $platformCommissionRate = 0.05; // 5% platform fee
+ 
     
     private function setupStripe()
 {
@@ -219,7 +219,9 @@ public function cancel(Request $request)
         $finalAmount = $request->amount;
         
         // Calculate platform fee using reduced rate
-        $platformFee = $finalAmount * $this->platformCommissionRate;
+      $freelancer = User::find($appointment->freelancer_id);
+        $commissionRate = $freelancer->commission_rate ?? 0.05;
+        $platformFee = $finalAmount * $commissionRate;
         $freelancerAmount = $finalAmount - $platformFee;
         
         // Store amount in appointment
@@ -335,7 +337,9 @@ public function cancel(Request $request)
             $commitmentFee = $appointment->commitment_fee;
             
             // Calculate platform commission (5% of service amount)
-            $platformCommission = $serviceAmount * $this->platformCommissionRate;
+            $freelancer = User::find($appointment->freelancer_id);
+            $commissionRate = $freelancer->commission_rate ?? 0.05;
+            $platformCommission = $serviceAmount * $commissionRate;
             $freelancerEarnings = $serviceAmount - $platformCommission;
             
             \Log::info('Processing final payment', [
@@ -354,7 +358,7 @@ public function cancel(Request $request)
                 'appointment_id' => $appointment->id,
                 'user_id' => $appointment->freelancer_id,
                 'date' => now()->format('Y-m-d'),
-                'notes' => "Platform commission (" . ($this->platformCommissionRate*100) . "%) from service payment of ₱{$serviceAmount}",
+                'notes' => "Platform commission (" . ($commissionRate*100). "%) from service payment of ₱{$serviceAmount}",
                 'status' => 'collected',
                 'created_at' => now(),
                 'updated_at' => now()
@@ -491,7 +495,9 @@ public function stripeWebhook(Request $request)
             $serviceAmount = $appointmentFinal->total_amount;
             
             // Calculate platform commission (5% of service amount)
-            $platformCommission = $serviceAmount * $this->platformCommissionRate;
+           $freelancer = User::find($appointmentFinal->freelancer_id);
+            $commissionRate = $freelancer->commission_rate ?? 0.05;
+            $platformCommission = $serviceAmount * $commissionRate;
             $freelancerEarnings = $serviceAmount - $platformCommission;
             
             // Record platform revenue
@@ -501,7 +507,7 @@ public function stripeWebhook(Request $request)
                 'amount' => $platformCommission,
                 'source' => 'service_commission',
                 'date' => Carbon::now()->format('Y-m-d'),
-                'notes' => "Platform commission (" . ($this->platformCommissionRate*100) . "%) from service payment",
+                'notes' => "Platform commission (" . ($commissionRate*100) . "%) from service payment",
                 'status' => 'collected'
             ]);
             
@@ -564,83 +570,6 @@ public function stripeWebhook(Request $request)
     ]);
     
     return 0;
-}
-
-public function payCash(Request $request)
-{
-    $appointmentId = $request->appointment_id;
-    $appointment = Appointment::findOrFail($appointmentId);
-
-    // Only allow if current user is the customer and appointment is completed
-    if ($appointment->customer_id !== auth()->id() || $appointment->status !== 'completed') {
-        return redirect()->back()->with('error', 'Unauthorized or invalid appointment status.');
-    }
-    
-    // Set the total_amount from the request (calculated in frontend)
-    $amount = $request->amount;
-    if ($amount && $amount > 0) {
-        $appointment->total_amount = $amount;
-    }
-    // Mark as paid (cash)
-    $appointment->final_payment_status = 'paid_cash';
-    $appointment->save();
-
-    // Get the full service amount (final payment + commitment fee)
-    $commitmentFee = $appointment->commitment_fee ?? 0;
-    $fullServiceAmount = $appointment->total_amount + $commitmentFee;
-
-    // Calculate platform commission and freelancer earnings from full service amount
-    $platformCommission = $fullServiceAmount * $this->platformCommissionRate;
-    $freelancerEarnings = $fullServiceAmount - $platformCommission;
-
-    PlatformRevenue::create([
-        'amount' => $platformCommission,
-        'source' => 'service_commission',
-        'appointment_id' => $appointment->id,
-        'user_id' => $appointment->freelancer_id,
-        'date' => now()->format('Y-m-d'),
-        'notes' => "Platform commission (cash payment)",
-        'status' => 'collected',
-        'created_at' => now(),
-        'updated_at' => now()
-    ]);
-
-    // Record freelancer earning for service payment
-    FreelancerEarning::create([
-        'freelancer_id' => $appointment->freelancer_id,
-        'appointment_id' => $appointment->id,
-        'amount' => $freelancerEarnings - $commitmentFee, // Only the part paid at completion
-        'source' => 'service_payment_cash',
-        'date' => now()->format('Y-m-d'),
-        'notes' => "Cash payment for completed services",
-        'created_at' => now(),
-        'updated_at' => now()
-    ]);
-
-    // Release commitment fee as bonus
-    if ($commitmentFee > 0) {
-        // Mark commitment fee as released in PlatformRevenue
-        $this->releaseCommitmentFee($appointment->id);
-
-        FreelancerEarning::create([
-            'freelancer_id' => $appointment->freelancer_id,
-            'appointment_id' => $appointment->id,
-            'amount' => $commitmentFee,
-            'source' => 'commitment_fee_bonus',
-            'date' => now()->format('Y-m-d'),
-            'notes' => "Released commitment fee: ₱{$commitmentFee}",
-            'created_at' => now(),
-            'updated_at' => now()
-        ]);
-    }
-
-    // Notify freelancer
-    $freelancer = User::find($appointment->freelancer_id);
-    if ($freelancer) {
-        $freelancer->notify(new \App\Notifications\FinalPaymentReceivedNotification($appointment, 'cash'));
-    }
-
-    return redirect()->back()->with('success', 'Cash payment recorded successfully!');
 }
 
 
